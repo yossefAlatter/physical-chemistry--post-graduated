@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import SectionView from "@/components/views/SectionView";
+import { plainText } from "@/components/Blocks";
 import { getRegistry } from "@/content/registry";
 import { t } from "@/lib/i18n";
 
@@ -23,7 +24,7 @@ export async function generateMetadata({
   if (!s || !lecture) return { title: d.sectionNotFound };
   return {
     title: `${s.title} — ${lecture.label}`,
-    description: s.summary,
+    description: plainText(s.summary),
   };
 }
 

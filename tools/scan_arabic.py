@@ -34,6 +34,9 @@ SPLICED = re.compile(AR_LETTER + LATIN_RUN + "|" + LATIN_RUN + AR_LETTER)
 LATIN_WORD = re.compile(LATIN_RUN)
 # A deliberate bilingual gloss, e.g. المصعد((anode)).
 GLOSS = re.compile(r'\(\(.*?\)\)')
+# An inline code span, e.g. `nF` or `E = E(cathode) - E(anode)`. The content
+# is deliberately Latin and is validated by tsc, not by this script.
+CODE_SPAN = re.compile(r'`[^`]*`')
 # Double-quoted and single-quoted string contents, so code around them is
 # never mistaken for prose.
 STRING_LITERAL = re.compile(r'"((?:[^"\\\\]|\\\\.)*)"|\'((?:[^\'\\\\]|\\\\.)*)\'')
@@ -123,7 +126,11 @@ src = strip_comments(open(path, encoding="utf-8").read())
 issues = []
 
 for lineno, line in enumerate(src.split("\n"), 1):
-    for ch in line:
+    # Deliberate Latin lives in glosses and code spans; a stray Greek letter or
+    # replacement character inside `q = nF \u03be` is fine, but one in the prose
+    # is corruption. Both checks therefore run on the line with those removed.
+    prose = CODE_SPAN.sub(" ", GLOSS.sub(" ", line))
+    for ch in prose:
         o = ord(ch)
         if GLYPH.match(ch) or (0x20 <= o <= 0x7E) or ch in ALLOWED_PUNCT:
             continue
@@ -141,7 +148,7 @@ for lineno, line in enumerate(src.split("\n"), 1):
         # Strip deliberate glosses first: المصعد((anode)) puts an English
         # word in the middle of Arabic on purpose, and check_glossary.ts is
         # what validates those, not this script.
-        probe = GLOSS.sub(" ", literal)
+        probe = CODE_SPAN.sub(" ", GLOSS.sub(" ", literal))
         for phrase in ALLOWED_PHRASES:
             probe = probe.replace(phrase, " ")
         for word in sorted(set(LATIN_WORD.findall(probe))):

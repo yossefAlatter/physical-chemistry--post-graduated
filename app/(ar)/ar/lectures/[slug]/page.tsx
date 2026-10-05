@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import LectureView from "@/components/views/LectureView";
+import { plainText } from "@/components/Blocks";
 import { getRegistry } from "@/content/registry";
 import { t } from "@/lib/i18n";
 
@@ -20,7 +21,7 @@ export async function generateMetadata({
   if (!lecture) return { title: d.lectureNotFound };
   return {
     title: `${lecture.label}: ${lecture.title}`,
-    description: lecture.summary,
+    description: plainText(lecture.summary),
   };
 }
 

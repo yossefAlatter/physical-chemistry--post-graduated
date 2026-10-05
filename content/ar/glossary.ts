@@ -59,6 +59,15 @@ export const GLOSSARY: Record<string, string> = {
   "ثابت فاراداي": "Faraday constant",
   "ثابت الغاز": "gas constant",
 
+  // Thermodynamics. The Fundamentals rewrite is pitched at a reader who
+  // already knows what ΔG is, so these carry the framing of the whole primer.
+  "الطاقة الحرة": "free energy",
+  "درجة التفاعل": "extent of reaction",
+  تلقائي: "spontaneous",
+  الشغل: "work",
+  "الشغل غير التوسيعي": "non-expansion work",
+  "تفاعل نصفي": "half-reaction",
+
   // Transport, layers and electrode kinetics.
   "نقل الكتلة": "mass transport",
   "الانتقال الثنائي": "diffusion",
@@ -114,6 +123,12 @@ export const GLOSSARY: Record<string, string> = {
   "عدد التأكسد": "oxidation number",
   "حالة التأكسد": "oxidation state",
   "الجهد القياسي": "standard potential",
+  قطبية: "polarity",
+
+  // Ways of measuring and of driving a cell.
+  "القياس الكمّي الكهربائي": "coulometry",
+  "تيار التبادل": "exchange current",
+  "وقود متجدد": "regenerative fuel",
 };
 
 /**

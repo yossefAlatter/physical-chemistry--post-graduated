@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { RenderBlock } from "@/components/Blocks";
+import { RenderBlock, RichText } from "@/components/Blocks";
 import { getRegistry, lectureHref, quizHref, sectionHref } from "@/content/registry";
 import { fill, t, type Locale } from "@/lib/i18n";
 
@@ -39,7 +39,7 @@ export default function LectureView({
           {lecture.title}
         </h1>
         <p className="mt-2 max-w-[62ch] text-[1rem] leading-relaxed text-ink-soft">
-          {lecture.summary}
+          <RichText text={lecture.summary} />
         </p>
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -110,7 +110,7 @@ export default function LectureView({
                     </span>
                   </span>
                   <span className="mt-1.5 flex-1 text-[0.9rem] leading-relaxed text-ink-soft">
-                    {s.summary}
+                    <RichText text={s.summary} />
                   </span>
                   <span className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.76rem] text-faint">
                     {s.minutes && <span>{fill(d.minutes, { n: s.minutes })}</span>}

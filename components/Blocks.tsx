@@ -11,8 +11,10 @@ import { figureFor } from "@/components/figures";
  * character by character, so a caption of "The Tafel **slope** is unchanged"
  * used as a label announces "Tafel asterisk asterisk slope". The visible
  * caption goes through RichText; the accessible name has to be flattened.
+ * Also used for <meta name="description">, which is plain text and must not
+ * carry the reader-facing markup either.
  */
-function plainText(text: string): string {
+export function plainText(text: string): string {
   return text
     .replace(/\*\*([^*]+)\*\*/g, "$1")
     .replace(/\*([^*]+)\*/g, "$1")

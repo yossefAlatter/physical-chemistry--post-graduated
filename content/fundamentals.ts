@@ -58,54 +58,70 @@ export const fundamentals: Lecture = {
       title: "What electrochemistry actually is",
       minutes: 7,
       summary:
-        "One idea: move electrons through a wire and you get chemistry you " +
-        "can measure, control and use.",
+        "Electrochemistry is the branch of chemistry in which the reaction " +
+        "is wired to the outside world. It turns the free energy of a " +
+        "reaction into a potential difference you can measure, a " +
+        "current you can " +
+        "control, and work you can use.",
       keyPoints: [
-        "Anode is oxidation. Cathode is reduction. Those names never swap.",
-        "Anode is negative in a galvanic cell, positive in an electrolytic one.",
-        "Galvanic runs on its own; electrolytic has to be forced by an outside power supply.",
-        "Electron flow through the wire is anode to cathode, always.",
+        "Anode is oxidation and cathode is reduction. The names never swap, in either family of cell.",
+        "Anode is negative in a galvanic cell and positive in an electrolytic one. The reaction fixes the name; the sign is a consequence.",
+        "A galvanic cell runs because ΔG < 0. An electrolytic cell is that same reaction driven backwards because ΔG > 0.",
+        "Electron flow in the external circuit runs anode to cathode, and its integral is the extent of the reaction.",
       ],
       blocks: [
         {
           kind: "para",
           text:
             "**The question this section answers:** you have a chemical " +
-            "reaction. How do you turn it into something you can read on a " +
-            "meter?",
+            "reaction with a large negative ΔG. How do you get that energy " +
+            "out as electrical work instead of heat, measure how far the " +
+            "reaction has run, and stop it when you choose?",
         },
         {
           kind: "para",
           text:
-            "In an ordinary chemical reaction, molecules meet each other and " +
-            "rearrange. You cannot see the electrons, and you cannot hold " +
-            "them back. The reaction happens wherever the reactants happen to " +
-            "touch, at whatever rate the temperature dictates.",
+            "Left alone, the reaction does whatever thermodynamics and " +
+            "kinetics tell it to. ΔG < 0 fixes the direction, the rate " +
+            "constant fixes the speed, and both are properties of the " +
+            "mixture you happen to have. You cannot meter a reaction " +
+            "proceeding inside a beaker, you cannot hold the electrons back " +
+            "once two species have touched, and you cannot interrogate ΔG at " +
+            "all. Electrochemistry changes precisely that.",
         },
         {
           kind: "para",
           text:
-            "An electrochemical reaction is the same chemistry with the two " +
-            "halves pulled apart and joined by a wire. Instead of electrons " +
-            "hopping directly from one molecule to the next, they are forced " +
-            "to travel down a conductor you can put a meter in. That single " +
-            "change buys you three things, and together they are the entire " +
-            "subject:",
+            "The move is to pull the two half-reactions apart onto conducting " +
+            "surfaces and reconnect them through an external circuit. The " +
+            "electrons must then travel down a wire you can cut into, meter " +
+            "and supply. This is the one form of non-expansion work that " +
+            "chemistry can deliver on demand, and it has an exact price " +
+            "list: one mole of reaction carries the charge `nF`, so the " +
+            "extent of the reaction and the charge that has passed are the " +
+            "same quantity written two ways. Most of this subject is " +
+            "bookkeeping built on that identity.",
         },
         {
           kind: "list",
           items: [
-            "**You can measure.** Electrons moving past a point is a current, and current is easy to read on an instrument.",
-            "**You can control.** Put a power supply in the wire and you decide how hard the reaction runs.",
-            "**You can use it.** Deliver the electrons somewhere useful and you have a battery, a plating bath, a fuel cell or a fuel.",
+            "**You can measure.** The charge that has passed is the extent of the reaction, `q = nF ξ`. Charge and stoichiometry are not linked by a model you have to assume but are the same statement, which is why coulometry can determine composition to parts per million.",
+            "**You can control.** Put a potentiostat between the electrodes and the applied potential becomes the control variable. You stop waiting for a mixture to react and start choosing a point on the electrochemistry, then holding it there.",
+            "**You can use it.** Deliver the electrons somewhere useful and you have a battery, a plating bath, a fuel cell, or a regenerative fuel.",
+            "**You can interrogate it.** The free energy you cannot read in a beaker is read straight off a cell potential, `ΔG = -nFE`. Electrochemistry is the one place in chemistry where the thermodynamic driving force is directly observable rather than inferred.",
           ],
         },
         {
           kind: "para",
           text:
-            "So there are two families of cell, and the difference is simply " +
-            "where the energy comes from. Everything else in this course is a " +
-            "detail of one of these two arrangements.",
+            "Everything after this is a consequence of where the energy " +
+            "comes from. If the chemistry can run by itself the cell is " +
+            "galvanic: ΔG < 0, and since ΔG = -nFE, the cell must develop a " +
+            "positive potential difference. If it cannot run by itself, a " +
+            "power supply is " +
+            "connected and the cell is electrolytic: the same half-reactions, " +
+            "driven in reverse, with ΔG > 0 forced against the gradient at a " +
+            "cost of `nFE` per mole of reaction.",
         },
         {
           kind: "figure",
@@ -125,8 +141,8 @@ export const fundamentals: Lecture = {
           head: ["", "Galvanic (voltaic)", "Electrolytic"],
           widths: [1.5, 2, 2],
           rows: [
+            ["Driving force", "ΔG < 0, spontaneous", "ΔG > 0, driven by the supply"],
             ["Energy flow", "Chemical → electrical", "Electrical → chemical"],
-            ["Runs on its own?", "Yes, it is spontaneous", "No, it must be driven"],
             ["Anode is", "Negative", "Positive"],
             ["Cathode is", "Positive", "Negative"],
             ["Examples", "Daniell cell, fuel cell, corrosion", "Electroplating, electrorefining, battery charging"],
@@ -135,23 +151,35 @@ export const fundamentals: Lecture = {
         {
           kind: "para",
           text:
-            "The two columns differ in signs but never in names. That is the " +
-            "single most important thing on this page, so here is how to say it " +
-            "in a way that cannot be got wrong: **the anode is where atoms lose " +
-            "electrons, the cathode is where atoms gain them.** If you know " +
-            "only that sentence, you can work out the sign of anything.",
+            "The two columns differ in signs but never in names, and the " +
+            "reason is worth stating properly rather than as a slogan. " +
+            "Electrons fall through a potential energy landscape: they leave " +
+            "the electrode with the higher electron free energy and arrive at " +
+            "the one with the lower. Oxidation feeds electrons into the " +
+            "circuit and reduction consumes them, so the high-energy end is " +
+            "the anode and the low-energy end the cathode. The signs then " +
+            "follow from whether the cell makes power or consumes it. Note " +
+            "the useful consequence: `E = E(cathode) - E(anode)`, which is " +
+            "positive in the galvanic case, so the sign never has to be " +
+            "remembered. **The anode is where atoms lose electrons and the " +
+            "cathode is where they gain them**; the polarity follows from " +
+            "algebra.",
         },
         {
           kind: "callout",
           variant: "warn",
           title: "The one trap in this table",
           body:
-            "The words **anode** and **cathode** are tied to the *reaction*, not " +
-            "to the sign of the wire. Whether that electrode is positive or " +
-            "negative flips between the two families. Two phrases fix it: " +
-            "\"Red Cat\" (reduction at the cathode) and \"An Ox\" (oxidation at " +
-            "the anode). Never memorise \"anode is negative\" - it is only true " +
-            "for the top row.",
+            "The words **anode** and **cathode** are attached to the " +
+            "*reaction*, not to the polarity of the wire, and that polarity " +
+            "genuinely flips between the two families. Two anchors keep you " +
+            "out of trouble: \"Red Cat\" (reduction at the cathode) and \"An " +
+            "Ox\" (oxidation at the anode). Treat \"anode is negative\" as an " +
+            "artefact of the galvanic column rather than a definition, " +
+            "because it fails the moment a power supply enters the circuit. " +
+            "A related trap: since the galvanic anode is the negative " +
+            "terminal, electrons leave a battery at its negative terminal, do " +
+            "their work in the load, and return at the positive one.",
         },
         {
           kind: "figure",
@@ -188,11 +216,15 @@ export const fundamentals: Lecture = {
           body:
             "Every AA battery in a remote control is a galvanic cell: zinc " +
             "gives up electrons at one end, manganese dioxide takes them at " +
-            "the other, and the wire is the path. Charging your phone is an " +
-            "electrolytic cell doing the same chemistry backwards. The rust " +
-            "on a damp steel gate is a galvanic cell that nobody connected to " +
-            "anything, and the entire corrosion industry exists to stop it. " +
-            "One idea, three very different-looking problems.",
+            "the other, and the wire is the path. Charging your phone runs " +
+            "that chemistry in reverse as an electrolytic cell. The rust on a " +
+            "damp steel gate is the instructive one, because it is a " +
+            "galvanic cell whose external circuit is the gate itself: no " +
+            "current is drawn, so none of the driving force leaves as work, " +
+            "and all of it leaves as heat while the metal dissolves. The " +
+            "corrosion industry exists to break that circuit deliberately, and " +
+            "sacrificial anodes, coatings and inhibitors are all just ways of " +
+            "managing `E` and the exchange current.",
         },
         {
           kind: "figure",
@@ -209,9 +241,10 @@ export const fundamentals: Lecture = {
         {
           kind: "para",
           text:
-            "That is the idea. You now know *what* the subject is. The next " +
-            "section takes the cell apart and names the four pieces it is " +
-            "built from.",
+            "So the idea, and more usefully the bookkeeping behind it: " +
+            "reaction extent, charge and free energy are one quantity in three " +
+            "units. The next section takes the cell apart and names the four " +
+            "parts it is built from.",
         },
       ],
     },

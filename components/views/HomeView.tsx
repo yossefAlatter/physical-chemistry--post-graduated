@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RichText } from "@/components/Blocks";
 import { getSubjects, lectureHref } from "@/content/registry";
 import { fill, t, type Locale } from "@/lib/i18n";
 
@@ -135,7 +136,7 @@ export default function HomeView({ locale }: { locale: Locale }) {
                           {lecture.title}
                         </h4>
                         <p className="mt-1.5 text-[0.93rem] leading-relaxed text-ink-soft">
-                          {lecture.summary}
+                          <RichText text={lecture.summary} />
                         </p>
 
                         <ul className="mt-3.5 divide-y divide-rule border-t border-rule">

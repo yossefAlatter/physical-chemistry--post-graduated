@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import LectureView from "@/components/views/LectureView";
+import { plainText } from "@/components/Blocks";
 import { allLectures } from "@/content";
 
 type Params = { slug: string };
@@ -18,7 +19,7 @@ export async function generateMetadata({
   if (!lecture) return { title: "Lecture not found" };
   return {
     title: `${lecture.label}: ${lecture.title}`,
-    description: lecture.summary,
+    description: plainText(lecture.summary),
   };
 }
 

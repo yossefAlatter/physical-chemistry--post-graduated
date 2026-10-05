@@ -80,7 +80,7 @@ export default function SectionView({
         </div>
         {section.summary && (
           <p className="mt-2 max-w-[62ch] text-[1rem] leading-relaxed text-ink-soft italic">
-            {section.summary}
+            <RichText text={section.summary} />
           </p>
         )}
 
@@ -208,7 +208,7 @@ export default function SectionView({
               {String(index - 1).padStart(2, "0")} {prev.title}
             </span>
             <span className="mt-0.5 block text-[0.82rem] text-faint">
-              {prev.summary}
+              <RichText text={prev.summary} />
             </span>
           </Link>
         ) : (
@@ -237,7 +237,7 @@ export default function SectionView({
               {String(index + 1).padStart(2, "0")} {next.title}
             </span>
             <span className="mt-0.5 block text-[0.82rem] text-faint">
-              {next.summary}
+              <RichText text={next.summary} />
             </span>
           </Link>
         ) : (

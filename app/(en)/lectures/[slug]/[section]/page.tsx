@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import SectionView from "@/components/views/SectionView";
+import { plainText } from "@/components/Blocks";
 import { allLectures } from "@/content";
 
 type Params = { slug: string; section: string };
@@ -21,7 +22,7 @@ export async function generateMetadata({
   if (!s || !lecture) return { title: "Section not found" };
   return {
     title: `${s.title} — ${lecture.label}`,
-    description: s.summary,
+    description: plainText(s.summary),
   };
 }
 
