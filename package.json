@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "ledger": "npx --yes tsx tools/write-ledger.ts",
+    "check": "python3 tools/check_site.py"
   },
   "dependencies": {
     "@types/katex": "^0.16.8",
