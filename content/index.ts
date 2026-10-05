@@ -30,22 +30,16 @@ export const subjects: Subject[] = [
       "quick check, and the full question bank sits behind each lecture.",
     courses: [
       {
-        id: "start-here",
-        title: "Start Here",
-        description:
-          "Read this first. It builds the vocabulary and the handful of " +
-          "relations every later lecture assumes, and it finishes by telling " +
-          "you which topics you are ready to start.",
-        lectures: [fundamentals],
-      },
-      {
         id: "electrochemistry",
         title: "Electrochemistry",
         description:
           "The core subject: how charge moves, how potentials are measured, " +
           "why rates are what they are, and how cells are designed, used and " +
-          "broken. Work through the lectures in order.",
+          "broken. Start with Fundamentals, which assumes no prior chemistry " +
+          "beyond high-school physics and chemistry, then work through the " +
+          "lectures in order.",
         lectures: [
+          fundamentals,
           lecture1,
           // lecture2,   <- Lecture 2 goes here
           // lecture3,
