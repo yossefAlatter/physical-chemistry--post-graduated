@@ -1,5 +1,6 @@
 import type { Lecture } from "../types";
 import { fundamentalsMcqAr } from "./fundamentals.mcq";
+import { whatIsItAr } from "./sections/fundamentals-01-what-is-it";
 
 /**
  * Arabic translation of the Fundamentals lecture.
@@ -23,7 +24,7 @@ export const fundamentalsAr: Partial<Lecture> = {
       kind: "para",
       text:
         "هذه المقدمة بطيئة عن قصد. تبدأ من فكرةتين تملكهما بالفعل، وهما الشحنة والتيار، " +
-        "ثم تبني فوقهما مفردات الكيمياء الكهربية. لا شيء هنا يحتاج إلى.course كيمياء " +
+        "ثم تبني فوقهما مفردات الكيمياء الكهربية. لا شيء هنا يحتاج إلى معرفة كيمياء " +
         "جامعي، بينما كل ما يأتي لاحقًا يحتاج إليها.",
     },
     {
@@ -55,5 +56,5 @@ export const fundamentalsAr: Partial<Lecture> = {
         "تنتهي من القسم الأخير ستعرف المواضيع التي يمكنك البدء بها.",
     },
   ],
-  sections: [],
+  sections: [whatIsItAr],
 };
