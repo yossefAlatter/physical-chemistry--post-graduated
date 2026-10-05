@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Electrochemistry: two electrodes joined by an external circuit">
+  <!--
+    Drawn for 16 px first, not 512. At that size only four shapes survive, so
+    the mark is exactly four: a tile, two electrode bars, the wire that joins
+    them, and the solution they stand in. The idea it carries - two electrodes,
+    an external path for the electrons - is the one thing a first-time visitor
+    needs to recognise. Anything more detailed turns to mush in a tab strip.
+  -->
+  <rect width="32" height="32" rx="7" fill="#0B6E99" />
+  <rect width="32" height="32" rx="7" fill="url(#g)" />
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.16" />
+      <stop offset="1" stop-color="#0A4A6B" stop-opacity="0.28" />
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#FFFFFF" stroke-linecap="round">
+    <!-- the external circuit the electrons travel along -->
+    <path d="M10 13.5C10 6.5 22 6.5 22 13.5" stroke-width="2.6" />
+    <!-- the two electrodes, dipping into the solution -->
+    <path d="M10 13.5V23" stroke-width="3" />
+    <path d="M22 13.5V23" stroke-width="3" />
+    <!-- the electrolyte -->
+    <path d="M6.5 25.5H25.5" stroke-width="2.4" />
+  </g>
+</svg>

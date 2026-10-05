@@ -77,11 +77,12 @@ export const fundamentals: Lecture = {
           kind: "figure",
           src: "fund_two_worlds.png",
           alt:
-            "Two panels side by side. Left: a galvanic cell driving electrons " +
-            "through a wire on its own, with corrosion and fuel cells named. " +
-            "Right: an electrolytic cell where an external power supply pushes " +
-            "electrons against the natural direction, with electroplating, " +
-            "electrorefining and battery charging named.",
+            "Two panels, one above the other. Top, galvanic: an anode on the " +
+            "left and a cathode on the right joined by a wire through a " +
+            "circle marked e-minus, labelled chemical energy, with the anode " +
+            "negative and oxidising and the cathode positive and reducing. " +
+            "Bottom, electrolytic: the same layout driven by a power supply, " +
+            "with the anode positive and the cathode negative.",
           caption:
             "Left: the cell does the work. Right: you do the work, and the cell obeys.",
         },
@@ -126,14 +127,27 @@ export const fundamentals: Lecture = {
         },
         {
           kind: "figure",
+          src: "fund_mnemonic.png",
+          alt:
+            "Three stacked boxes. Red Cat: reduction happens at the cathode. " +
+            "An Ox: oxidation happens at the anode. Anode to cathode: " +
+            "electrons travel that way. Below, a warning that anode is never " +
+            "the plus sign and that a galvanometer reads conventional current, " +
+            "which runs the other way from the electrons.",
+          caption:
+            "Three phrases worth memorising before you memorise anything else.",
+        },
+        {
+          kind: "figure",
           src: "fund_roadmap.png",
           alt:
-            "A concept map of the subject. A central node labelled " +
-            "electrochemistry branches into charge and current, then into " +
-            "measuring potential, moving charge, reaction rates, corrosion, " +
-            "electrolysis and energy storage.",
+            "A numbered list of the seven sections of this primer: what " +
+            "electrochemistry is, anatomy of a cell, charge current and " +
+            "resistance, Faraday's two laws, energy and power, a real " +
+            "laboratory cell, and units and glossary. A box at the bottom " +
+            "points on to Lecture 1, described as eleven short sections.",
           caption:
-            "Where you are going. Lecture 1 follows these branches in order.",
+            "Where you are going. Lecture 1 follows these sections in order.",
         },
       ],
     },
@@ -161,15 +175,32 @@ export const fundamentals: Lecture = {
           kind: "figure",
           src: "fund_cell_anatomy.png",
           alt:
-            "A cutaway of a zinc and copper cell. A zinc electrode on the left " +
-            "in grey, a copper electrode on the right, both dipping into a " +
-            "beaker of electrolyte. A wire runs over the top between them " +
-            "through a light bulb. Electrons are drawn as blue dots moving " +
-            "left to right along the wire. A salt bridge connects the two " +
-            "solutions below, with anions moving left and cations moving right.",
+            "A zinc-copper cell. A zinc electrode on the left in grey and a " +
+            "copper electrode on the right, each dipping into its own " +
+            "solution, joined above by a wire through a box labelled " +
+            "voltmeter, with an arrow marking electron flow to the right. " +
+            "Between the two solutions sits a salt bridge, with anions " +
+            "moving left toward the anode and cations moving right toward " +
+            "the cathode. Beneath each side is its half-reaction: zinc giving " +
+            "up two electrons, and copper ions taking two electrons.",
           caption:
             "A zinc-copper cell. Electrons travel left to right through the " +
             "wire; the ions take the long way round through the bridge.",
+        },
+        {
+          kind: "figure",
+          src: "fund_cell_notation.png",
+          alt:
+            "Cell notation written down one term at a time in a vertical " +
+            "ladder, with each term explained underneath. Zn (s), zinc " +
+            "metal, the anode. A single vertical bar for a phase boundary. " +
+            "Zn2+ (aq), zinc ions in solution. A double vertical bar for the " +
+            "salt bridge. Cu2+ (aq), copper ions in solution. A single " +
+            "vertical bar for a phase boundary. Cu (s), copper metal, the " +
+            "cathode.",
+          caption:
+            "Every cell is written the same way: oxidation side, bridge, " +
+            "reduction side, anode always on the left.",
         },
         {
           kind: "table",
@@ -219,6 +250,21 @@ export const fundamentals: Lecture = {
             "elements oxidise more or less willingly. That single fact is the " +
             "whole of cell chemistry: **the voltage is decided by which two " +
             "reactions you pair**, not by the cell you happen to build them in.",
+        },
+        {
+          kind: "figure",
+          src: "fund_potential_scale.png",
+          alt:
+            "A ranked list of standard reduction potentials in volts against " +
+            "the standard hydrogen electrode, highest at the top: F2 over " +
+            "F-minus plus 2.87, O2 over water plus 1.23, Cu2+ over Cu plus " +
+            "0.34, 2H+ over H2 at zero and boxed as the reference, Fe2+ over " +
+            "Fe minus 0.44, Zn2+ over Zn minus 0.76, and Mg2+ over Mg minus " +
+            "2.37. An arrow up the left margin says more oxidising. A box at " +
+            "the bottom explains that one electrode cannot be measured alone.",
+          caption:
+            "Every potential is quoted against the same reference, which is " +
+            "what makes the subtraction possible.",
         },
       ],
     },

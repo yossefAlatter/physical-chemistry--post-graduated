@@ -2,85 +2,180 @@
 
 Writes PNGs into ``public/figures/``. The ``fund_*`` set covers the
 Fundamentals primer - absolute basics up to laboratory practice - and is
-written for the web: wide layouts and type large enough to read at 360 px.
+written for the web: a phone shows a figure about 360 px wide, so every
+label has to survive being scaled down to that.
 
 Run from the site root:
 
     ../electricial-chemistry/.venv/bin/python tools/figures.py
 
+Legibility rule (this is the whole reason this file exists)
+------------------------------------------------------------
+A label is only useful if it can be read on a phone. The rendered size is
+
+    css_px = points * dpi / 72 * (viewport_px / image_px)
+
+With ``DPI = 200`` and a 1000 px canvas (``CANVAS_W``):
+
+    css_px = points * (200/72) * (360/1000)  ~=  points
+
+so the font sizes below read directly as the phone size they become. The
+floor is 12 pt, which is the smallest text worth showing at all; below that
+it is decoration pretending to be an explanation. Every fundamentals figure
+here is exactly 1000 px wide for that reason - see ``_save``.
+
+The first version of these figures failed this: 8.5-10.5 pt labels on
+canvases that ``bbox_inches="tight"`` had quietly stretched to 1400 px, which
+put the text at about 5 css px on a phone. ``tools/check_legibility.py``
+reproduces the arithmetic and fails the build if it happens again.
+
 Layout rules, learned the hard way on the printed guide:
   * a schematic panel (axes off) never shares a figure with a plotting panel;
   * every label carries a semi-opaque white background so it stays readable
     where it crosses a line;
-  * leave a margin around each panel so annotations cannot touch the frame.
+  * nothing is stacked side by side that a phone would have to shrink to read;
+  * text is wrapped to a known character count - matplotlib does not wrap,
+    and an unwrapped line runs off the canvas and gets clipped.
 """
 
 from __future__ import annotations
 
 import os
+import textwrap
 
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
+from PIL import Image  # noqa: E402
 from matplotlib.patches import Circle, FancyBboxPatch, Rectangle  # noqa: E402
 
-OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                   "public", "figures")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(ROOT, "public", "figures")
 
-# Mirrors the light-theme tone tokens in app/globals.css, so a figure and the
-# section it illustrates share a hue. tools/advanced_figures.py does the same
-# for the 16 imported advanced diagrams.
+# Light-theme tone tokens from app/globals.css, so a diagram and the section
+# it illustrates share a hue. tools/advanced_figures.py does the same for the
+# 16 imported advanced diagrams.
 S = {
-    "ink": "#10192B", "soft": "#3D4C63", "accent": "#0B6E99",
-    "cath": "#0B6E99", "anod": "#BE123C", "pos": "#C2410C", "neg": "#4338CA",
+    "ink": "#10192B", "soft": "#3D4C63", "faint": "#5B6879",
+    "accent": "#0B6E99", "azure": "#0B6E99",
+    "cath": "#0B6E99", "anod": "#BE123C",
+    "indigo": "#4338CA", "violet": "#7C3AED", "rose": "#BE123C",
+    "coral": "#C2410C", "amber": "#9C4708", "emerald": "#0F7B5A",
+    "teal": "#0F766E", "slate": "#475569",
     "good": "#0F7B5A", "warn": "#9C4708", "bad": "#C0392B",
-    "grid": "#D5DFEA", "metal": "#5B6879", "sol": "#E4F2FA",
-    "surface": "#C3CCD6", "lilac": "#F2ECFE", "gold": "#9C4708",
+    "grid": "#D5DFEA", "metal": "#5B6879",
+}
+
+# Tints for panel backgrounds.
+TINT = {
+    "azure": "#E4F2FA", "indigo": "#ECEDFE", "violet": "#F2ECFE",
+    "rose": "#FDE9EE", "coral": "#FDEEE5", "amber": "#FDF3E0",
+    "emerald": "#E3F5EE", "teal": "#E0F4F2", "slate": "#EEF1F6",
 }
 
 matplotlib.rcParams.update({
     "font.family": "DejaVu Sans",
-    "font.size": 10.5,
     "mathtext.fontset": "stix",
-    "axes.edgecolor": "#64748B",
+    "axes.edgecolor": "#5B6879",
     "axes.linewidth": 0.9,
-    "axes.labelsize": 11,
-    "axes.titlesize": 12.5,
-    "xtick.labelsize": 9.5,
-    "ytick.labelsize": 9.5,
-    "legend.fontsize": 9.5,
-    "legend.frameon": True,
-    "legend.framealpha": 0.94,
     "figure.facecolor": "white",
     "savefig.facecolor": "white",
 })
 
-DPI = 150
-F = 9.6          # default figure width, inches
+DPI = 200
+CANVAS_W = 1000          # px; with DPI=200 a point becomes ~1 css px on a phone
+CW = CANVAS_W / DPI      # inches
 FARADAY = 96485.0
+
+# Font floor. Anything smaller than this is unreadable once the figure is
+# scaled into a phone-width column. See the module docstring.
+SZ_TITLE = 20
+SZ_HEAD = 18
+SZ_BODY = 15
+SZ_SMALL = 14
+SZ_FLOOR = 13
+
+# Characters that fit on one line of a 1000 px canvas at a given size, for a
+# label spanning roughly the full canvas width. DejaVu Sans averages about
+# half an em per character, so this is conservative on purpose.
+WRAP = {SZ_TITLE: 28, SZ_HEAD: 32, SZ_BODY: 37, SZ_SMALL: 40, SZ_FLOOR: 43}
+
+
+def wrap(text: str, size: int = SZ_BODY) -> str:
+    return "\n".join(textwrap.wrap(text, WRAP.get(size, 46)))
 
 
 # ---------------------------------------------------------------- helpers ---
 
-def _clean(ax, grid="y"):
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    if grid:
-        ax.grid(True, color=S["grid"], lw=0.7, alpha=0.9, zorder=0)
-        ax.set_axisbelow(True)
+def _fig(height, w_ratio=1.0):
+    """A figure exactly CANVAS_W px wide (w_ratio is a multiple) and h tall."""
+    return plt.figure(figsize=(CW * w_ratio, height))
 
 
-def _off(ax):
+def panel(fig, rect, title=None, tone=None):
+    """An axes with the axes turned off: a pure schematic in 0..100 space."""
+    ax = fig.add_axes(rect)
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 100)
     ax.set_xticks([])
     ax.set_yticks([])
     for sp in ax.spines.values():
         sp.set_visible(False)
+    if tone:
+        ax.set_facecolor(TINT[tone])
+    if title:
+        T(ax, 50, 97, title, size=SZ_HEAD, weight="bold",
+          color=S[tone] if tone else S["ink"], va="top")
+    return ax
 
 
-def arrow(ax, p0, p1, color=None, lw=2.0, style="-|>", ls="-", ms=11,
-          z=4, rad=0.0, alpha=1.0):
+def plotax(fig, rect, title=None, xlabel=None, ylabel=None):
+    """A normal axes for a real plot. Never share a figure with a panel()."""
+    ax = fig.add_axes(rect)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.grid(True, color=S["grid"], lw=0.8, alpha=0.95, zorder=0)
+    ax.set_axisbelow(True)
+    ax.tick_params(labelsize=SZ_FLOOR)
+    if xlabel:
+        ax.set_xlabel(xlabel, fontsize=SZ_BODY)
+    if ylabel:
+        ax.set_ylabel(ylabel, fontsize=SZ_BODY)
+    if title:
+        ax.set_title(title, fontsize=SZ_HEAD, fontweight="bold", pad=9)
+    return ax
+
+
+def T(ax, x, y, s, size=SZ_BODY, color=None, ha="center", va="center",
+      weight="normal", style="normal", rot=0, z=6, bbox=True, alpha=0.92):
+    """Text. The default white box keeps a label readable over a line."""
+    kw = dict(bbox=dict(boxstyle="round,pad=0.20", fc="white", ec="none",
+                        alpha=alpha)) if bbox else {}
+    assert size >= SZ_FLOOR, f"label below the legibility floor: {size}pt {s!r}"
+    return ax.text(x, y, s, color=color or S["ink"], fontsize=size, ha=ha,
+                   va=va, fontweight=weight, fontstyle=style, rotation=rot,
+                   zorder=z, linespacing=1.35, **kw)
+
+
+def box(ax, x, y, w, h, fc="white", ec=None, lw=1.6, z=2, r=1.2):
+    ax.add_patch(FancyBboxPatch(
+        (x, y), w, h, boxstyle=f"round,pad=0.35,rounding_size={r}",
+        fc=fc, ec=ec or S["accent"], lw=lw, zorder=z))
+
+
+def chip(ax, x, y, w, h, text, fc, tc="white", size=SZ_BODY, weight="bold",
+         ec=None, z=3):
+    """A filled label with centred text."""
+    box(ax, x, y, w, h, fc=fc, ec=ec or fc, z=z)
+    ax.text(x + w / 2, y + h / 2, text, ha="center", va="center",
+            fontsize=size, color=tc, fontweight=weight, zorder=z + 1,
+            linespacing=1.3)
+
+
+def arrow(ax, p0, p1, color=None, lw=2.2, style="-|>", ls="-", ms=13, z=4,
+          rad=0.0, alpha=1.0):
     cp = dict(arrowstyle=style, color=color or S["ink"], lw=lw,
               mutation_scale=ms, shrinkA=0, shrinkB=0, alpha=alpha,
               linestyle=ls, zorder=z)
@@ -89,116 +184,143 @@ def arrow(ax, p0, p1, color=None, lw=2.0, style="-|>", ls="-", ms=11,
     ax.annotate("", xy=p1, xytext=p0, arrowprops=cp, zorder=z)
 
 
-def lbl(ax, x, y, s, color=None, size=10.5, ha="center", va="center",
-        weight="normal", style="normal", rot=0, z=6, bbox=True, alpha=0.9,
-        ls_=1.4):
-    kw = dict(bbox=dict(boxstyle="round,pad=0.22", fc="white", ec="none",
-                        alpha=alpha)) if bbox else {}
-    return ax.text(x, y, s, color=color or S["ink"], fontsize=size, ha=ha,
-                   va=va, fontweight=weight, fontstyle=style, rotation=rot,
-                   zorder=z, linespacing=ls_, **kw)
+def dot(ax, x, y, r=0.9, fc=None, z=6, alpha=1.0):
+    ax.add_patch(Circle((x, y), r, fc=fc or S["anod"], ec="white", lw=0.9,
+                        zorder=z, alpha=alpha))
 
 
-def box(ax, x, y, w, h, text, fc="#EAF4FA", ec=None, tc=None, size=11,
-        weight="bold", lw=1.4, z=2, r=0.8, ls_=1.45):
-    ax.add_patch(FancyBboxPatch(
-        (x, y), w, h, boxstyle=f"round,pad=0.3,rounding_size={r}",
-        fc=fc, ec=ec or S["accent"], lw=lw, zorder=z))
-    ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=size,
-            color=tc or S["ink"], fontweight=weight, zorder=z + 1,
-            linespacing=ls_)
+def beaker(ax, x, y, w, h, fill, label=None):
+    """A vessel drawn as an open-topped box with liquid inside."""
+    ax.add_patch(Rectangle((x, y), w, h * 0.62, fc=fill, ec="none", zorder=1,
+                           alpha=0.9))
+    ax.plot([x, x + w], [y + h * 0.62] * 2, color=S["metal"], lw=1.4,
+            zorder=3, alpha=0.8)
+    ax.plot([x, x], [y, y + h], color=S["metal"], lw=1.8, zorder=3)
+    ax.plot([x + w, x + w], [y, y + h], color=S["metal"], lw=1.8, zorder=3)
+    ax.plot([x, x + w], [y, y], color=S["metal"], lw=1.8, zorder=3)
+    if label:
+        T(ax, x + w / 2, y + h + 4, label, size=SZ_BODY, weight="bold")
 
 
-def dot(ax, x, y, r=0.85, fc=None, sym="", tc="white", size=8, z=6):
-    ax.add_patch(Circle((x, y), r, fc=fc or S["anod"], ec="white", lw=0.8,
-                        zorder=z))
-    if sym:
-        ax.text(x, y, sym, ha="center", va="center", fontsize=size,
-                color=tc, fontweight="bold", zorder=z + 1)
+def wire(ax, x0, y0, x1, y1, color=None, lw=2.4):
+    ax.plot([x0, x1], [y0, y1], color=color or S["ink"], lw=lw, zorder=3,
+            solid_capstyle="round")
+
+
+def caption(fig, text, y=0.010, gap=0.014):
+    """Draw a wrapped note along the bottom; return the panel bottom to use.
+
+    Returns the lowest usable ``add_axes`` bottom, so callers size their panel
+    from the caption instead of guessing. Every figure did collide with its own
+    caption before this existed: the note was drawn last, straight through
+    whatever sat at the bottom of the panel. Fixing that by nudging coordinates
+    is not a fix, so the caption now reserves its own band.
+    """
+    wrapped = wrap(text, SZ_SMALL)
+    lines = wrapped.count("\n") + 1
+    need_in = lines * SZ_SMALL * 1.5 / 72
+    h = need_in / fig.get_figheight()
+    ax = fig.add_axes([0.03, y, 0.94, h])
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+    # via T(), not ax.text, so the legibility checker measures the caption too
+    T(ax, 0.5, 0.5, wrapped, size=SZ_SMALL, color=S["soft"], bbox=False)
+    return y + h + gap
 
 
 def _save(fig, name):
+    """Write the PNG at exactly ``CANVAS_W`` px wide, with nothing clipped.
+
+    The canvas width is what makes the on-phone text size predictable, and the
+    text size is the whole point of this module - see the docstring. So the
+    width is pinned here rather than left to whatever the artists happen to
+    occupy.
+
+    ``bbox_inches="tight"`` crops to the content, which guarantees nothing gets
+    clipped; the result is then padded back out with white to ``CANVAS_W``. A
+    figure whose content is genuinely too wide keeps its full width instead of
+    being scaled down, and ``tools/check_legibility.py`` then fails it, because
+    a wider canvas means smaller text on a phone. Overflow is therefore a
+    build failure rather than a silently unreadable diagram.
+    """
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, name)
-    fig.savefig(path, dpi=DPI, bbox_inches="tight", pad_inches=0.09)
+    tmp = path + ".tmp.png"
+    fig.savefig(tmp, dpi=DPI, bbox_inches="tight", pad_inches=0.04)
     plt.close(fig)
+    with Image.open(tmp) as raw:
+        im = raw.convert("RGB")
+        natural_w, natural_h = im.size
+        if natural_w <= CANVAS_W:
+            canvas = Image.new("RGB", (CANVAS_W, natural_h), "white")
+            canvas.paste(im, ((CANVAS_W - natural_w) // 2, 0))
+        else:
+            canvas = im
+        canvas.save(path)
+    os.remove(tmp)
     return path
 
 
 # ------------------------------------------------------- 1. two families ---
 
 def fig_two_worlds():
-    fig, axes = plt.subplots(1, 2, figsize=(F, 4.5))
-    fig.subplots_adjust(left=0.02, right=0.98, top=0.82, bottom=0.04,
-                        wspace=0.16)
+    """Galvanic against electrolytic: the same four names, opposite signs.
 
+    Stacked rather than side by side: at 1000 px there is room for one readable
+    column of labels, and a phone sees this figure narrow.
+    """
+    fig = _fig(8.4)
     specs = [
-        dict(title="Galvanic (voltaic)", sub="the cell does the work",
-             a_sign="-", a_label="anode  \u2013  oxidation",
-             c_sign="+", c_label="cathode  +  reduction",
-             drive="Chemical energy", lamp="bulb lit", use="use the electrons",
-             examples="corrosion · fuel cells · Zn/Cu cell",
-             sub2="the cell does the work",
-             fc="#E7F6EE", ec=S["good"]),
-        dict(title="Electrolytic", sub="you do the work",
-             a_sign="+", a_label="anode  +  oxidation",
-             c_sign="–", c_label="cathode  –  reduction",
-             drive="Power supply", lamp="forced uphill", use="drive the reaction",
-             examples="plating · refining · battery charging",
-             sub2="you do the work",
-             fc="#FDEEEA", ec=S["anod"]),
+        dict(tone="emerald", title="Galvanic  (voltaic)",
+             sub="the cell does the work",
+             a_sign="−", c_sign="+",
+             drive="Chemical energy", through="electrons flow here",
+             payoff="battery · corrosion · fuel cell"),
+        dict(tone="coral", title="Electrolytic",
+             sub="you do the work",
+             a_sign="+", c_sign="−",
+             drive="Power supply", through="the supply pushes electrons",
+             payoff="plating · refining · charging"),
     ]
-
-    for ax, sp in zip(axes, specs):
-        _off(ax)
-        ax.set_xlim(0, 100)
-        ax.set_ylim(0, 100)
-
+    bottom = caption(fig, "Anode always means oxidation. Cathode always "
+                          "means reduction. Only the signs swap between the "
+                          "two families.")
+    top = 0.975
+    gap = 0.035
+    height = (top - bottom - gap) / 2
+    for i, sp in enumerate(specs):
+        ax = panel(fig, [0.04, top - (i + 1) * height - i * gap, 0.92, height],
+                   title=sp["title"], tone=sp["tone"])
+        T(ax, 50, 84, sp["sub"], size=SZ_SMALL, color=S["soft"], style="italic")
         ax.add_patch(FancyBboxPatch(
-            (2, 4), 96, 88,
-            boxstyle="round,pad=0.6,rounding_size=2",
-            fc=sp["fc"], ec=sp["ec"], lw=1.5, zorder=1))
-        lbl(ax, 50, 86, sp["title"], size=14, weight="bold", color=sp["ec"])
-        lbl(ax, 50, 76, f'{sp["sub2"]}\n{sp["examples"]}', size=9.4,
-            style="italic", color=S["soft"])
+            (3, 3), 94, 73, boxstyle="round,pad=0.5,rounding_size=2",
+            fc="white", ec=S[sp["tone"]], lw=1.6, zorder=1))
 
-        # electrodes
-        box(ax, 8, 34, 20, 13, "anode", fc="white", ec=S["anod"], tc=S["anod"])
-        box(ax, 72, 34, 20, 13, "cathode", fc="white", ec=S["cath"],
-            tc=S["cath"])
-        lbl(ax, 18, 26, sp["a_label"], size=9, color=S["anod"], weight="bold")
-        lbl(ax, 82, 26, sp["c_label"], size=9, color=S["cath"], weight="bold")
+        # electrodes and the wire between them
+        chip(ax, 8, 48, 26, 13, "anode", S["anod"])
+        chip(ax, 66, 48, 26, 13, "cathode", S["cath"])
+        wire(ax, 21, 64, 50, 64)
+        wire(ax, 50, 64, 79, 64)
+        ax.add_patch(Circle((50, 64), 5.8, fc="white", ec=S[sp["tone"]],
+                            lw=2.0, zorder=5))
+        T(ax, 50, 64, "e⁻", size=SZ_BODY, weight="bold",
+          color=S[sp["tone"]], bbox=False, z=6)
+        T(ax, 50, 72, sp["drive"], size=SZ_BODY, weight="bold")
 
-        # wire over the top
-        arrow(ax, (18, 48), (50, 60), color=S["ink"], lw=2.4)
-        arrow(ax, (50, 60), (82, 48), color=S["ink"], lw=2.4)
-        ax.add_patch(Circle((50, 60), 5.2, fc="white", ec=S["gold"], lw=2.0,
-                            zorder=3))
-        lbl(ax, 50, 60, "e\u207b", size=11, weight="bold", color=S["gold"],
-            bbox=False, z=4)
-        lbl(ax, 50, 69.5, sp["drive"], size=9.5, weight="bold")
-
-        # electron direction along the wire
-        if sp is specs[0]:
-            for t in (0.30, 0.46, 0.62, 0.78):
-                x = 18 + (82 - 18) * t
-                y = 48 + 12 * (4 * t * (1 - t))
-                dot(ax, x, y, r=1.0, fc=S["cath"], size=0)
-            lbl(ax, 50, 54, "electrons flow \u2192", size=8.5, color=S["cath"])
-        else:
-            lbl(ax, 50, 54, "supply pushes electrons \u2192", size=8.5,
-                color=S["anod"])
-
-        lbl(ax, 18, 17, "loses e\u207b", size=8.5, color=S["soft"])
-        lbl(ax, 82, 17, "gains e\u207b", size=8.5, color=S["soft"])
-        lbl(ax, 50, 9.5, sp["use"], size=9.5, weight="bold", color=S["ink"])
-
-    fig.suptitle("Two families of cell, one set of names",
-                 fontsize=14.5, fontweight="bold", y=0.98)
-    fig.text(0.5, 0.005,
-             "Anode always means oxidation. Cathode always means reduction. "
-             "Only the sign changes.",
-             ha="center", fontsize=10, color=S["ink"], fontweight="bold")
+        # the sign trap, which is where most beginners go wrong
+        T(ax, 21, 36, f'anode\n{sp["a_sign"]}  oxidation', size=SZ_BODY,
+          color=S["anod"], weight="bold")
+        T(ax, 79, 36, f'cathode\n{sp["c_sign"]}  reduction', size=SZ_BODY,
+          color=S["cath"], weight="bold")
+        T(ax, 21, 23, "loses e⁻", size=SZ_SMALL, color=S["soft"])
+        T(ax, 79, 23, "gains e⁻", size=SZ_SMALL, color=S["soft"])
+        T(ax, 50, 14, sp["through"], size=SZ_SMALL, color=S["soft"])
+        T(ax, 50, 7, sp["payoff"], size=SZ_SMALL, color=S["faint"],
+          style="italic")
 
     return fig
 
@@ -206,382 +328,431 @@ def fig_two_worlds():
 # ------------------------------------------------------------ 2. roadmap ---
 
 def fig_roadmap():
-    fig, ax = plt.subplots(figsize=(12, 4.0))
-    _off(ax)
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, 100)
+    """What the primer covers, and where it hands over to Lecture 1."""
+    fig = _fig(6.8)
+    ax = panel(fig, [0.04, 0.05, 0.92, 0.90])
+    T(ax, 50, 97, "Your route through this primer", size=SZ_TITLE,
+      weight="bold", va="top")
 
-    stages = [
-        ("Start here", "Fundamentals", S["good"],
-         ["charge & current", "Faraday's law", "energy vs power",
-          "the lab cell"]),
-        ("Lecture 1", "The cell itself", S["accent"],
-         ["cell anatomy", "double layer", "mass transport"]),
-        ("Measuring", "Potential", S["cath"],
-         ["polarisation curves", "overpotentials", "Nernst"]),
-        ("Rates", "Kinetics", S["gold"],
-         ["Butler\u2013Volmer", "Tafel analysis", "HER"]),
-        ("In service", "Applications", S["bad"],
-         ["corrosion", "electrolysis", "batteries"]),
+    steps = [
+        ("1", "What electrochemistry is", "azure"),
+        ("2", "Anatomy of a cell", "teal"),
+        ("3", "Charge, current, resistance", "indigo"),
+        ("4", "Faraday's two laws", "violet"),
+        ("5", "Energy and power", "amber"),
+        ("6", "A real laboratory cell", "emerald"),
+        ("7", "Units and glossary", "slate"),
     ]
+    y = 88
+    for i, (num, text, tone) in enumerate(steps):
+        ax.add_patch(Circle((9, y), 4.2, fc=S[tone], ec="white", lw=1.6,
+                            zorder=4))
+        T(ax, 9, y, num, size=SZ_BODY, color="white", weight="bold",
+          bbox=False, z=5)
+        T(ax, 18, y, text, size=SZ_HEAD, ha="left", weight="bold")
+        if i < len(steps) - 1:
+            ax.plot([9, 9], [y - 9.2, y - 4.6], color=S["grid"], lw=2.4,
+                    zorder=2)
+        y -= 10.4
 
-    n = len(stages)
-    w, gap = 16.5, 4.2
-    x0 = (100 - (n * w + (n - 1) * gap)) / 2
-
-    for i, (num, title, colour, items) in enumerate(stages):
-        x = x0 + i * (w + gap)
-        box(ax, x, 46, w, 40, "", fc="white", ec=colour, lw=1.8)
-        ax.add_patch(FancyBboxPatch(
-            (x, 74), w, 12, boxstyle="round,pad=0.3,rounding_size=0.8",
-            fc=colour, ec=colour, lw=0, zorder=3))
-        ax.text(x + w / 2, 80, num, ha="center", va="center", fontsize=10.5,
-                color="white", fontweight="bold", zorder=4)
-        ax.text(x + w / 2, 63, title, ha="center", va="center", fontsize=11.5,
-                color=S["ink"], fontweight="bold", zorder=4, linespacing=1.3)
-        for j, it in enumerate(items):
-            ax.text(x + w / 2, 55 - j * 6.4, f"\u2022 {it}", ha="center",
-                    va="center", fontsize=8.6, color=S["soft"], zorder=4)
-
-        if i < n - 1:
-            arrow(ax, (x + w + 0.6, 66), (x + w + gap - 0.6, 66),
-                  color=S["metal"], lw=2.2, ms=12)
-
-    lbl(ax, 50, 88, "From zero to research level: the order this subject is "
-                    "built in", size=13.5, weight="bold", bbox=False)
-    ax.text(50, 26, "Each arrow is a step you can take in an afternoon. "
-                    "Nothing above is needed for anything below it.",
-            ha="center", va="center", fontsize=10, color=S["soft"],
-            style="italic")
-    ax.text(50, 14, "You are here", ha="center", va="center", fontsize=10,
-            color=S["good"], fontweight="bold")
-    arrow(ax, (x0 + w / 2, 20), (x0 + w / 2, 43), color=S["good"], lw=2.0)
-
+    # handover to the lecture
+    ax.add_patch(FancyBboxPatch(
+        (3, 2), 94, 14, boxstyle="round,pad=0.5,rounding_size=2",
+        fc=TINT["emerald"], ec=S["emerald"], lw=1.8, zorder=1))
+    T(ax, 50, 12, "then Lecture 1: electrochemistry", size=SZ_HEAD,
+      weight="bold", color=S["emerald"])
+    T(ax, 50, 5.5, "eleven short sections", size=SZ_SMALL, color=S["soft"])
     return fig
 
 
 # ---------------------------------------------------- 3. cell anatomy ---
 
 def fig_cell_anatomy():
-    fig, ax = plt.subplots(figsize=(F, 5.4))
-    _off(ax)
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, 100)
+    """The Zn/Cu cell: where the electrons go, and where the ions go."""
+    fig = _fig(7.6)
+    bottom = caption(fig, "Electrons go round the outside wire. Ions go "
+                          "through the bridge, to keep each side electrically "
+                          "neutral.")
+    ax = panel(fig, [0.04, bottom, 0.92, 0.975 - bottom])
+    T(ax, 50, 97, "A zinc–copper cell", size=SZ_TITLE, weight="bold", va="top")
 
-    # beaker
-    ax.add_patch(Rectangle((9, 24), 82, 30, fc="white", ec="none", zorder=1))
-    ax.add_patch(Rectangle((9, 24), 82, 22, fc=S["sol"], ec="none", zorder=2))
-    ax.plot([9, 9, 91, 91], [24, 56, 56, 24], color=S["surface"], lw=2.6,
-            zorder=5, solid_capstyle="round")
-    ax.plot([9, 91], [46, 46], color=S["accent"], lw=1.4, zorder=4,
-            alpha=0.75)
+    # two half-cells
+    beaker(ax, 5, 30, 32, 32, TINT["rose"])
+    beaker(ax, 63, 30, 32, 32, TINT["azure"])
+    T(ax, 21, 67, "zinc half-cell", size=SZ_BODY, weight="bold")
+    T(ax, 79, 67, "copper half-cell", size=SZ_BODY, weight="bold")
 
-    # electrodes
-    ax.add_patch(Rectangle((23, 46), 7, 30, fc=S["metal"], ec=S["soft"],
-                           lw=1.2, zorder=6))
-    ax.add_patch(Rectangle((70, 46), 7, 30, fc="#B87333", ec=S["soft"],
-                           lw=1.2, zorder=6))
-    lbl(ax, 26.5, 80, "Zn", size=12, weight="bold")
-    lbl(ax, 73.5, 80, "Cu", size=12, weight="bold")
+    # electrodes dipping into the solution
+    ax.add_patch(Rectangle((14, 30), 5, 28, fc=S["metal"], ec="white", lw=1.2,
+                           zorder=4))
+    ax.add_patch(Rectangle((76, 30), 5, 28, fc="#B87333", ec="white", lw=1.2,
+                           zorder=4))
+    T(ax, 16.5, 63, "Zn", size=SZ_BODY, weight="bold", color=S["anod"],
+      bbox=False)
+    T(ax, 78.5, 63, "Cu", size=SZ_BODY, weight="bold", color=S["cath"],
+      bbox=False)
+    T(ax, 30, 40, "Zn²⁺", size=SZ_BODY, color=S["soft"])
+    T(ax, 68, 40, "Cu²⁺", size=SZ_BODY, color=S["soft"])
 
-    # wire and lamp
-    ax.plot([26.5, 26.5, 73.5, 73.5], [76, 90, 90, 76], color=S["ink"],
-            lw=2.4, zorder=6)
-    ax.add_patch(Circle((50, 90), 6.0, fc="white", ec=S["gold"], lw=2.2,
-                        zorder=7))
-    for a in range(0, 360, 45):
-        r = np.deg2rad(a)
-        ax.plot([50 + 6.6 * np.cos(r), 50 + 8.6 * np.cos(r)],
-                [90 + 6.6 * np.sin(r), 90 + 8.6 * np.sin(r)],
-                color=S["gold"], lw=1.2, zorder=6)
+    # external circuit with a meter
+    wire(ax, 16.5, 58, 16.5, 80)
+    wire(ax, 78.5, 58, 78.5, 80)
+    wire(ax, 16.5, 80, 38, 87)
+    wire(ax, 78.5, 80, 57, 87)
+    ax.add_patch(Rectangle((38, 82), 19, 10, fc="white", ec=S["amber"],
+                           lw=2.0, zorder=5, joinstyle="round"))
+    T(ax, 47.5, 87, "voltmeter", size=SZ_SMALL, weight="bold", color=S["amber"])
+    T(ax, 47.5, 74, "e⁻ flow  →", size=SZ_BODY, weight="bold", color=S["cath"])
 
-    # electrons on the wire
-    for x in (33, 39, 61, 67):
-        dot(ax, x, 90, r=1.15, fc=S["cath"], size=0, z=8)
-    arrow(ax, (44, 95.5), (56, 95.5), color=S["cath"], lw=2.0, ms=11)
-    lbl(ax, 50, 95.5, "  electrons \u2192", size=9.5, color=S["cath"],
-        weight="bold")
+    # the salt bridge: ions, not electrons
+    ax.add_patch(FancyBboxPatch(
+        (38, 26), 24, 8, boxstyle="round,pad=0.3,rounding_size=1.2",
+        fc="white", ec=S["teal"], lw=1.6, zorder=5))
+    T(ax, 50, 30, "salt bridge", size=SZ_SMALL, weight="bold", color=S["teal"])
+    arrow(ax, (46, 34), (33, 34), color=S["teal"], lw=2.0)
+    arrow(ax, (54, 34), (67, 34), color=S["teal"], lw=2.0)
+    T(ax, 24, 34, "anions", size=SZ_FLOOR, color=S["teal"])
+    T(ax, 76, 34, "cations", size=SZ_FLOOR, color=S["teal"])
 
-    # ion movement inside the two solutions
-    for y in (30, 36, 42):
-        dot(ax, 33, y, r=1.0, fc=S["anod"], sym="+", size=7)
-        dot(ax, 67, y, r=1.0, fc=S["soft"], sym="\u2212", size=7)
-    arrow(ax, (36, 40.5), (30, 40.5), color=S["anod"], lw=1.7, ms=9)
-    arrow(ax, (64, 30.5), (70, 30.5), color=S["soft"], lw=1.7, ms=9)
-    lbl(ax, 43, 44, "Zn\u00b2\u207a leaves,\nCu\u00b2\u207a arrives", size=8.4,
-        color=S["soft"])
-
-    # salt bridge
-    ax.plot([45, 45, 55, 55], [24, 8, 8, 24], color=S["surface"], lw=5.0,
-            zorder=5, solid_capstyle="round")
-    ax.plot([45, 45, 55, 55], [24, 8, 8, 24], color="white", lw=2.4,
-            zorder=6, solid_capstyle="round")
-    for x, sym in ((48.5, "\u2212"), (51.5, "+")):
-        dot(ax, x, 14, r=0.9, fc=S["soft"], sym=sym, size=7, z=8)
-    arrow(ax, (47, 19), (44.5, 13), color=S["soft"], lw=1.5, ms=9)
-    arrow(ax, (53, 13), (55.5, 19), color=S["soft"], lw=1.5, ms=9)
-    lbl(ax, 50, 4, "salt bridge carries ions", size=9, color=S["soft"],
-        weight="bold")
-
-    # labels
-    lbl(ax, 26.5, 62, "ANODE\noxidation\nnegative", size=9.5, color=S["anod"],
-        weight="bold")
-    lbl(ax, 73.5, 62, "CATHODE\nreduction\npositive", size=9.5, color=S["cath"],
-        weight="bold")
-    lbl(ax, 50, 51.5, "electrolyte: ions carry the charge inside", size=9,
-        color=S["accent"], weight="bold")
-
-    ax.text(26.5, 20.5, "Zn \u2192 Zn\u00b2\u207a + 2e\u207b", ha="center",
-            fontsize=9.5, color=S["anod"], zorder=9)
-    ax.text(73.5, 20.5, "Cu\u00b2\u207a + 2e\u207b \u2192 Cu", ha="center",
-            fontsize=9.5, color=S["cath"], zorder=9)
+    # half-reactions, one per side, kept short
+    T(ax, 21, 16, "Zn → Zn²⁺ + 2e⁻\noxidation", size=SZ_BODY, color=S["anod"],
+      weight="bold")
+    T(ax, 79, 16, "Cu²⁺ + 2e⁻ → Cu\nreduction", size=SZ_BODY, color=S["cath"],
+      weight="bold")
 
     return fig
 
 
-# -------------------------------------------------- 4. charge carriers ---
+# --------------------------------------------- 4. cell notation (new) ---
+
+def fig_cell_notation():
+    """The shorthand every lab report has to be able to read and write.
+
+    Written as a vertical ladder rather than the usual one-line string: the
+    whole point is what each bar means, and at phone width one line of seven
+    terms is too small to read while one term per row is not.
+    """
+    fig = _fig(8.0)
+    bottom = caption(fig, "Read left to right: oxidation side, bridge, "
+                          "reduction side. The anode always goes on the left. "
+                          "Add concentrations when they are not standard.")
+    ax = panel(fig, [0.04, bottom, 0.92, 0.975 - bottom])
+    T(ax, 50, 97, "Cell notation, term by term", size=SZ_TITLE,
+      weight="bold", va="top")
+
+    # One term per row with its meaning directly underneath. A two-column
+    # layout was tried first and abandoned: at 1000 px there is barely 1.5 in
+    # for an explanation column, and every phrasing that fitted was too terse
+    # to be worth the space.
+    rows = [
+        ("text", "Zn (s)", "zinc metal — the anode", S["anod"]),
+        ("bar", "|", "phase boundary", S["soft"]),
+        ("text", "Zn²⁺ (aq)", "zinc ions in solution", S["soft"]),
+        ("bar", "||", "salt bridge", S["teal"]),
+        ("text", "Cu²⁺ (aq)", "copper ions in solution", S["soft"]),
+        ("bar", "|", "phase boundary", S["soft"]),
+        ("text", "Cu (s)", "copper metal — the cathode", S["cath"]),
+    ]
+    y = 86
+    for i, (kind, text, meaning, colour) in enumerate(rows):
+        if kind == "bar":
+            # draw the bar tall, exactly as the notation itself does
+            if text == "||":
+                ax.plot([46.5, 46.5], [y - 2.4, y + 2.4], color=colour,
+                        lw=3.4, zorder=4)
+                ax.plot([53.5, 53.5], [y - 2.4, y + 2.4], color=colour,
+                        lw=3.4, zorder=4)
+            else:
+                ax.plot([50, 50], [y - 2.4, y + 2.4], color=colour, lw=3.4,
+                        zorder=4)
+        else:
+            T(ax, 50, y, text, size=SZ_HEAD + 2, weight="bold", color=colour,
+              bbox=False)
+        T(ax, 50, y - 5.8, meaning, size=SZ_FLOOR, color=S["soft"],
+          style="italic")
+        if i < len(rows) - 1:
+            ax.plot([17, 83], [y - 9.2, y - 9.2], color=S["grid"], lw=1.0,
+                    zorder=1)
+        y -= 11.2
+
+    return fig
+
+
+# ----------------------------------------- 5. potential scale (new) ---
+
+def fig_potential_scale():
+    """Why E°cell is a subtraction: everything is quoted against the SHE.
+
+    Drawn as a ranked list rather than a true spatial scale. Twelve couples
+    spaced in proportion to their potentials put the SHE label and the Pb one
+    about 2.4 units apart on a 100-unit axis, which cannot be labelled at any
+    legible size - the ranking is the teaching point, and the list keeps it.
+    """
+    fig = _fig(7.2)
+    bottom = caption(fig, "E°cell = E°cathode − E°anode. For the Zn/Cu cell "
+                          "that is 0.34 − (−0.76) = +1.10 V, so it runs "
+                          "forwards on its own.")
+    ax = panel(fig, [0.04, bottom, 0.92, 0.975 - bottom])
+    T(ax, 50, 97, "Standard reduction potentials", size=SZ_TITLE,
+      weight="bold", va="top")
+
+    # E° in volts against the SHE; standard textbook values at 25 °C.
+    couples = [
+        ("F₂ / F⁻", 2.87, False),
+        ("O₂ / H₂O", 1.23, False),
+        ("Cu²⁺ / Cu", 0.34, False),
+        ("2H⁺ / H₂", 0.00, True),
+        ("Fe²⁺ / Fe", -0.44, False),
+        ("Zn²⁺ / Zn", -0.76, False),
+        ("Mg²⁺ / Mg", -2.37, False),
+    ]
+    y = 84
+    ax.plot([13, 13], [26, 85], color=S["grid"], lw=2.2, zorder=1)
+    arrow(ax, (13, 85), (13, 90), color=S["grid"], lw=2.2, style="-|>")
+    T(ax, 9, 58, "more oxidising", size=SZ_FLOOR, color=S["soft"], rot=90)
+    for text, v, is_she in couples:
+        if is_she:
+            ax.add_patch(FancyBboxPatch(
+                (10, y - 3.6), 86, 7.2,
+                boxstyle="round,pad=0.2,rounding_size=1.0",
+                fc="none", ec=S["amber"], lw=1.6, zorder=3))
+        T(ax, 17, y, text, size=SZ_BODY, ha="left",
+          weight="bold" if is_she else "normal",
+          color=S["amber"] if is_she else S["ink"])
+        T(ax, 94, y, f"{v:+.2f}", size=SZ_BODY, ha="right", weight="bold",
+          color=S["amber"] if is_she else S["soft"])
+        y -= 8.6
+
+    # why there is a reference at all
+    ax.add_patch(FancyBboxPatch(
+        (4, 3), 92, 20, boxstyle="round,pad=0.4,rounding_size=1.5",
+        fc=TINT["amber"], ec=S["amber"], lw=1.5, zorder=1))
+    T(ax, 50, 13, wrap("One electrode on its own cannot be measured, so the "
+                       "SHE is given zero by convention and everything above "
+                       "is quoted against it.", SZ_SMALL),
+      size=SZ_SMALL, color=S["amber"], weight="bold")
+
+    return fig
+
+
+# -------------------------------------------------- 6. charge carriers ---
 
 def fig_charge_carriers():
-    fig, ax = plt.subplots(figsize=(F, 4.2))
-    _off(ax)
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, 100)
+    """In a wire the charge is electrons; in a solution it is ions."""
+    fig = _fig(6.2)
+    bottom = caption(fig, "A metal electrode is not carried by ions, and the "
+                          "electrolyte is not carried by electrons. Each path "
+                          "needs its own carrier.")
+    ax = panel(fig, [0.04, bottom, 0.92, 0.975 - bottom])
+    T(ax, 50, 97, "Two conductors, two carriers", size=SZ_TITLE,
+      weight="bold", va="top")
 
-    ax.add_patch(Rectangle((6, 72), 88, 9, fc=S["metal"], ec=S["soft"], lw=1.2,
-                           zorder=3))
-    lbl(ax, 19, 76.5, "metal wire", size=9.5, color="white", weight="bold",
-        bbox=False)
-    for x in (42, 52, 62, 72, 82, 90):
-        dot(ax, x, 76.5, r=1.3, fc=S["cath"], sym="\u2212", size=7.5, z=5)
-    arrow(ax, (20, 85.5), (46, 85.5), color=S["cath"], lw=2.2, ms=12)
-    lbl(ax, 56, 85.5, "electrons only", size=10.5, color=S["cath"],
-        weight="bold", ha="left")
+    # metal: electrons
+    ax.add_patch(FancyBboxPatch(
+        (5, 52), 90, 30, boxstyle="round,pad=0.4,rounding_size=2",
+        fc=TINT["amber"], ec=S["amber"], lw=1.8, zorder=1))
+    T(ax, 50, 76, "in the metal wire", size=SZ_HEAD, weight="bold",
+      color=S["amber"])
+    arrow(ax, (10, 65), (90, 65), color=S["amber"], lw=2.2)
+    T(ax, 50, 65, "free electrons drift", size=SZ_BODY, z=7)
+    T(ax, 50, 57, "carrier: e⁻", size=SZ_BODY, weight="bold",
+      color=S["amber"])
 
-    ax.add_patch(Rectangle((14, 10), 72, 46, fc=S["sol"], ec="none", zorder=1))
-    ax.plot([14, 14, 86, 86], [10, 58, 58, 10], color=S["surface"], lw=2.6,
-            zorder=4, solid_capstyle="round")
-
-    for y in (20, 30, 40, 50):
-        dot(ax, 34, y, r=1.35, fc=S["anod"], sym="+", size=7.5, z=5)
-    for y in (24, 34, 44):
-        dot(ax, 66, y, r=1.35, fc=S["soft"], sym="\u2212", size=7.5, z=5)
-
-    arrow(ax, (44, 46), (30, 46), color=S["anod"], lw=2.0, ms=11)
-    arrow(ax, (56, 24), (70, 24), color=S["soft"], lw=2.0, ms=11)
-    lbl(ax, 50, 52, "cations drift to the cathode", size=9.5, color=S["anod"],
-        weight="bold")
-    lbl(ax, 50, 15, "anions drift to the anode", size=9.5, color=S["soft"],
-        weight="bold")
-    lbl(ax, 50, 34, "electrolyte", size=11, color=S["accent"], weight="bold")
-
-    ax.text(50, 65, "Electrons carry the charge through the metal. Ions carry "
-                    "it through the solution. Neither can do the other's job.",
-            ha="center", va="center", fontsize=10, color=S["ink"],
-            fontweight="bold", zorder=9)
-    ax.text(50, 4, "1 A = 1 C per second   \u2022   I = dQ/dt   \u2022   "
-                   "Q = I\u00b7t",
-            ha="center", va="center", fontsize=10, color=S["soft"],
-            style="italic", zorder=9)
+    # solution: ions
+    ax.add_patch(FancyBboxPatch(
+        (5, 12), 90, 30, boxstyle="round,pad=0.4,rounding_size=2",
+        fc=TINT["teal"], ec=S["teal"], lw=1.8, zorder=1))
+    T(ax, 50, 36, "in the solution", size=SZ_HEAD, weight="bold",
+      color=S["teal"])
+    arrow(ax, (10, 25), (90, 25), color=S["teal"], lw=2.2)
+    T(ax, 50, 25, "ions drift", size=SZ_BODY, z=7)
+    T(ax, 50, 17, "carrier: cations and anions", size=SZ_BODY, weight="bold",
+      color=S["teal"])
 
     return fig
 
 
-# ------------------------------------------------------------ 5. Faraday ---
+# ------------------------------------------------------------ 7. Faraday ---
 
 def fig_faraday():
-    fig, ax = plt.subplots(figsize=(6.4, 4.6))
-    _clean(ax)
-    Q = np.linspace(0, 6000, 200)
-    metals = [
-        ("Ag\u207a  (n = 1)", 107.868, 1, S["gold"]),
-        ("Au\u00b3\u207a  (n = 3)", 196.967, 3, S["bad"]),
-        ("Cu\u00b2\u207a  (n = 2)", 63.546, 2, S["cath"]),
-    ]
-    for name, M, n, c in metals:
-        slope = M / (n * FARADAY)
-        ax.plot(Q, slope * Q, color=c, lw=2.4, label=f"{name}")
-        ax.annotate(f"{slope * 6000:.2f} g", xy=(6000, slope * 6000),
-                    xytext=(6, 0), textcoords="offset points",
-                    va="center", fontsize=9.5, color=c, fontweight="bold")
+    """Faraday's first law: deposited mass follows charge, not time."""
+    fig = _fig(6.4)
+    bottom = caption(fig, "Double the charge and you double the metal. "
+                          "m = (M / F) · Q, with F = 96 485 C mol⁻¹; copper "
+                          "needs about 1 518 C per gram.")
+    ax = panel(fig, [0.04, bottom, 0.92, 0.975 - bottom],
+               title="Faraday's first law:  m ∝ Q", tone="azure")
+    T(ax, 50, 83, "one cell, three currents, all run for one hour",
+      size=SZ_BODY, color=S["soft"], style="italic")
 
-    ax.set_xlim(0, 6900)
-    ax.set_ylim(0, 7.4)
-    ax.set_xlabel("charge passed,  Q  (C)")
-    ax.set_ylabel("mass deposited,  m  (g)")
-    ax.set_title("Mass deposited against charge, 100% efficiency",
-                 pad=10)
-    ax.legend(loc="upper left", framealpha=0.95)
-    ax.text(0.985, 0.05,
-            "slope = M / nF\nindependent of current",
-            transform=ax.transAxes, ha="right", va="bottom", fontsize=9.5,
-            color=S["soft"], style="italic",
-            bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="none",
-                      alpha=0.9))
-    fig.tight_layout()
+    rows = [("1 A", 1.19), ("2 A", 2.37), ("4 A", 4.74)]
+    y = 60
+    for lab, mass in rows:
+        T(ax, 13, y, lab, size=SZ_HEAD, weight="bold", ha="right")
+        ax.add_patch(FancyBboxPatch(
+            (18, y - 4.5), 48, 9,
+            boxstyle="round,pad=0,rounding_size=0.8",
+            fc=TINT["azure"], ec="none", zorder=2))
+        ax.add_patch(Rectangle((18, y - 4.5), 48 * mass / 4.74, 9,
+                               fc=S["accent"], ec="none", zorder=3))
+        T(ax, 93, y, f"{mass:.2f} g", size=SZ_HEAD, weight="bold",
+          color=S["accent"], ha="right")
+        y -= 14
+    T(ax, 18, 13, "copper deposited in 1 hour", size=SZ_BODY, color=S["soft"],
+      ha="left")
+
     return fig
 
 
-# ----------------------------------------------------- 6. energy/power ---
+# ------------------------------------------------------ 8. energy/power ---
 
 def fig_energy_power():
-    fig, axes = plt.subplots(1, 2, figsize=(F, 3.9))
-    fig.subplots_adjust(left=0.08, right=0.98, top=0.86, bottom=0.17,
-                        wspace=0.34)
+    """Energy is what a battery stores; power is how fast it gives it up."""
+    fig = _fig(6.6)
+    bottom = caption(fig, "Power is the rate: P = V × I in watts. That same "
+                          "10 Wh pack emptied in 5 hours would deliver only "
+                          "2 W.")
+    ax = panel(fig, [0.04, bottom, 0.92, 0.975 - bottom], title="Energy stored")
+    T(ax, 50, 83, "capacity × voltage", size=SZ_BODY, color=S["soft"],
+      style="italic")
 
-    ax = axes[0]
-    _clean(ax)
-    x = np.linspace(0, 70, 400)
-    v = 12.75 - 0.40 * (x / 45) ** 1.6
-    drop = np.clip((x - 60) / 10, 0, None) ** 1.7
-    v = np.where(x > 60, v - 2.6 * drop, v)
-    ax.fill_between(x, 0, v, color=S["accent"], alpha=0.13)
-    ax.plot(x, v, color=S["accent"], lw=2.4)
-    ax.axvline(60, color=S["bad"], lw=1.4, ls="--")
-    ax.set_xlim(0, 72)
-    ax.set_ylim(0, 14.5)
-    ax.set_xlabel("capacity delivered  (Ah)")
-    ax.set_ylabel("terminal voltage  (V)")
-    ax.set_title("Energy = area under the curve", fontsize=11.5, pad=8)
-    lbl(ax, 58, 13.4, "12 V, 60 Ah  \u2192  720 Wh", size=9.5, weight="bold")
-    lbl(ax, 60.6, 5.2, "end of life", size=8.6, color=S["bad"], ha="left")
+    chip(ax, 16, 60, 68, 13, "4 V", S["accent"])
+    T(ax, 50, 54, "×", size=SZ_HEAD, color=S["soft"], bbox=False)
+    chip(ax, 16, 39, 68, 13, "2.5 Ah", S["violet"])
+    T(ax, 50, 33, "=", size=SZ_HEAD, color=S["soft"], bbox=False)
+    chip(ax, 10, 18, 80, 15, "10 Wh", S["emerald"])
 
-    ax = axes[1]
-    _clean(ax, grid="y")
-    names = ["Lead-acid", "NiMH", "Li-ion"]
-    vals = [30, 100, 160]
-    cols = [S["metal"], S["soft"], S["good"]]
-    bars = ax.bar(names, vals, color=cols, width=0.6, zorder=3)
-    for b, val in zip(bars, vals):
-        ax.text(b.get_x() + b.get_width() / 2, val + 5, f"{val}",
-                ha="center", fontsize=10.5, fontweight="bold",
-                color=S["ink"])
-    ax.set_ylim(0, 195)
-    ax.set_ylabel("specific energy  (Wh kg\u207b\u00b9)")
-    ax.set_title("Why chemistry sets the range", fontsize=11.5, pad=8)
+    ax.add_patch(FancyBboxPatch(
+        (10, 4), 80, 10, boxstyle="round,pad=0.4,rounding_size=1.5",
+        fc=TINT["slate"], ec=S["slate"], lw=1.4, zorder=1))
+    T(ax, 50, 9, "= 36 kJ  =  3.6 × 10⁴ J", size=SZ_BODY, color=S["slate"],
+      weight="bold")
 
-    fig.suptitle("Energy, power and what the label means", fontsize=13.5,
-                 fontweight="bold", y=0.99)
     return fig
 
 
-# ----------------------------------------------------- 7. three-electrode ---
+# --------------------------------------------------- 9. laboratory cell ---
 
 def fig_lab_setup():
-    fig, ax = plt.subplots(figsize=(F, 4.8))
-    _off(ax)
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, 100)
+    """The three-electrode cell, with the colours the leads actually use."""
+    fig = _fig(7.8)
+    bottom = caption(fig, "The reference electrode carries no current, so the "
+                          "potential it reports cannot shift as the cell draws "
+                          "current. That is the whole reason for three.")
+    ax = panel(fig, [0.04, bottom, 0.92, 0.975 - bottom])
+    T(ax, 50, 97, "A three-electrode cell", size=SZ_TITLE, weight="bold",
+      va="top")
 
-    # cell
-    ax.add_patch(Rectangle((7, 18), 44, 44, fc=S["sol"], ec="none", zorder=1))
-    ax.plot([7, 7, 51, 51], [18, 64, 64, 18], color=S["surface"], lw=2.6,
-            zorder=6, solid_capstyle="round")
+    beaker(ax, 18, 36, 64, 38, TINT["azure"])
+    T(ax, 50, 78, "electrolyte + analyte", size=SZ_SMALL, color=S["soft"])
 
-    # WE
-    ax.add_patch(Rectangle((13, 34), 4.5, 30, fc=S["metal"], ec=S["soft"],
-                           lw=1.1, zorder=7))
-    lbl(ax, 15.2, 68, "WE", size=11, weight="bold")
-    # RE
-    ax.add_patch(Rectangle((26, 20), 4.0, 44, fc="white", ec=S["cath"],
-                           lw=1.4, zorder=7))
-    ax.add_patch(Rectangle((25.2, 14), 5.6, 7, fc="#FEF3C7", ec=S["gold"],
-                           lw=1.2, zorder=7))
-    lbl(ax, 28, 68, "RE", size=11, weight="bold")
-    # CE
-    ax.add_patch(Rectangle((41, 30), 4.0, 34, fc="#E5E7EB", ec=S["soft"],
-                           lw=1.1, zorder=7))
-    lbl(ax, 43, 68, "CE", size=11, weight="bold")
+    # working, counter and reference electrodes
+    ax.add_patch(Rectangle((29, 36), 4, 24, fc=S["metal"], ec="white", lw=1.2,
+                           zorder=5))
+    ax.add_patch(Rectangle((67, 36), 3, 32, fc="#B87333", ec="white", lw=1.2,
+                           zorder=5))
+    ax.add_patch(FancyBboxPatch((46, 36), 8, 18,
+                                boxstyle="round,pad=0.3,rounding_size=0.8",
+                                fc="white", ec=S["slate"], lw=1.6, zorder=5))
+    T(ax, 50, 45, "KCl", size=SZ_FLOOR, color=S["slate"], weight="bold")
 
-    lbl(ax, 22, 22.5, "electrolyte", size=8.6, color=S["accent"], weight="bold")
+    # leads, in the colours the cables use
+    for x, colour, name, tc in (
+        (31, "#C0392B", "working", "white"),
+        (50, "#F1F5F9", "reference", S["ink"]),
+        (68.5, "#1D4ED8", "counter", "white"),
+    ):
+        ax.plot([x, x, x], [60, 82, 82], color=colour, lw=3.6, zorder=4,
+                solid_capstyle="round")
+        ax.add_patch(Rectangle((x - 7, 82), 14, 9, fc=colour, ec="white",
+                               lw=1.2, zorder=5))
+        ax.text(x, 86.5, name, ha="center", va="center", fontsize=SZ_SMALL,
+                fontweight="bold", color=tc, zorder=6)
 
-    # potentiostat
-    box(ax, 64, 30, 30, 34, "", fc="white", ec=S["ink"], lw=1.8)
-    ax.text(79, 55, "potentiostat", ha="center", va="center", fontsize=10.5,
-            fontweight="bold", color=S["ink"], zorder=4)
-    ax.text(79, 44, "holds WE at a\npotential you choose", ha="center",
-            va="center", fontsize=8.6, color=S["soft"], zorder=4,
-            linespacing=1.4)
-    ax.text(79, 35.5, "measures the current", ha="center", va="center",
-            fontsize=8.6, color=S["soft"], zorder=4)
-
-    leads = [
-        ((15.2, 68), (15.2, 86), (79, 86), (79, 64), S["ink"], "control"),
-        ((28, 68), (28, 79), (92, 79), (92, 47), S["cath"], "measure"),
-        ((43, 68), (43, 72), (66, 72), (66, 47), S["soft"], "carry current"),
+    # a legend rather than captions hung off each electrode, which collided
+    legend = [
+        ("#C0392B", "working", "E is set here"),
+        ("#F1F5F9", "reference", "never carries current"),
+        ("#1D4ED8", "counter", "closes the circuit"),
     ]
-    for p0, p1, p2, p3, c, _ in leads:
-        ax.plot([p0[0], p1[0], p2[0], p3[0]], [p0[1], p1[1], p2[1], p3[1]],
-                color=c, lw=2.0, zorder=5, solid_capstyle="round")
-
-    lbl(ax, 50, 97, "three electrodes, one measurement", size=13,
-        weight="bold", bbox=False)
-    lbl(ax, 21, 80, "control", size=8.4, color=S["ink"], ha="center")
-    lbl(ax, 35, 74, "measure", size=8.4, color=S["cath"], ha="center")
-    lbl(ax, 58, 67.5, "carry current", size=8.4, color=S["soft"], ha="left")
-
-    rows = [("WE", "working \u2014 the electrode you study", S["ink"]),
-            ("RE", "reference \u2014 fixed known potential", S["cath"]),
-            ("CE", "counter \u2014 completes the circuit", S["soft"])]
-    for i, (code, text, c) in enumerate(rows):
-        y = 15.5 - i * 5.0
-        ax.text(9, y, code, fontsize=9.5, fontweight="bold", color=c,
-                ha="left", va="center", zorder=7)
-        ax.text(19, y, text, fontsize=9.5, color=S["soft"], ha="left",
-                va="center", zorder=7)
-    ax.text(9, 1.5, "The reference carries almost no current \u2014 that is "
-                    "what keeps its potential trustworthy.",
-            fontsize=9.2, color=S["ink"], style="italic", ha="left",
-            va="center", zorder=7)
+    y = 24
+    for colour, name, meaning in legend:
+        ax.add_patch(FancyBboxPatch(
+            (7, y - 2.6), 6, 5.2,
+            boxstyle="round,pad=0.2,rounding_size=0.6",
+            fc=colour, ec=S["metal"] if colour == "#F1F5F9" else colour,
+            lw=1.2, zorder=4))
+        T(ax, 16, y, f"{name} — {meaning}", size=SZ_FLOOR, ha="left")
+        y -= 7.4
 
     return fig
 
 
-# ------------------------------------------------ 8. oxidation numbers ---
+# ------------------------------------------------ 10. oxidation numbers ---
 
 def fig_oxidation_states():
-    fig, ax = plt.subplots(figsize=(F, 4.0))
-    _off(ax)
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, 100)
+    """The bookkeeping test that tells you which electrode is which."""
+    fig = _fig(5.8)
+    bottom = caption(fig, "Zinc loses electrons at the anode. Copper gains them "
+                          "at the cathode. Nothing else needs to be known to "
+                          "place them.")
+    ax = panel(fig, [0.04, bottom, 0.92, 0.975 - bottom])
+    T(ax, 50, 97, "Finding the anode", size=SZ_TITLE, weight="bold", va="top")
+    T(ax, 50, 78, wrap("A rising oxidation number means oxidation, so that "
+                       "species belongs at the anode.", SZ_BODY),
+      size=SZ_BODY, color=S["soft"], style="italic")
+
+    cases = [
+        ("Zn → Zn²⁺", "0  →  +2", "up", "oxidation", S["anod"]),
+        ("Cu²⁺ → Cu", "+2  →  0", "down", "reduction", S["cath"]),
+    ]
+    y = 54
+    for text, nums, direction, name, colour in cases:
+        chip(ax, 5, y - 8, 28, 16, text, "white", tc=S["ink"], ec=colour,
+             size=SZ_BODY)
+        T(ax, 50, y, nums, size=SZ_HEAD, weight="bold", color=colour)
+        arrow(ax, (64, y), (72, y), color=colour, lw=2.4)
+        T(ax, 85, y + 3.4, direction, size=SZ_BODY, weight="bold", color=colour)
+        T(ax, 85, y - 4.4, name, size=SZ_FLOOR, color=S["soft"])
+        y -= 26
+
+    ax.add_patch(FancyBboxPatch(
+        (3, 4), 94, 15, boxstyle="round,pad=0.4,rounding_size=1.5",
+        fc=TINT["amber"], ec=S["amber"], lw=1.5, zorder=1))
+    T(ax, 50, 14, "Number up = electrons lost", size=SZ_BODY, color=S["amber"],
+      weight="bold")
+    T(ax, 50, 7.5, "Number down = electrons gained", size=SZ_BODY,
+      color=S["amber"], weight="bold")
+
+    return fig
+
+
+# ------------------------------------------------------ 11. the mnemonic ---
+
+def fig_mnemonic():
+    """The three phrases that stop the most common beginner mistakes."""
+    fig = _fig(7.0)
+    bottom = caption(fig, "Anode is never the plus sign, and cathode is never "
+                          "the minus sign. A galvanometer reads conventional "
+                          "current, which runs the other way from the "
+                          "electrons.")
+    ax = panel(fig, [0.04, bottom, 0.92, 0.975 - bottom])
+    T(ax, 50, 97, "Three phrases that help", size=SZ_TITLE, weight="bold",
+      va="top")
 
     rows = [
-        dict(species="Zn", prod="Zn\u00b2\u207a", n0="0", n1="+2",
-             verb="loses", n_e="2", e_dir="out through the wire",
-             kind="OXIDATION", elabel="ANODE", col=S["anod"], y=62),
-        dict(species="Cu\u00b2\u207a", prod="Cu", n0="+2", n1="0",
-             verb="gains", n_e="2", e_dir="in through the wire",
-             kind="REDUCTION", elabel="CATHODE", col=S["cath"], y=26),
+        ("Red Cat", "reduction happens at the Cathode", S["cath"]),
+        ("An Ox", "oxidation happens at the Anode", S["anod"]),
+        ("Anode → Cathode", "electrons travel that way", S["indigo"]),
     ]
-
-    for r in rows:
-        y = r["y"]
-        box(ax, 5, y - 7, 20, 14, r["species"], fc="white", ec=r["col"], tc=r["col"])
-        lbl(ax, 13.5, y + 10, f"oxidation number {r['n0']}", size=8.4,
-            color=S["soft"])
-        arrow(ax, (26, y), (41, y), color=r["col"], lw=2.4, ms=13)
-        lbl(ax, 33.5, y + 5.5, f"{r['verb']} {r['n_e']} e\u207b", size=9.2,
-            color=r["col"], weight="bold")
-        lbl(ax, 33.5, y - 5.5, r["e_dir"], size=8, color=S["soft"])
-        box(ax, 42, y - 7, 20, 14, r["prod"], fc="white", ec=r["col"],
-            tc=r["col"])
-        lbl(ax, 52, y + 10, f"oxidation number {r['n1']}", size=8.4,
-            color=S["soft"])
-        box(ax, 66, y - 7, 29, 14, "", fc=r["col"], ec=r["col"])
-        ax.text(80.5, y + 2.2, r["kind"], ha="center", va="center",
-                fontsize=10.5, color="white", fontweight="bold", zorder=4)
-        ax.text(80.5, y - 3.4, r["elabel"], ha="center", va="center",
-                fontsize=11, color="white", fontweight="bold", zorder=4)
-
-    lbl(ax, 50, 94, "How to decide which electrode is which", size=13.5,
-        weight="bold", bbox=False)
-    ax.text(50, 88, "Write the half-equation, then look at the oxidation "
-                    "number: it goes up for oxidation, down for reduction.",
-            ha="center", va="center", fontsize=9.6, color=S["soft"],
-            style="italic")
-    ax.text(50, 9, "This test works in galvanic and electrolytic cells alike, "
-                   "which is why the names never need memorising.",
-            ha="center", va="center", fontsize=9.8, color=S["ink"],
-            fontweight="bold")
+    y = 78
+    for head, meaning, colour in rows:
+        ax.add_patch(FancyBboxPatch(
+            (3, y - 11), 94, 22, boxstyle="round,pad=0.4,rounding_size=1.5",
+            fc="white", ec=colour, lw=1.7, zorder=1))
+        T(ax, 50, y + 5, head, size=SZ_HEAD + 1, weight="bold", color=colour)
+        T(ax, 50, y - 5, meaning, size=SZ_BODY)
+        y -= 26
 
     return fig
 
@@ -589,29 +760,36 @@ def fig_oxidation_states():
 # ------------------------------------------------------------------- run ---
 
 FIGURES = [
-    ("fund_two_worlds.png", fig_two_worlds),
-    ("fund_roadmap.png", fig_roadmap),
-    ("fund_cell_anatomy.png", fig_cell_anatomy),
-    ("fund_charge_carriers.png", fig_charge_carriers),
-    ("fund_faraday.png", fig_faraday),
-    ("fund_energy_power.png", fig_energy_power),
-    ("fund_lab_setup.png", fig_lab_setup),
-    ("fund_oxidation_states.png", fig_oxidation_states),
+    ("fund_two_worlds", fig_two_worlds),
+    ("fund_roadmap", fig_roadmap),
+    ("fund_cell_anatomy", fig_cell_anatomy),
+    ("fund_cell_notation", fig_cell_notation),
+    ("fund_potential_scale", fig_potential_scale),
+    ("fund_charge_carriers", fig_charge_carriers),
+    ("fund_faraday", fig_faraday),
+    ("fund_energy_power", fig_energy_power),
+    ("fund_lab_setup", fig_lab_setup),
+    ("fund_oxidation_states", fig_oxidation_states),
+    ("fund_mnemonic", fig_mnemonic),
 ]
 
 
-def save_all():
-    os.makedirs(OUT, exist_ok=True)
-    paths = []
+def render(name, fn):
+    """Draw one figure and write it out. Returns the saved path.
+
+    The figure functions themselves return the ``Figure`` rather than the path,
+    because ``tools/check_figures.py`` inspects the live canvas for overlapping
+    labels, and a closed figure cannot be measured.
+    """
+    return _save(fn(), f"{name}.png")
+
+
+def main():
+    print(f"writing {len(FIGURES)} fundamentals figures to {OUT}")
     for name, fn in FIGURES:
-        fig = fn()
-        p = os.path.join(OUT, name)
-        fig.savefig(p, dpi=DPI, bbox_inches="tight", pad_inches=0.09)
-        plt.close(fig)
-        paths.append(p)
-    return paths
+        render(name, fn)
+        print(f"  wrote {name}.png")
 
 
 if __name__ == "__main__":
-    for p in save_all():
-        print("wrote", os.path.relpath(p, os.getcwd()))
+    main()
