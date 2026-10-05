@@ -4,20 +4,24 @@ import { SiteShell } from "@/components/SiteShell";
 
 export const metadata: Metadata = {
   title: {
-    default: "Electrochemistry Lectures",
-    template: "%s · Electrochemistry Lectures",
+    default: "Physical Chemistry — Postgraduate",
+    template: "%s · Physical Chemistry",
   },
   description:
-    "Lecture notes and multiple-choice questions for an undergraduate " +
-    "electrochemistry course, from cell anatomy through to batteries.",
+    "Postgraduate physical chemistry, taught in short illustrated sections. " +
+    "Start from zero with the Fundamentals primer, then work through " +
+    "electrochemistry from cell anatomy to batteries, with a quick check at " +
+    "the end of every section.",
   authors: [{ name: "Yossef Hafez Alatter" }],
   keywords: [
+    "physical chemistry",
+    "postgraduate",
     "electrochemistry",
     "Nernst equation",
     "Butler-Volmer",
     "Tafel",
     "Levich",
-    "lecture notes",
+    "Faraday's laws",
   ],
 };
 

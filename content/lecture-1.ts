@@ -45,6 +45,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 1 --
     {
       id: "cell-anatomy",
+      minutes: 8,
       title: "Cell anatomy and sign conventions",
       summary:
         "Anode, cathode, electrolyte, e⁻ and i⁺ — and why the names follow " +
@@ -136,6 +137,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 2 --
     {
       id: "double-layer",
+      minutes: 7,
       title: "The electrical double layer",
       summary:
         "Every electrode in every electrolyte carries a structured charge " +
@@ -212,6 +214,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 3 --
     {
       id: "mass-transport",
+      minutes: 9,
       title: "Mass transport and the Levich equation",
       summary:
         "Diffusion, migration and convection: how reactants reach the " +
@@ -282,7 +285,7 @@ export const lecture1: Lecture = {
           body:
             "Do not mix them up. The planar diffusion layer obeys " +
             "δ = nFD C*/i. The rotating-disk hydrodynamic layer obeys " +
-            "δ_H ≈ 1.28·D^⅓·ω^(-1/2)·ν^(-1/6), which is why it is " +
+            "δ_H ≈ 1.28·D^½·ω^(-1/2)·ν^(-1/6), which is why it is " +
             "predictable. And a transient Cottrell layer grows as √(πDt).",
         },
         {
@@ -335,6 +338,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 4 --
     {
       id: "polarisation",
+      minutes: 7,
       title: "Polarisation curves",
       summary:
         "One plot, three regimes: capacitive, kinetic and " +
@@ -429,6 +433,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 5 --
     {
       id: "overpotentials",
+      minutes: 6,
       title: "Overpotentials",
       summary:
         "The extra voltage you actually have to apply, and how to break it " +
@@ -509,6 +514,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 6 --
     {
       id: "nernst",
+      minutes: 10,
       title: "The Nernst equation and reference electrodes",
       summary:
         "Potential depends on concentration, not on how fast you go. This " +
@@ -607,6 +613,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 7 --
     {
       id: "kinetics",
+      minutes: 10,
       title: "Butler-Volmer kinetics and Tafel analysis",
       summary:
         "Exponential kinetics, the Tafel plot, and the diagnostics that " +
@@ -726,6 +733,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 8 --
     {
       id: "her",
+      minutes: 7,
       title: "The hydrogen evolution reaction",
       summary:
         "The model cathodic reaction: why its overpotential measures a " +
@@ -813,6 +821,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 9 --
     {
       id: "corrosion",
+      minutes: 6,
       title: "Corrosion",
       summary:
         "Every metal corrodes back toward its thermodynamic state; the job " +
@@ -910,6 +919,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 10 --
     {
       id: "electrolysis",
+      minutes: 7,
       title: "Electrolysis and metal extraction",
       summary:
         "Using an external supply to drive an uphill reaction, and why " +
@@ -944,11 +954,15 @@ export const lecture1: Lecture = {
           title: "Which product wins at the anode?",
           body:
             "Competing anodic processes are ranked by their oxidation " +
-            "potentials, and the easiest one wins. In aqueous solution " +
-            "oxidising water to O₂ needs about +1.23 V, so chlorine can only " +
-            "be produced from concentrated chloride below roughly 1 V " +
-            "applied — hence the brine electrolysis cell, and hence the " +
-            "hazard of chlorine.",
+            "potentials, and the easier one wins. Oxidation of chloride to " +
+            "chlorine needs about +1.36 V, while oxidation of water to " +
+            "oxygen needs about +1.23 V - so on paper oxygen should win, " +
+            "and in pure water it does. Chlorine is produced anyway because " +
+            "oxygen has a large overpotential on the anode material: real " +
+            "oxygen evolution starts several hundred millivolts later than " +
+            "its equilibrium value, while chloride oxidation does not. " +
+            "Concentrated brine is therefore chlorinated, and the chlorine " +
+            "hazard is why the cell needs care.",
         },
         {
           kind: "table",
@@ -1003,6 +1017,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 11 --
     {
       id: "batteries",
+      minutes: 7,
       title: "Batteries and fuel cells",
       summary:
         "The same electrochemistry, run in reverse: store energy as " +
@@ -1077,12 +1092,13 @@ export const lecture1: Lecture = {
         {
           kind: "para",
           text:
-            "A lithium-ion cell at 4 V and 2500 mAh stores 4 × 2.5 = 10 W h. " +
-            "That is about 26.6 kJ for roughly 150 g, so a realistic " +
-            "gravimetric density is near 200 W h kg⁻¹. Compare a lead-acid " +
-            "battery at about 35 W h kg⁻¹: the chemistry is five times " +
-            "better, and the pack is still heavy because of the inactive " +
-            "mass of casing, separators and current collectors.",
+            "A lithium-ion cell at 4 V and 2500 mAh stores 4 × 2.5 = 10 W h, " +
+            "which is about 36 kJ. At 150 g for the cell alone that is " +
+            "67 W h kg⁻¹; a real 18650 at about 45 g reaches 220 W h kg⁻¹, " +
+            "and a whole pack reaches less again because casing, separators " +
+            "and current collectors weigh nothing useful. Lead-acid sits " +
+            "near 35 W h kg⁻¹, so the honest comparison is a factor of two " +
+            "to six, not an order of magnitude.",
         },
         {
           kind: "callout",

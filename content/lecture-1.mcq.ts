@@ -15,6 +15,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-001",
     "topicId": "cell-anatomy",
+    "quick": true,
     "question": "In an electrolytic cell driven by an external power supply, the anode is",
     "options": [
       "the negative electrode",
@@ -54,6 +55,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-004",
     "topicId": "cell-anatomy",
+    "quick": true,
     "question": "The main purpose of a reference electrode is to",
     "options": [
       "supply current to the working electrode",
@@ -93,6 +95,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-007",
     "topicId": "cell-anatomy",
+    "quick": true,
     "question": "The open-circuit potential of an electrode pair is",
     "options": [
       "the potential reached at very high current",
@@ -106,6 +109,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-008",
     "topicId": "double-layer",
+    "quick": true,
     "question": "A typical electrical double layer at an electrode in water is",
     "options": [
       "one molecule thick",
@@ -145,6 +149,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-011",
     "topicId": "double-layer",
+    "quick": true,
     "question": "The Stern model combines",
     "options": [
       "Gouy-Chapman and Debye-Huckel only",
@@ -171,6 +176,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-013",
     "topicId": "double-layer",
+    "quick": true,
     "question": "Adding supporting electrolyte to a solution will normally",
     "options": [
       "reduce the double-layer capacitance",
@@ -184,6 +190,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-014",
     "topicId": "mass-transport",
+    "quick": true,
     "question": "The Nernst-Planck equation combines flux contributions from",
     "options": [
       "diffusion and convection only",
@@ -249,6 +256,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-019",
     "topicId": "mass-transport",
+    "quick": true,
     "question": "At the limiting current, the concentration overpotential",
     "options": [
       "is zero",
@@ -301,6 +309,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-023",
     "topicId": "mass-transport",
+    "quick": true,
     "question": "Why is a rotating disk electrode more useful than a stirred beaker for quantitative work?",
     "options": [
       "It makes the boundary-layer thickness reproducible and calculable",
@@ -314,6 +323,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-024",
     "topicId": "polarisation",
+    "quick": true,
     "question": "An ideally polarised electrode gives a",
     "options": [
       "horizontal polarisation curve",
@@ -340,6 +350,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-026",
     "topicId": "polarisation",
+    "quick": true,
     "question": "The flat plateau at the top of a polarisation curve is reached when",
     "options": [
       "the activation overpotential dominates",
@@ -366,6 +377,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-028",
     "topicId": "polarisation",
+    "quick": true,
     "question": "At the reversible potential of a Butler-Volmer process, the net current is",
     "options": [
       "zero",
@@ -379,6 +391,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-029",
     "topicId": "overpotentials",
+    "quick": true,
     "question": "The ohmic overpotential scales with current as",
     "options": [
       "log i",
@@ -405,6 +418,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-031",
     "topicId": "overpotentials",
+    "quick": true,
     "question": "If the ohmic overpotential dominates in an experiment, the most useful fix is to",
     "options": [
       "increase the applied voltage",
@@ -431,6 +445,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-033",
     "topicId": "overpotentials",
+    "quick": true,
     "question": "Which diagnostic identifies an ohmic contribution?",
     "options": [
       "the branch that follows Butler-Volmer kinetics",
@@ -444,6 +459,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-034",
     "topicId": "nernst",
+    "quick": true,
     "question": "The Nernst equation for a redox couple is",
     "options": [
       "E = E0 + (RT / nF) ln Q",
@@ -509,6 +525,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-039",
     "topicId": "nernst",
+    "quick": true,
     "question": "A potential of -0.30 V vs SHE converts to about",
     "options": [
       "-0.30 V vs RHE at any pH",
@@ -561,6 +578,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-043",
     "topicId": "nernst",
+    "quick": true,
     "question": "For the couple Cu2+ + 2e- -> Cu, the reaction quotient is",
     "options": [
       "[Cu2+]",
@@ -574,6 +592,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-044",
     "topicId": "kinetics",
+    "quick": true,
     "question": "The Tafel equation is",
     "options": [
       "eta = a + b log i",
@@ -652,6 +671,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-050",
     "topicId": "kinetics",
+    "quick": true,
     "question": "Re-expressing a measured potential from vs SHE to vs RHE at fixed pH changes",
     "options": [
       "the potential by a constant offset",
@@ -717,6 +737,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-055",
     "topicId": "kinetics",
+    "quick": true,
     "question": "The transfer coefficient alpha is best described as",
     "options": [
       "the fraction of the electrode surface that is active",
@@ -730,6 +751,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-056",
     "topicId": "her",
+    "quick": true,
     "question": "The overall hydrogen evolution reaction in acid is",
     "options": [
       "2H+ + 2e- -> H2",
@@ -782,6 +804,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-060",
     "topicId": "her",
+    "quick": true,
     "question": "In the Volmer-Heyrovsky mechanism hydrogen leaves the surface by",
     "options": [
       "chemical recombination of two adsorbed atoms",
@@ -821,6 +844,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-063",
     "topicId": "her",
+    "quick": true,
     "question": "On the potential axis, driving HER requires",
     "options": [
       "a positive overpotential",
@@ -834,6 +858,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-064",
     "topicId": "corrosion",
+    "quick": true,
     "question": "In an electrochemical corrosion cell, the anode is",
     "options": [
       "where oxygen is reduced",
@@ -860,6 +885,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-066",
     "topicId": "corrosion",
+    "quick": true,
     "question": "A more negative standard potential means the metal is",
     "options": [
       "less likely to oxidise",
@@ -886,6 +912,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-068",
     "topicId": "corrosion",
+    "quick": true,
     "question": "Which is the correct order of increasingly noble metals?",
     "options": [
       "Zn < Fe < Ni < Cu < Ag",
@@ -899,6 +926,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-069",
     "topicId": "electrolysis",
+    "quick": true,
     "question": "In electroplating, the object being coated is made the",
     "options": [
       "anode",
@@ -938,6 +966,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-072",
     "topicId": "electrolysis",
+    "quick": true,
     "question": "Electrolysis of molten alumina produces aluminium at the",
     "options": [
       "anode, as oxygen",
@@ -964,6 +993,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-074",
     "topicId": "electrolysis",
+    "quick": true,
     "question": "The theoretical decomposition voltage of a cell is",
     "options": [
       "minus the cell potential from the thermodynamics",
@@ -977,6 +1007,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-075",
     "topicId": "batteries",
+    "quick": true,
     "question": "In a lithium-ion cell during discharge, the negative electrode is",
     "options": [
       "graphite releasing lithium",
@@ -1016,6 +1047,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-078",
     "topicId": "batteries",
+    "quick": true,
     "question": "Coulombic efficiency is defined as",
     "options": [
       "useful output energy divided by input energy",
@@ -1042,6 +1074,7 @@ export const lecture1Mcq: Mcq[] = [
   {
     "id": "l1-mcq-080",
     "topicId": "batteries",
+    "quick": true,
     "question": "Energy density is highest for",
     "options": [
       "a supercapacitor",

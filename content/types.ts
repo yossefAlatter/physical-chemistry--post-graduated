@@ -1,8 +1,19 @@
-// Content model for the electrochemistry lecture site.
+// Content model for the site.
 //
 // Everything the site displays is hard-coded in `content/`. There is no
-// database and no fetch at runtime. Adding a lecture means adding one file
-// and one line to content/index.ts - see ADDING_A_LECTURE.md.
+// database and no fetch at runtime. Adding material means adding a file and
+// one line to content/index.ts - see ADDING_A_LECTURE.md.
+//
+// The nesting is:
+//
+//   Subject   -> a subject area, e.g. "Physical Chemistry"
+//     Course  -> a group of lectures, e.g. "Electrochemistry"
+//       Lecture -> e.g. "Lecture 1", has its own question bank
+//         Section -> one routable page, e.g. "/lectures/lecture-1/nernst"
+//
+// Sections are the unit you actually study: each is its own short page with
+// its own Next / Previous buttons and its own quick check, so no single page
+// ever gets long.
 
 /** A run of body text. `text` may contain **bold**, *italic*, `code`. */
 export interface Paragraph {
@@ -18,7 +29,7 @@ export interface Formula {
   caption?: string;
 }
 
-/** An illustration from public/figures, drawn by the PDF figure script. */
+/** An illustration from public/figures. */
 export interface Figure {
   kind: "figure";
   /** File name inside public/figures, e.g. "cell_anatomy.png". */
@@ -70,15 +81,35 @@ export type Block =
   | ListBlock
   | Worked;
 
-/** One topic within a lecture. The anchor used by the sidebar and by MCQs. */
+/** A closing call-to-action at the bottom of a section. */
+export interface SectionCta {
+  title: string;
+  body: string;
+  /** Where the button goes, usually the next lecture. */
+  href: string;
+  linkLabel: string;
+  /** Optional smaller second link, e.g. back to the section index. */
+  secondaryHref?: string;
+  secondaryLabel?: string;
+}
+
+/**
+ * One topic within a lecture. A section is a page in its own right, so it is
+ * kept short on purpose.
+ */
 export interface Section {
+  /** URL segment and the anchor used by MCQs; unique inside the lecture. */
   id: string;
   title: string;
   /** One-line summary shown on section cards and in the sidebar. */
   summary: string;
-  blocks: Block[];
-  /** Bullet points worth memorising; also used by the quiz review screen. */
+  /** Rough reading time for this section alone, in minutes. */
+  minutes?: number;
+  /** Bullet points worth memorising. */
   keyPoints?: string[];
+  blocks: Block[];
+  /** Rendered as a highlighted panel at the very bottom of the section. */
+  cta?: SectionCta;
 }
 
 /** A single multiple-choice question. */
@@ -92,6 +123,12 @@ export interface Mcq {
   /** Index of the correct option. */
   answer: number;
   explanation: string;
+  /**
+   * Set on a small number of questions per section. These are the ones shown
+   * in the inline "Quick check" at the bottom of the section page, so keep
+   * them short and unambiguous - a learner meets them with no timer.
+   */
+  quick?: boolean;
 }
 
 /** Constants and other numbers the site shows in a "reference" panel. */
@@ -102,6 +139,7 @@ export interface Constant {
 }
 
 export interface Lecture {
+  /** URL segment, unique across the whole site. */
   slug: string;
   /** Sidebar label, e.g. "Lecture 1". */
   label: string;
@@ -109,17 +147,35 @@ export interface Lecture {
   summary: string;
   /** Sidebar / card ordering. Lowest first. */
   order: number;
-  /** Approximate reading time in minutes, shown as a badge. */
+  /** Approximate reading time for the whole lecture, in minutes. */
   minutes: number;
+  /** Shown on the lecture overview page, above the section list. */
+  intro?: Block[];
   sections: Section[];
   mcq: Mcq[];
   constants?: Constant[];
 }
 
-/** A group of lectures in the sidebar, e.g. "Fundamentals". */
+/** A group of lectures in the sidebar, e.g. "Electrochemistry". */
 export interface Course {
   id: string;
   title: string;
   description: string;
   lectures: Lecture[];
+}
+
+/**
+ * A subject area. The site is named after the first one, but others are
+ * expected: add a Subject and the home page, sidebar and routes pick it up.
+ */
+export interface Subject {
+  /** URL segment, e.g. "physical-chemistry". */
+  slug: string;
+  /** Short name for cards and the sidebar, e.g. "Physical Chemistry". */
+  title: string;
+  /** One line under the title. */
+  tagline: string;
+  /** Longer text for the subject's own page. */
+  description: string;
+  courses: Course[];
 }

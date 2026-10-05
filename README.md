@@ -1,87 +1,101 @@
-# Electrochemistry Lectures
+# Physical Chemistry — Postgraduate
 
-Lecture notes and multiple-choice questions for an undergraduate
-electrochemistry course. Mobile-first, statically generated, no database and
-no server at runtime.
+Lecture material and multiple-choice questions for a postgraduate physical
+chemistry course, currently covering electrochemistry. Mobile-first, statically
+generated, no database and no server at runtime.
 
 Built with Next.js (App Router), TypeScript and Tailwind CSS, with KaTeX for
 the maths.
 
-## Getting started
-
-```bash
-npm install
-npm run dev          # http://localhost:3000
-npm run build        # type-check and produce the static build
-npm run lint
-```
-
-Deploying is a normal Vercel project: import the repository and accept the
-defaults, or use the CLI.
-
 ## How the content is organised
 
-Everything shown on the site is hard-coded in `content/`:
+The unit you study is a **section**, and a section is a short page. Nothing on
+this site is a wall of text.
+
+```
+Subject    Physical Chemistry        <- subject area, more are expected
+  Course   Electrochemistry         <- group of lectures
+    Lecture  lecture-1               <- has its own question bank
+      Section  nernst               <- ONE PAGE, ends in its own quick check
+```
+
+Everything displayed is hard-coded in `content/`:
 
 ```
 content/
-  types.ts              the shape of every block, section, question
-  index.ts              the registry - the only file to touch to add a lecture
-  lecture-1.ts          Lecture 1 content: 11 sections
-  lecture-1.mcq.ts      80 multiple choice questions, with explanations
+  types.ts              the shape of every block, section and question
+  index.ts              the registry - the only file to touch to add material
+  fundamentals.ts       the zero-to-one primer, 7 sections
+  fundamentals.mcq.ts   21 questions for the primer
+  lecture-1.ts          11 sections, cell anatomy through to batteries
+  lecture-1.mcq.ts      80 questions with explanations
 ```
 
-`content/index.ts` exports the course structure. The sidebar, the home page,
-the routes and the quiz filters all read from it, so adding a lecture is
+`content/index.ts` exports the subject structure. The sidebar, the home page,
+every route and the quiz filters all read from it, so adding material is
 purely additive.
 
-**See [ADDING_A_LECTURE.md](ADDING_A_LECTURE.md)** for a step-by-step walk
-through adding Lecture 2 or 3.
+**See [ADDING_A_LECTURE.md](ADDING_A_LECTURE.md)** for how to add a section, a
+lecture, a course or a whole subject.
 
 ## Routes
 
 | Route | What it is |
 | --- | --- |
-| `/` | home: the course, the lectures, how to use the site |
-| `/lectures/[slug]` | the lecture notes, with figures, tables and worked examples |
-| `/lectures/[slug]/quiz` | the quiz for that lecture |
-| `/lectures/[slug]/quiz?topic=[section]` | only the questions on one topic |
+| `/` | home: subjects, courses, lectures and their section lists |
+| `/lectures/[lecture]` | lecture contents: cards for each short section |
+| `/lectures/[lecture]/[section]` | one section, with Next / Previous and a quick check |
+| `/lectures/[lecture]/quiz` | the full bank for that lecture, shuffled |
+| `/lectures/[lecture]/quiz?topic=[section]` | only the questions on one section |
 
-All three are prerendered at build time via `generateStaticParams`.
+All of these are prerendered at build time via `generateStaticParams`.
 
 ## Layout
 
-- **Mobile first.** Below `lg` there is a sticky top bar with a hamburger, and
+- **Mobile first.** Below `lg` there is a sticky top bar with a hamburger and
   the sidebar is a slide-in drawer that traps the page behind an overlay and
   closes on Escape or on navigation.
-- From `lg` up the sidebar is a permanent column and the lecture page gains an
-  "On this page" rail with previous/next lecture links.
-- Answer buttons are full-width rows, so they are comfortable to tap.
+- From `lg` up the sidebar is a permanent column.
+- When you are inside a lecture, the sidebar lists that lecture's sections and
+  marks the one you are reading.
+- Buttons and links are at least 36 px tall on touch, and answer options are
+  full-width rows.
+- Nothing overflows horizontally at 360 px: long equations and wide tables
+  scroll inside their own container instead of pushing the page sideways.
 
 ## Maths
 
 Display maths is rendered on the server with KaTeX, so the maths library is
-never sent to the browser. Long equations scroll horizontally inside their
-own container instead of forcing the page sideways on a phone.
+never sent to the browser.
 
 ## Questions
 
-Each question carries a `topicId` matching a section id, which is what powers
-the per-topic counts on the lecture page, the "Test this topic" links and the
-topic groupings in the review screen.
+Each question carries a `topicId` matching a section id. Three questions per
+section are flagged `quick: true`; those become the inline **Quick check** at
+the bottom of the section page, so a learner can test themselves without
+leaving the page. Everything else stays in the full bank, which is where the
+shuffled end-to-end quiz comes from.
 
 Lecture 1's questions were exported from the verified question bank in the
 sibling `electricial-chemistry` project, whose `tools/check_questions.py`
 recomputes all 65 printed numeric values against the printed working. The
 export is a one-time step; the file is then edited like any other source file.
 
-## The figures
+## Figures
 
-The 16 diagrams in `public/figures/` are generated by the Python figure script
-in `../electricial-chemistry/echem_guide/figures.py`, which also draws the
-figures for the printed guide. If you change them there, re-run that build and
-copy the PNGs across; `tools/check_figures.py` in the same project checks them
-for overlapping or clipped text.
+The Fundamentals diagrams are generated by `tools/figures.py`:
+
+```bash
+../electricial-chemistry/.venv/bin/python tools/figures.py       # redraw into public/figures
+../electricial-chemistry/.venv/bin/python tools/check_figures.py # layout + reference check
+```
+
+`check_figures.py` detects overlapping labels, labels pushed off the canvas,
+and any figure referenced by content that is missing from disk - the failures
+that are invisible in the source but obvious on the page.
+
+The Lecture 1 diagrams were generated by the Python figure script in
+`../electricial-chemistry/echem_guide/figures.py`.
 
 ## Attribution
 

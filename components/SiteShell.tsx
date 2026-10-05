@@ -3,18 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { courses } from "@/content";
+import { subjects } from "@/content";
 
 /**
  * App shell: a permanent sidebar from `lg` up, and a slide-in drawer with a
  * hamburger below it. The drawer closes on navigation and on Escape, and it
  * traps the page behind an overlay so a stray tap cannot scroll it.
+ *
+ * The sidebar is generated from the subject registry in content/index.ts, so
+ * a new subject, course, lecture or section appears here without edits here.
  */
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
-
-  // Every link in the sidebar closes the drawer through onNavigate, so the
-  // route change itself needs no effect.
 
   // Escape closes the drawer
   useEffect(() => {
@@ -55,10 +55,10 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           </button>
           <Link href="/" className="min-w-0">
             <span className="block truncate font-serif text-[1.05rem] font-semibold text-ink">
-              Electrochemistry
+              Physical Chemistry
             </span>
             <span className="block truncate text-[0.7rem] font-semibold uppercase tracking-widest text-accent">
-              Lectures
+              Postgraduate
             </span>
           </Link>
         </div>
@@ -106,10 +106,10 @@ function SidebarBody({ onNavigate }: { onNavigate: () => void }) {
       <div className="flex items-start justify-between gap-2 border-b border-rule px-5 py-4">
         <Link href="/" onClick={onNavigate} className="min-w-0">
           <span className="block font-serif text-lg leading-tight font-semibold text-ink">
-            Electrochemistry
+            Physical Chemistry
           </span>
           <span className="mt-0.5 block text-[0.68rem] font-bold uppercase tracking-[0.16em] text-accent">
-            Lecture notes &amp; MCQs
+            Postgraduate
           </span>
         </Link>
         <button
@@ -130,68 +130,84 @@ function SidebarBody({ onNavigate }: { onNavigate: () => void }) {
       </div>
 
       <div className="flex-1 px-3 py-4">
-        {courses.map((course) => (
-          <div key={course.id} className="mb-6">
-            <h2 className="px-2 pb-2 text-[0.68rem] font-bold uppercase tracking-[0.15em] text-faint">
-              {course.title}
-            </h2>
-            <ul className="space-y-0.5">
-              {course.lectures.map((lecture) => {
-                const onLecture = pathname === `/lectures/${lecture.slug}`;
-                return (
-                  <li key={lecture.slug}>
-                    <Link
-                      href={`/lectures/${lecture.slug}`}
-                      onClick={onNavigate}
-                      aria-current={onLecture ? "page" : undefined}
-                      className={[
-                        "flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-2.5",
-                        "text-[0.94rem] leading-snug transition-colors",
-                        onLecture
-                          ? "bg-accent-light font-semibold text-accent-dark"
-                          : "text-ink-soft hover:bg-tint hover:text-ink",
-                      ].join(" ")}
-                    >
-                      <span className="min-w-0">{lecture.label}</span>
-                      <span
-                        className={[
-                          "shrink-0 text-[0.68rem] font-semibold tabular-nums",
-                          onLecture ? "text-accent" : "text-faint",
-                        ].join(" ")}
-                      >
-                        {lecture.mcq.length} Q
-                      </span>
-                    </Link>
-                    {onLecture && (
-                      <ul className="mb-1 ml-2.5 mt-0.5 space-y-0.5 border-l border-rule pl-2">
-                        <SubLink
-                          href={`/lectures/${lecture.slug}/quiz`}
-                          label="All questions"
-                          active={pathname === `/lectures/${lecture.slug}/quiz`}
-                          onNavigate={onNavigate}
-                        />
-                        {lecture.sections.slice(0, 4).map((s) => (
-                          <SubLink
-                            key={s.id}
-                            href={`/lectures/${lecture.slug}#${s.id}`}
-                            label={s.title}
-                            onNavigate={onNavigate}
-                          />
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+        {subjects.map((subject) => (
+          <div key={subject.slug} className="mb-6">
+            {subjects.length > 1 && (
+              <h2 className="px-2 pb-2 text-[0.68rem] font-bold uppercase tracking-[0.15em] text-faint">
+                {subject.title}
+              </h2>
+            )}
+
+            {subject.courses.map((course) => (
+              <div key={course.id} className="mb-4 last:mb-0">
+                <h3 className="px-2 pb-1.5 text-[0.68rem] font-bold uppercase tracking-[0.15em] text-faint">
+                  {course.title}
+                </h3>
+                <ul className="space-y-0.5">
+                  {course.lectures.map((lecture) => {
+                    const lectureBase = `/lectures/${lecture.slug}`;
+                    const onLecture =
+                      pathname === lectureBase ||
+                      pathname.startsWith(`${lectureBase}/`);
+                    return (
+                      <li key={lecture.slug}>
+                        <Link
+                          href={lectureBase}
+                          onClick={onNavigate}
+                          aria-current={pathname === lectureBase ? "page" : undefined}
+                          className={[
+                            "flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-2.5",
+                            "text-[0.94rem] leading-snug transition-colors",
+                            onLecture
+                              ? "bg-accent-light font-semibold text-accent-dark"
+                              : "text-ink-soft hover:bg-tint hover:text-ink",
+                          ].join(" ")}
+                        >
+                          <span className="min-w-0">{lecture.label}</span>
+                          <span
+                            className={[
+                              "shrink-0 text-[0.68rem] font-semibold tabular-nums",
+                              onLecture ? "text-accent" : "text-faint",
+                            ].join(" ")}
+                          >
+                            {lecture.sections.length}
+                          </span>
+                        </Link>
+
+                        {onLecture && (
+                          <ul className="mb-1 ml-2.5 mt-0.5 space-y-0.5 border-l border-rule pl-2">
+                            {lecture.sections.map((s) => (
+                              <SubLink
+                                key={s.id}
+                                href={`${lectureBase}/${s.id}`}
+                                label={s.title}
+                                active={pathname === `${lectureBase}/${s.id}`}
+                                onNavigate={onNavigate}
+                              />
+                            ))}
+                            <SubLink
+                              href={`${lectureBase}/quiz`}
+                              label="All questions"
+                              active={pathname === `${lectureBase}/quiz`}
+                              onNavigate={onNavigate}
+                            />
+                          </ul>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
           </div>
         ))}
 
         <div className="rounded-lg bg-tint px-3 py-3 text-[0.8rem] leading-relaxed text-ink-soft">
-          <p className="font-semibold text-ink">About this site</p>
+          <p className="font-semibold text-ink">How this site is built</p>
           <p className="mt-1">
-            Notes and questions are hard-coded per lecture, so each one can
-            be corrected in place without touching the others.
+            Every lecture is a short set of section pages, each ending in its
+            own quick check. Content is stored in the project files, so a
+            correction lands on every copy at once.
           </p>
         </div>
       </div>
@@ -224,8 +240,8 @@ function SubLink({
         className={[
           "flex min-h-9 items-center rounded-md px-2 text-[0.85rem] leading-snug transition-colors",
           active
-            ? "font-semibold text-accent-dark"
-            : "text-ink-soft hover:text-accent hover:underline",
+            ? "bg-accent-light font-semibold text-accent-dark"
+            : "text-ink-soft hover:bg-accent hover:underline",
         ].join(" ")}
       >
         {label}

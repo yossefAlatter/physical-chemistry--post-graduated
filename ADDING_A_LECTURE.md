@@ -1,14 +1,52 @@
-# Adding a lecture
+# Adding material
 
-Every lecture is a pair of hard-coded files plus one line in the registry.
-There is no database, no CMS and no build-time content fetch, so a new
-lecture is entirely additive: nothing existing has to change.
+Every lecture is a set of **short section pages**, and each section ends with
+its own three-question check. That structure is the whole design: no page is
+long enough to feel like a wall, and a learner can stop after any section.
 
-## The three steps
+The nesting is:
 
-### 1. Write the content: `content/lecture-2.ts`
+```
+Subject   Physical Chemistry          <- a subject area; others are expected
+  Course  Electrochemistry           <- a group of lectures
+    Lecture  lecture-1                <- has its own question bank
+      Section  nernst                <- ONE PAGE, with Next / Previous
+```
 
-Copy the shape of `content/lecture-1.ts`:
+Adding a section, a lecture, a course or a subject is purely additive. Nothing
+that already exists has to change.
+
+## Add a section to an existing lecture
+
+Sections are the common case, and the change is one file edit: append an
+object to that lecture's `sections` array.
+
+```ts
+{
+  id: "capacitors",              // URL segment, unique inside the lecture
+  title: "Double-layer capacitance",
+  summary: "One-line card text. Say what the section answers.",
+  minutes: 7,                    // shown on the card and the section header
+  keyPoints: ["Worth memorising; also drives the quiz review."],
+  blocks: [ /* see below */ ],
+  cta: {                         // optional panel at the very bottom
+    title: "Next up",
+    body: "Why it matters.",
+    href: "/lectures/lecture-2",
+    linkLabel: "Go to Lecture 2",
+  },
+}
+```
+
+That is all. The route `/lectures/lecture-1/capacitors`, the card on the
+contents page, the sidebar entry and the Next/Previous buttons are generated
+from `sections`, so there is nothing else to register.
+
+## Add a lecture
+
+Two files, then one line in the registry.
+
+### 1. `content/lecture-2.ts`
 
 ```ts
 import type { Lecture } from "./types";
@@ -17,32 +55,18 @@ import { lecture2Mcq } from "./lecture-2.mcq";
 export const lecture2: Lecture = {
   slug: "lecture-2",              // becomes /lectures/lecture-2
   label: "Lecture 2",             // sidebar text
-  title: "Aqueous Corrosion and Protection",
+  title: "Electroanalytical methods",
   summary: "One or two sentences, shown on the home page card.",
   order: 2,                       // sidebar ordering, lowest first
-  minutes: 60,                    // badge on the card
+  minutes: 60,                    // fallback if sections carry no minutes
+  intro: [ { kind: "para", text: "Shown on the lecture contents page." } ],
+  sections: [ /* as above */ ],
   mcq: lecture2Mcq,
-  sections: [ /* see below */ ],
+  constants: [ { symbol: "F", name: "Faraday", value: "96 485 C mol⁻¹" } ],
 };
 ```
 
-Each entry in `sections` needs `id`, `title`, `summary` and `blocks`:
-
-```ts
-{
-  id: "pitting",                  // becomes #pitting, must be unique
-  title: "Pitting corrosion",
-  summary: "Short italic line under the heading.",
-  keyPoints: ["Worth memorising, shown in a gold box."],
-  blocks: [ /* ... */ ],
-}
-```
-
-The `id` is the contract between the notes and the questions: a question
-with `topicId: "pitting"` is filed under that section automatically, and the
-lecture page turns that into a "Test this topic" link and a count.
-
-### 2. Write the questions: `content/lecture-2.mcq.ts`
+### 2. `content/lecture-2.mcq.ts`
 
 ```ts
 import type { Mcq } from "./types";
@@ -50,36 +74,49 @@ import type { Mcq } from "./types";
 export const lecture2Mcq: Mcq[] = [
   {
     id: "l2-mcq-001",             // unique across the whole site
-    topicId: "pitting",           // must match a section id above
-    question: "Pitting is most likely when the surface is…",
-    options: ["…", "…", "…", "…"], // exactly four
+    topicId: "capacitors",        // must match a section id
+    quick: true,                  // optional: include in that section's check
+    question: "…",
+    options: ["…", "…", "…", "…"],  // exactly four
     answer: 2,                    // index of the correct option
     explanation: "Why that is right, and why the nearest wrong answer is not.",
   },
 ];
 ```
 
-That is the whole file. `id`, `topicId` and the `options`/`answer` pair are
-the only fields the site depends on.
+Mark three questions per section with `quick: true`. Those become the inline
+**Quick check** at the bottom of the section page; everything else stays in
+the full bank. `content/index.ts` falls back to the first three of a section's
+questions if none are flagged, so a section is never left without a check.
 
 ### 3. Register it: `content/index.ts`
 
 ```ts
-import { lecture1 } from "./lecture-1";
 import { lecture2 } from "./lecture-2";   // add
 
-export const lectures: Lecture[] = [
+lectures: [
   lecture1,
   lecture2,                              // add
-];
+],
 ```
 
-Stop here. The sidebar, the home page, `/lectures/lecture-2`,
-`/lectures/lecture-2/quiz`, the previous/next links and the static
-`generateStaticParams` all pick it up from here. Nothing else to edit.
+## Add a course or a subject
 
-To put the lecture in its own group, add a second entry to `courses` in the
-same file.
+A **course** is a group of lectures in the sidebar. A **subject** is a group
+of courses. Both are plain objects in `content/index.ts`:
+
+```ts
+{
+  id: "spectroscopy",
+  title: "Spectroscopy",
+  tagline: "Postgraduate · from first principles to research level",
+  description: "Shown on the subject block of the home page.",
+  courses: [ /* ... */ ],
+}
+```
+
+When a second subject appears the sidebar starts printing subject headings on
+its own - no change to `SiteShell` is needed.
 
 ## What you can write in `blocks`
 
@@ -107,8 +144,8 @@ same file.
 maths-related is shipped to the browser. Display maths scrolls horizontally
 on a narrow screen rather than overflowing the page.
 
-Inside a `worked` block, write each step in LaTeX and it will be rendered as
-a displayed equation:
+Inside a `worked` block, write each step in LaTeX and it is rendered as a
+displayed equation:
 
 ```ts
 {
@@ -123,41 +160,44 @@ a displayed equation:
 }
 ```
 
-Use `String.raw` so backslashes are not eaten by JavaScript. If a formula is
-malformed, KaTeX renders it in red rather than crashing the page.
+Use `String.raw` so backslashes survive JavaScript. A malformed formula is
+rendered in red by KaTeX rather than crashing the page.
 
 ### Figures
 
 Drop a PNG into `public/figures/` and reference it by file name:
 
 ```ts
-{ kind: "figure", src: "passivation.png", alt: "…describe it for screen readers…", caption: "…" }
+{ kind: "figure", src: "passivation.png", alt: "…", caption: "…" }
 ```
 
-Always write a real `alt`. It is what a screen reader announces, and it is
-also the text search engines and diagram-quality tools read.
+Always write a real `alt`: it is what a screen reader announces.
 
-The existing 16 diagrams were generated by the Python figure script in the
-sibling `electricial-chemistry` project; regenerate and re-copy them if you
-change them.
+The Fundamentals diagrams are generated by `tools/figures.py`:
+
+```bash
+../electricial-chemistry/.venv/bin/python tools/figures.py     # redraw
+../electricial-chemistry/.venv/bin/python tools/check_figures.py # layout check
+```
+
+`check_figures.py` reports overlapping labels, labels pushed off the canvas,
+and any figure referenced by content that does not exist on disk.
 
 ## Checklist before you commit
 
 ```bash
-npm run build     # type-checks every block and every question
+npm run build
 npm run lint
+../electricial-chemistry/.venv/bin/python tools/check_figures.py
 ```
 
-`npm run build` fails if a question's `topicId` does not match a section,
-if an option list is not length four, or if the types do not line up. That
-catches almost every mistake worth catching.
+The build fails if a question's `topicId` matches no section, if an option
+list is not length four, or if the types do not line up.
 
 ## Quiz behaviour you get for free
 
 - questions shuffled per attempt
 - one question per screen, large tap targets, no horizontal scrolling
 - the explanation appears the moment you commit, including for correct answers
-- a results screen with the score, a bar, and a review list of everything you
-  got wrong, grouped with its topic
-- per-topic entry points: `/lectures/lecture-2/quiz?topic=pitting`
-- a per-question progress readout and a running score
+- a results screen with the score and a review list of everything you got wrong
+- per-section entry points: `/lectures/lecture-2/quiz?topic=capacitors`
