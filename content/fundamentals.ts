@@ -254,29 +254,35 @@ export const fundamentals: Lecture = {
       title: "Anatomy of a cell",
       minutes: 7,
       summary:
-        "Two electrodes, one electrolyte, one wire - and a route for the " +
-        "ions so the solution does not charge up.",
+        "Four parts and two charge paths: electrons through the wire, ions " +
+        "through the electrolyte. A cell works only while both are open.",
       keyPoints: [
-        "Electrode = a conducting surface where electrons are exchanged. Electrolyte = a solution that lets ions move.",
-        "Oxidation happens at the anode, reduction at the cathode.",
-        "Something must carry the ions; otherwise charge builds up and the current stops.",
-        "Cell notation is always written oxidation side first, anode on the left.",
+        "An electrode is a conducting surface where electrons are exchanged; the electrolyte is the phase in which ions carry charge.",
+        "Oxidation at the anode, reduction at the cathode, in either family of cell.",
+        "Charge needs two paths at once. Break the electronic one or the ionic one and the current stops.",
+        "Cell notation is bookkeeping: oxidation side first, `|` for a phase boundary, `||` for the bridge.",
       ],
       blocks: [
         {
           kind: "para",
           text:
             "**The question this section answers:** if the two halves of the " +
-            "reaction are pulled apart, what exactly do you need to build, and " +
-            "what does each part do?",
+            "reaction are pulled apart, what exactly do you have to build, " +
+            "and what is each part doing?",
         },
         {
           kind: "para",
           text:
-            "Every cell in this subject is an assembly of the same four " +
-            "parts. Learn them once. You already know from the previous " +
-            "section that oxidation happens at the anode and reduction at the " +
-            "cathode; this is the hardware that makes that happen.",
+            "Every cell in this subject is the same handful of parts " +
+            "assembled differently, and the reason there are so few is charge " +
+            "conservation. Oxidation pushes electrons into a conductor and " +
+            "reduction takes them out again, so between the two electrodes " +
+            "the electrons need a path you can put a meter in. That is the " +
+            "external circuit. At the same time the solution must not be " +
+            "allowed to accumulate charge, so each half-reaction has to be " +
+            "balanced by ions moving inside the electrolyte. Those two " +
+            "requirements fix the parts before you have chosen any chemistry " +
+            "at all.",
         },
         {
           kind: "figure",
@@ -314,11 +320,14 @@ export const fundamentals: Lecture = {
           text:
             "Read the notation rule carefully, because it is pure convention " +
             "and examiners assume you know it. One vertical bar `|` marks a " +
-            "boundary between two *phases* - say, metal touching solution. A " +
-            "double bar `||` marks the salt bridge, which is the cell's own " +
-            "internal connection. `(s)` means solid, `(aq)` means dissolved in " +
-            "water, `(l)` means liquid. And the oxidation side is always " +
-            "written first, on the left, whatever the cell is used for.",
+            "boundary between two *phases* - metal touching solution, say. A " +
+            "double bar `||` marks the salt bridge, the cell's own internal " +
+            "connection. `(s)` is solid, `(aq)` dissolved in water, `(l)` " +
+            "liquid, `(g)` gas. And the oxidation side is always written " +
+            "first, on the left, whatever the cell is being used for. The " +
+            "point of that convention is worth stating: it makes the " +
+            "left-hand electrode the anode *by definition*, so a cell " +
+            "potential can never come out ambiguous when you subtract.",
         },
         {
           kind: "table",
@@ -337,8 +346,10 @@ export const fundamentals: Lecture = {
           text:
             "Follow the electrons and the external circuit explains itself. " +
             "The zinc oxidises, so electrons leave it and travel down the " +
-            "wire. They arrive at the copper and are consumed, so the wire is " +
-            "a one-way street and no charge piles up in it.",
+            "wire; they arrive at the copper and are consumed. The wire is a " +
+            "one-way street because a metal has mobile electrons that move " +
+            "without accumulating charge - a conductor carries charge, it " +
+            "does not store it.",
         },
         {
           kind: "para",
@@ -346,11 +357,15 @@ export const fundamentals: Lecture = {
             "Now the solution, which is the half people forget. Zinc ions go " +
             "into solution at the anode, so positive charge accumulates there; " +
             "copper ions are removed at the cathode, so negative charge " +
-            "accumulates there. Within about a millimetre the electric field " +
-            "this builds opposes further ion motion, and the current stops. " +
-            "The salt bridge exists purely to repair this: anions migrate " +
-            "toward the anode and cations toward the cathode, keeping both " +
-            "solutions electrically neutral.",
+            "accumulates there. Over a distance comparable to the Debye " +
+            "length the field this builds opposes further ion motion, the " +
+            "charge separation screens itself, and the current dies. The " +
+            "bridge exists purely to repair that: anions migrate toward the " +
+            "anode and cations toward the cathode, holding both solutions " +
+            "close to neutral. It is not free, though - a bridge is a " +
+            "junction between two different solutions, so it carries a " +
+            "diffusion potential that has to be eliminated before any " +
+            "measurement can be trusted.",
         },
         {
           kind: "callout",
@@ -360,7 +375,12 @@ export const fundamentals: Lecture = {
             "Only ions can move charge through a liquid, and only a species " +
             "that is *already* ionic can supply them. That is why the " +
             "electrolyte is a molten salt or a salt solution, and why pure " +
-            "water is a hopeless conductor - it has almost no mobile ions.",
+            "water is a hopeless conductor - it has almost no mobile ions. " +
+            "Note also that cations and anions both carry current inside the " +
+            "cell, and the share each one carries is its transference number. " +
+            "So the internal resistance of a cell is not fixed by geometry " +
+            "alone: it depends on how the current divides between the two " +
+            "ionic species.",
         },
         {
           kind: "worked",
@@ -376,8 +396,8 @@ export const fundamentals: Lecture = {
             "The cathode has just lost 5 mmol of positive charge (Cu²⁺ " +
               "plated out), so it needs positive charge: cations migrate " +
               "**toward the cathode**.",
-            "Both halves now run at the same number of equivalents per " +
-              "second, so no charge builds up anywhere and the current " +
+            "Both halves now carry the same number of equivalents per " +
+              "second, so no charge builds up anywhere, and the current " +
               "keeps flowing.",
           ],
           result:
@@ -387,10 +407,15 @@ export const fundamentals: Lecture = {
         {
           kind: "para",
           text:
-            "Swapping the metals gives a different voltage, because different " +
-            "elements oxidise more or less willingly. That single fact is the " +
-            "whole of cell chemistry: **the voltage is decided by which two " +
-            "reactions you pair**, not by the cell you happen to build them in.",
+            "Swapping the metals changes the voltage, because different " +
+            "couples sit at different potentials. That single fact is most " +
+            "of cell chemistry: **the potential is decided by which two " +
+            "couples you pair**, not by the vessel you build them in. " +
+            "Formally `E = E(cathode) - E(anode)`, and since `ΔG = -nFE` the " +
+            "cell potential is a thermodynamic statement about a reaction. " +
+            "What it does *not* tell you is how fast the cell will run; that " +
+            "is a separate question, and pairing two couples that sit far " +
+            "apart buys a big voltage and often a sluggish one.",
         },
         {
           kind: "figure",
@@ -413,19 +438,23 @@ export const fundamentals: Lecture = {
           title: "Where you already meet this",
           body:
             "A lead-acid car battery has the same four parts in a different " +
-            "form: two lead plates in sulfuric acid, and instead of a salt " +
-            "bridge it uses a porous plastic separator that lets ions " +
-            "through while keeping the plates apart. Lithium-ion cells go " +
-            "further and use no liquid bridge at all - a solid or gel " +
-            "electrolyte between the electrodes. If the ions cannot get from " +
-            "one plate to the other, every battery ever made simply stops.",
+            "form: two lead plates in sulfuric acid, one oxidising to PbO₂ " +
+            "while the other is reduced, and instead of a salt bridge a " +
+            "porous plastic separator lets the ions through while keeping the " +
+            "plates apart. Here the electrolyte is not a spectator - the " +
+            "sulfate is consumed and must be restored by charging. " +
+            "Lithium-ion cells go further and use no liquid bridge at all, " +
+            "only a solid or gel electrolyte between the electrodes. If the " +
+            "ions cannot get from one plate to the other, every battery " +
+            "ever made simply stops.",
         },
         {
           kind: "para",
           text:
             "You now know the parts and the shape of a cell. But a cell does " +
-            "not simply produce electrons - it produces them at a *rate*, and " +
-            "the next section fixes the three numbers that rate depends on.",
+            "not simply produce electrons - it produces them at a *rate*, " +
+            "and the next section fixes the three numbers that rate depends " +
+            "on.",
         },
       ],
     },

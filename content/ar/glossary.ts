@@ -129,6 +129,15 @@ export const GLOSSARY: Record<string, string> = {
   "القياس الكمّي الكهربائي": "coulometry",
   "تيار التبادل": "exchange current",
   "وقود متجدد": "regenerative fuel",
+
+  // The interior of a cell, which the cell-anatomy section needs.
+  "الطور": "phase",
+  "الوصلة السائلة": "liquid junction",
+  "جهد الانتشار": "diffusion potential",
+  "طول ديباي": "Debye length",
+  "معامل النقل": "transference number",
+  "الثنائي الكهروكيميائي": "couple",
+  "بطارية الرصاص الحمضية": "lead-acid battery",
 };
 
 /**

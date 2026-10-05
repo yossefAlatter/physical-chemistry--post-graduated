@@ -1,6 +1,7 @@
 import type { Lecture } from "../types";
 import { fundamentalsMcqAr } from "./fundamentals.mcq";
 import { whatIsItAr } from "./sections/fundamentals-01-what-is-it";
+import { cellAnatomyAr } from "./sections/fundamentals-02-cell-anatomy";
 
 /**
  * Arabic translation of the Fundamentals lecture.
@@ -56,5 +57,5 @@ export const fundamentalsAr: Partial<Lecture> = {
         "تنتهي من القسم الأخير ستعرف المواضيع التي يمكنك البدء بها.",
     },
   ],
-  sections: [whatIsItAr],
+  sections: [whatIsItAr, cellAnatomyAr],
 };
