@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import "../globals.css";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { SiteShell } from "@/components/SiteShell";
 import { themeScript } from "@/components/themeScript";
 
@@ -77,6 +78,7 @@ export default function EnglishLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-full">
+        <ServiceWorkerRegister />
         <SiteShell locale="en">{children}</SiteShell>
       </body>
     </html>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Noto_Kufi_Arabic, Noto_Sans_Arabic } from "next/font/google";
 import "../globals.css";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { SiteShell } from "@/components/SiteShell";
 import { themeScript } from "@/components/themeScript";
 
@@ -92,6 +93,7 @@ export default function ArabicLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-full">
+        <ServiceWorkerRegister />
         <SiteShell locale="ar">{children}</SiteShell>
       </body>
     </html>
