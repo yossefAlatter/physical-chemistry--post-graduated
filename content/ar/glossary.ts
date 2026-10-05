@@ -138,6 +138,12 @@ export const GLOSSARY: Record<string, string> = {
   "معامل النقل": "transference number",
   "الثنائي الكهروكيميائي": "couple",
   "بطارية الرصاص الحمضية": "lead-acid battery",
+
+  // Quantities you measure, and the resistances you measure them through.
+  "قانون أوم": "Ohm's law",
+  "الانتشار": "diffusion",
+  "المحفّز الكهربائي": "electrocatalyst",
+  "معدل الشحن": "C-rate",
 };
 
 /**

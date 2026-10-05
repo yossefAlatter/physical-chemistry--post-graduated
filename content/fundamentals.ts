@@ -464,21 +464,24 @@ export const fundamentals: Lecture = {
       title: "Charge, current and resistance",
       minutes: 6,
       summary:
-        "Coulombs are how much, amps are how fast. Get that distinction " +
-        "right and half the confusion in the subject disappears.",
+        "Coulombs are how much, amps are how fast, and a current is the " +
+        "reaction's rate made observable. Fix that distinction and half the " +
+        "confusion in the subject disappears.",
       keyPoints: [
-        "1 amp = 1 coulomb per second.",
+        "1 amp = 1 coulomb per second, and `I = nF` times the rate of reaction.",
         "Current tells you how fast charge moves; charge tells you how much has moved.",
-        "Ohm's law links them: V = IR, with resistance depending on the electrode, the solution and the geometry.",
-        "Voltage is energy per coulomb, so you need to know the charge before you know the energy.",
+        "A cell's resistance has three separate sources: the solution, the electrode surface, and the transport of material to it.",
+        "A potential is energy per coulomb, so you need the charge before you can talk about the energy.",
       ],
       blocks: [
         {
           kind: "para",
           text:
             "**The question this section answers:** how do we *measure* a " +
-            "reaction that is happening? Three quantities come out of that " +
-            "measurement, and they are constantly confused, so we fix them now.",
+            "reaction that is happening? Four quantities come out of that " +
+            "measurement and they are constantly confused, so we fix them " +
+            "here - and then connect the first two to the reaction itself, " +
+            "because that connection is the whole point of the subject.",
         },
         {
           kind: "table",
@@ -503,7 +506,25 @@ export const fundamentals: Lecture = {
             "A useful way to hold on to this: charge is a *bag of marbles*, " +
             "current is *how fast you are emptying it*. A 2 A source delivers " +
             "twice the charge per second as a 1 A source, but if you run them " +
-            "for the same time the 2 A one simply delivers twice as much.",
+            "for the same time the 2 A one simply delivers twice as much. One " +
+            "warning about the picture: a current is not a substance. In a " +
+            "cell running steadily, no charge accumulates anywhere - every " +
+            "coulomb entering the wire leaves it, and every ion crossing one " +
+            "interface is replaced at the other. Current is a rate of " +
+            "passage, not a quantity on hand.",
+        },
+        {
+          kind: "para",
+          text:
+            "Here is the connection worth making early. The previous section " +
+            "wrote the cell reaction in terms of the extent `ξ`, and the " +
+            "reaction transfers `nF` coulombs per mole of reaction. So the " +
+            "ammeter on the wire is not measuring the cell, it is measuring " +
+            "the chemistry: `I = nF` times `dξ/dt`. **Current is the rate of " +
+            "the reaction, in electrochemical units.** That is why the " +
+            "Faraday relations in the next section are arithmetic rather than " +
+            "physics, and it is also why two cells running at the same current " +
+            "are doing chemically comparable things.",
         },
         {
           kind: "figure",
@@ -526,7 +547,10 @@ export const fundamentals: Lecture = {
           body:
             "**Amps are not coulombs.** A cell delivering 5 A for 100 s passed " +
             "500 C, not 5 C. And **volts are not joules.** A volt is joules per " +
-            "coulomb, so you must know the charge before you know the energy.",
+            "coulomb, so you must know the charge before you know the energy. " +
+            "The second one has a sign convention attached as well: since " +
+            "`ΔG = -nFE`, the potential is defined so that a cell giving energy " +
+            "to its surroundings has a *positive* `E`.",
         },
         {
           kind: "worked",
@@ -539,17 +563,38 @@ export const fundamentals: Lecture = {
           ],
           result:
             "5400 C of charge passed. At the cathode, 5400 / 96485 = 0.056 mol " +
-            "of electrons arrived.",
+            "of electrons arrived. If the cathode reaction was `Cu²⁺ + 2e⁻ → " +
+            "Cu`, that is 0.028 mol of copper plated out, and it moved the " +
+            "extent of reaction by `ξ = 0.028 mol`.",
         },
         {
           kind: "para",
           text:
             "Resistance is where electrochemistry becomes itself. Ohm's law " +
-            "holds for metals, but in a cell the resistance is dominated by " +
-            "the solution and by how fast ions can resupply the electrode " +
-            "surface. Make the electrode smaller and its resistance rises " +
-            "steeply, because the same current now has to arrive through less " +
-            "area. That is the whole basis of polarisation curves.",
+            "holds for metals, but in a cell the resistance you measure is " +
+            "not one thing: it is the sum of at least three contributions, and " +
+            "separating them is most of what electrochemistry does. There is " +
+            "the resistance of the solution itself, which is roughly " +
+            "geometric. There is the resistance of *transferring* charge " +
+            "across the electrode interface, which depends on the " +
+            "electrocatalyst and is the part a chemist can most improve. And " +
+            "there is the resistance of getting fresh reactant to a surface " +
+            "that is consuming it, which is diffusion and grows as the " +
+            "current rises. That is the origin of a polarisation curve: each " +
+            "contribution takes over in turn as you demand more current.",
+        },
+        {
+          kind: "para",
+          text:
+            "One more quantity hides inside the word current. A current is " +
+            "measured through the *whole* cell, so it tells you nothing about " +
+            "how hard that current is working at a given electrode. Divide by " +
+            "the area and you have the current density `j`, which is the " +
+            "quantity that actually belongs to the surface: double the " +
+            "electrode area at fixed total current and you have halved `j`, " +
+            "and on a polarisation curve you have moved to a different " +
+            "operating point entirely. Whenever a paper quotes a current, the " +
+            "first question is which of the two it meant.",
         },
         {
           kind: "callout",
@@ -561,8 +606,13 @@ export const fundamentals: Lecture = {
             "0.5 A for 6 hours - all the same stored charge. It is also why a " +
             "phone charges faster from a 2 A cable than a 0.5 A one: the " +
             "battery's voltage is roughly fixed, so pulling more current is " +
-            "the only way to refill it faster. The chapter on batteries makes " +
-            "this quantitative.",
+            "the only way to refill it faster. But the label is a promise " +
+            "made at a low current, and this is the trap in the next bullet: " +
+            "the C-rate. A 3000 mAh cell discharged at 3 A is running at 1C; " +
+            "asked for 6 A it is at 2C, and it will not deliver the full " +
+            "capacity before it falls over, because the third resistance " +
+            "above has started to dominate. Quoted capacity is always " +
+            "capacity *at a stated rate*.",
         },
         {
           kind: "para",
