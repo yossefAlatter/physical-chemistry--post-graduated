@@ -192,6 +192,23 @@ def check_locale(prefix: str, locale: str, qc_label: str, nav_label: str) -> Non
             if "<title>" not in html or "·" not in html.split("<title>")[1]:
                 problems.append(f"{path}: missing or malformed <title>")
 
+            # Inline markup must never reach the reader literally. This is a
+            # real bug that shipped once: keyPoints, quiz questions, options
+            # and explanations were rendered as plain strings, so a gloss or a
+            # **bold** marker showed up as raw "((anode))" on the page. Only
+            # the visible markup is checked - the same markers inside the
+            # inlined RSC payload in <script> are expected and harmless.
+            visible = re.sub(r"<script.*?</script>", "", html, flags=re.S)
+            visible = re.sub(r"<style.*?</style>", "", visible, flags=re.S)
+            # KaTeX renders LaTeX, not the content's inline markup, so an
+            # asterisk inside \text{...} is a literal asterisk there.
+            visible = re.sub(r'<div[^>]*role="math".*?</div>', "", visible, flags=re.S)
+            for marker, label in [(r"\(\(", "gloss"), (r"\*\*[^*]+\*\*", "bold")]:
+                if re.search(marker, visible):
+                    problems.append(
+                        f"{path}: unrendered {label} markup in visible output"
+                    )
+
             # No Arabic may leak into English content. Scoped to <main>
             # because the language switcher legitimately labels its target
             # with the other language's name ("العربية" on English pages).

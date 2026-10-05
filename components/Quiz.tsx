@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import type { Lecture, Mcq } from "@/content/types";
 import { lectureHref } from "@/content/registry";
 import { fill, optionLetters, t, type Locale } from "@/lib/i18n";
+import { RichText } from "@/components/Blocks";
 
 type Phase = "intro" | "quiz" | "results";
 
@@ -231,7 +232,7 @@ export function Quiz({
                       {section?.title ?? q.topicId}
                     </p>
                     <p className="mt-1.5 text-[0.97rem] font-medium text-ink">
-                      {q.question}
+                      <RichText text={q.question} />
                     </p>
                     <p className="mt-2 text-[0.93rem] text-ink-soft">
                       <span className="font-semibold text-green">
@@ -290,7 +291,7 @@ export function Quiz({
       </p>
 
       <h1 className="mt-2 font-serif text-[1.25rem] leading-snug font-semibold text-ink sm:text-[1.4rem]">
-        {current.question}
+        <RichText text={current.question} />
       </h1>
 
       <ul className="mt-4 space-y-2">
@@ -322,7 +323,7 @@ export function Quiz({
                   )}
                 </span>
                 <span className="min-w-0 text-[0.97rem] leading-snug">
-                  {opt}
+                  <RichText text={opt} />
                 </span>
               </button>
             </li>
@@ -349,7 +350,7 @@ export function Quiz({
               {d.why}
             </p>
             <p className="mt-1.5 text-[0.95rem] leading-relaxed text-ink-soft">
-              {current.explanation}
+              <RichText text={current.explanation} />
             </p>
           </div>
 

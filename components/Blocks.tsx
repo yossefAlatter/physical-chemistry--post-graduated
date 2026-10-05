@@ -2,6 +2,23 @@ import katex from "katex";
 import type { Block, Formula as FormulaBlock } from "@/content/types";
 import { t, type Locale } from "@/lib/i18n";
 
+/**
+ * The inline markup reduced to plain text, for places that cannot hold markup.
+ *
+ * An aria-label is a string, not a document: a screen reader reads it out
+ * character by character, so a caption of "The Tafel **slope** is unchanged"
+ * used as a label announces "Tafel asterisk asterisk slope". The visible
+ * caption goes through RichText; the accessible name has to be flattened.
+ */
+function plainText(text: string): string {
+  return text
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\(\(.*?\)\)/g, " ($1)")
+    .trim();
+}
+
 /** Renders LaTeX on the server, so no maths library ships to the browser. */
 export function Formula({ tex, caption }: Pick<FormulaBlock, "tex" | "caption">) {
   let html: string;
@@ -23,7 +40,7 @@ export function Formula({ tex, caption }: Pick<FormulaBlock, "tex" | "caption">)
         className="overflow-x-auto rounded-lg border border-rule bg-surface px-3 py-2 sm:px-5 sm:py-3"
         role="math"
         dir="ltr"
-        aria-label={caption ?? tex}
+        aria-label={plainText(caption ?? tex)}
         dangerouslySetInnerHTML={{ __html: html }}
       />
       {caption && (
@@ -42,9 +59,26 @@ function escapeHtml(s: string) {
     .replace(/>/g, "&gt;");
 }
 
-/** Renders the inline **bold** / *italic* / `code` subset used in the content. */
+/**
+ * Renders the inline markup used in the content.
+ *
+ * Supported: **bold**, *italic*, `code`, and ((gloss)).
+ *
+ * The gloss exists for the Arabic tree. The brief was that a chemical term
+ * should carry its English name after the Arabic one, so المصعد((anode)) shows
+ * "المصعد" with "anode" beside it. Double parentheses were chosen over single
+ * ones because single parentheses are ordinary prose punctuation in both
+ * languages, and over a bracketed tag because they stay readable in the source
+ * and cannot collide with the *italic* or **bold** delimiters.
+ *
+ * The English is rendered LTR and isolated, because a term like
+ * ((butler-volmer)) inside an Arabic sentence must not be reordered by the
+ * bidirectional algorithm.
+ */
 export function RichText({ text }: { text: string }) {
-  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g).filter(Boolean);
+  const parts = text
+    .split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\(\([^)]+\)\))/g)
+    .filter(Boolean);
   return (
     <>
       {parts.map((part, i) => {
@@ -62,6 +96,15 @@ export function RichText({ text }: { text: string }) {
             >
               {part.slice(1, -1)}
             </code>
+          );
+        }
+        if (part.startsWith("((") && part.endsWith("))")) {
+          return (
+            <span key={i} className="gloss">
+              {" ("}
+              {part.slice(2, -2)}
+              {")"}
+            </span>
           );
         }
         return <span key={i}>{part}</span>;

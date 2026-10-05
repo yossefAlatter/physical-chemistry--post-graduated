@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "ledger": "npx --yes tsx tools/write-ledger.ts",
-    "check": "python3 tools/check_site.py"
+    "check": "npm run lint && npx tsc --noEmit && npm run scan:ar && npm run check:glossary && npm run check:parity && npm run check:mcq",
+    "scan:ar": "for f in content/ar/*.ts content/ar/sections/*.ts; do python3 tools/scan_arabic.py \"$f\" || exit 1; done",
+    "check:glossary": "npx --yes tsx tools/check_glossary.ts",
+    "check:parity": "npx --yes tsx tools/check_section_parity.ts",
+    "check:mcq": "python3 tools/check_translation.py content/ar/fundamentals.mcq.ts content/fundamentals.mcq.ts"
   },
   "dependencies": {
     "@types/katex": "^0.16.8",

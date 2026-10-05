@@ -32,6 +32,8 @@ GLYPH = re.compile("[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]")
 SPLICED = re.compile(AR_LETTER + LATIN_RUN + "|" + LATIN_RUN + AR_LETTER)
 # A Latin word that sits among Arabic words.
 LATIN_WORD = re.compile(LATIN_RUN)
+# A deliberate bilingual gloss, e.g. المصعد((anode)).
+GLOSS = re.compile(r'\(\(.*?\)\)')
 # Double-quoted and single-quoted string contents, so code around them is
 # never mistaken for prose.
 STRING_LITERAL = re.compile(r'"((?:[^"\\\\]|\\\\.)*)"|\'((?:[^\'\\\\]|\\\\.)*)\'')
@@ -70,8 +72,54 @@ ALLOWED_PHRASES = [
     "oxidation at the anode",
 ]
 
+def strip_comments(src):
+    """Remove // and /* */ comments, but only outside string literals.
+
+    The scanner's job is to inspect the content strings. A doc comment that
+    happens to quote an example - the glossary header does, with
+    "المصعد (anode)" - is not content and must not be reported, and it must
+    not be able to hide a real problem either, so this walks the source
+    tracking quote state rather than using a regex.
+    """
+    out = []
+    i = 0
+    n = len(src)
+    quote = None
+    while i < n:
+        ch = src[i]
+        if quote:
+            out.append(ch)
+            if ch == "\\":
+                if i + 1 < n:
+                    out.append(src[i + 1])
+                    i += 2
+                    continue
+            elif ch == quote:
+                quote = None
+            i += 1
+            continue
+        if ch in "\"'`":
+            quote = ch
+            out.append(ch)
+            i += 1
+            continue
+        if src.startswith("//", i):
+            while i < n and src[i] != "\n":
+                i += 1
+            continue
+        if src.startswith("/*", i):
+            end = src.find("*/", i + 2)
+            i = n if end == -1 else end + 2
+            # keep newlines so reported line numbers stay right
+            out.append("\n" * src.count("\n", i - 2 if end == -1 else i, i))
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
 path = sys.argv[1]
-src = open(path, encoding="utf-8").read()
+src = strip_comments(open(path, encoding="utf-8").read())
 issues = []
 
 for lineno, line in enumerate(src.split("\n"), 1):
@@ -90,7 +138,10 @@ for lineno, line in enumerate(src.split("\n"), 1):
     for literal in (a or b for a, b in STRING_LITERAL.findall(line)):
         if not re.search(AR_LETTER, literal):
             continue
-        probe = literal
+        # Strip deliberate glosses first: المصعد((anode)) puts an English
+        # word in the middle of Arabic on purpose, and check_glossary.ts is
+        # what validates those, not this script.
+        probe = GLOSS.sub(" ", literal)
         for phrase in ALLOWED_PHRASES:
             probe = probe.replace(phrase, " ")
         for word in sorted(set(LATIN_WORD.findall(probe))):

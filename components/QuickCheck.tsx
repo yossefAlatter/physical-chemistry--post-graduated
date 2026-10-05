@@ -9,6 +9,7 @@
 import { useState } from "react";
 import type { Mcq } from "@/content/types";
 import { fill, optionLetters, t, type Locale } from "@/lib/i18n";
+import { RichText } from "@/components/Blocks";
 
 export default function QuickCheck({
   locale,
@@ -106,7 +107,7 @@ export default function QuickCheck({
       ) : (
         <>
           <p className="mt-3.5 text-[0.98rem] leading-relaxed font-medium text-ink">
-            {q.question}
+            <RichText text={q.question} />
           </p>
 
           <ul className="mt-3.5 space-y-2">
@@ -144,7 +145,7 @@ export default function QuickCheck({
                       {show && isAnswer ? "✓" : show && isPicked ? "✗" : LETTERS[i]}
                     </span>
                     <span className="text-[0.94rem] leading-relaxed text-ink">
-                      {opt}
+                      <RichText text={opt} />
                     </span>
                   </button>
                 </li>
@@ -167,7 +168,7 @@ export default function QuickCheck({
                 {d.why}
               </p>
               <p className="mt-1 text-[0.92rem] leading-relaxed text-ink-soft">
-                {q.explanation}
+                <RichText text={q.explanation} />
               </p>
               <button
                 type="button"

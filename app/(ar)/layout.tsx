@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Noto_Kufi_Arabic, Noto_Sans_Arabic } from "next/font/google";
+import { IBM_Plex_Sans_Arabic, JetBrains_Mono } from "next/font/google";
 import "../globals.css";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { SiteShell } from "@/components/SiteShell";
@@ -10,21 +10,32 @@ import { themeScript } from "@/components/themeScript";
  * Arabic glyphs, so reusing them would leave the whole site rendering in a
  * fallback font with wrong line heights.
  *
+ * IBM Plex Sans Arabic rather than the Noto pair, for three reasons that
+ * matter when the text is study material rather than interface chrome:
+ *
+ *   - it is drawn for text first. The Noto Kufi face used for headings is a
+ *     display face, and its tight spacing breaks up words at body sizes.
+ *   - it carries real Latin in the same design, so a chemical symbol or an
+ *     inline formula sitting inside an Arabic sentence matches the Arabic
+ *     around it instead of falling back to a different family.
+ *   - its ascenders and descenders are tall. Arabic has no x-height to hide
+ *     behind, and a face designed around Latin proportions leaves the dots
+ *     below ya and the marks above sit cramped against the line above.
+ *
  * The three custom property names are the same ones app/globals.css already
  * consumes, so no style had to change to make this work - only the fonts
- * behind the variables.
+ * behind the variables. The Arabic type *scale* is separate and lives in
+ * globals.css under [dir="rtl"], because the same 1rem that reads well in
+ * Latin is too small in Arabic.
  */
-const display = Noto_Kufi_Arabic({
+/* One family serves both headings and body: the separation is by size,
+   weight and colour rather than by switching typeface mid-page, which reads
+   as calmer on a long study text. The variable is applied to both custom
+   properties so globals.css needs no change to pick it up. */
+const arabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
   display: "swap",
   variable: "--font-display",
-  weight: ["500", "700"],
-});
-
-const body = Noto_Sans_Arabic({
-  subsets: ["arabic"],
-  display: "swap",
-  variable: "--font-body",
   weight: ["400", "500", "600", "700"],
 });
 
@@ -86,7 +97,7 @@ export default function ArabicLayout({
     <html
       lang="ar"
       dir="rtl"
-      className={`h-full ${display.variable} ${body.variable} ${code.variable}`}
+      className={`h-full ${arabic.variable} ${code.variable}`}
       suppressHydrationWarning
     >
       <head>

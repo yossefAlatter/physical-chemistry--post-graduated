@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { RenderBlock } from "@/components/Blocks";
+import { RenderBlock, RichText } from "@/components/Blocks";
 import QuickCheck from "@/components/QuickCheck";
 import {
   getRegistry,
@@ -132,7 +132,7 @@ export default function SectionView({
                 className="flex gap-2.5 text-[0.94rem] leading-relaxed text-ink-soft"
               >
                 <span className="mt-[0.55em] h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--tone)]" />
-                <span>{k}</span>
+                <span><RichText text={k} /></span>
               </li>
             ))}
           </ul>

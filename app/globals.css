@@ -32,6 +32,7 @@
   --c-surface-2: #f7fafd;
   --c-ink: #10192b;
   --c-ink-soft: #3d4c63;
+  --c-ink-faint: #5c6d85;
   --c-faint: #5b6879;
   --c-rule: #d5dfea;
   --c-rule-soft: #e6edf4;
@@ -81,6 +82,7 @@
   --c-surface-2: #16233a;
   --c-ink: #e9eff8;
   --c-ink-soft: #b3c2d6;
+  --c-ink-faint: #8fa2ba;
   --c-faint: #8195ae;
   --c-rule: #24344c;
   --c-rule-soft: #1b2739;
@@ -403,6 +405,80 @@ a {
    direction, so it is mirrored rather than merely re-aligned. */
 [dir="rtl"] .flow-arrow {
   transform: scaleX(-1);
+}
+
+/* ==========================================================================
+   Arabic type scale
+   --------------------------------------------------------------------------
+   The English scale is tuned for Latin, and Latin metrics are the wrong
+   reference for Arabic. Arabic is a cursive script with no x-height, tall
+   ascenders, marks below the baseline (the ya, and the kasra and jim dots) and
+   a deep descender. Set at Latin sizes the script reads as though it were
+   slightly small and the marks collide with the line above. So:
+
+     size      +6% on body prose, +12% on the lecture prose itself
+     leading   1.65 -> 1.85 body, 1.75 -> 1.95 in the lecture body
+
+   Both are modest. The reason to be careful is that leading this generous
+   makes the long single-line passages in the Fundamentals feel loosely set,
+   so the increase is spent on prose and headings, not on tables and captions.
+   ========================================================================== */
+
+/* The Arabic layout binds the variable to --font-display only, because one
+   family serves both roles. Point the sans stack at it so anything that asks
+   for --font-sans lands on Plex Arabic rather than the system fallback. */
+[dir="rtl"] {
+  --font-sans: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* No letter-spacing. Arabic joins along the baseline, and tracking breaks the
+   optical connection between letters, which is why the uppercase labels in
+   this site must never be given it. Word spacing is the opposite: it helps,
+   because Arabic word boundaries are less visually distinct than Latin ones. */
+[dir="rtl"] body {
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  word-spacing: 0.04em;
+  /* "cv11" is a Latin alternates feature and does nothing here; leaving it on
+     makes the browser hunt for a Latin glyph set it will not use. */
+  font-feature-settings: "kern", "liga";
+}
+
+[dir="rtl"] .prose-lecture {
+  font-size: 1.1875rem;
+  line-height: 1.95;
+}
+
+/* Headings carry more diacritics than Latin headings do, and a 1.2 leading
+   clips them on the first line of a multi-line heading. */
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] h4 {
+  line-height: 1.45;
+  word-spacing: normal;
+}
+
+/* Tables and captions stay at the English sizes: they are set in narrower
+   columns where a larger size would wrap every label onto two lines. */
+[dir="rtl"] table,
+[dir="rtl"] figcaption,
+[dir="rtl"] .text-xs,
+[dir="rtl"] .text-sm {
+  line-height: 1.6;
+}
+
+/* An inline gloss: the English term that follows an Arabic one on first
+   mention. Kept visually subordinate so it does not compete with the
+   sentence, but never so small that it becomes decoration. */
+[dir="rtl"] .gloss,
+.gloss {
+  color: var(--c-ink-faint);
+  font-size: 0.82em;
+  font-weight: 400;
+  direction: ltr;
+  unicode-bidi: isolate;
+  white-space: nowrap;
 }
 
 /* Maths, formulae, chemical symbols and code are not bidirectional. An
