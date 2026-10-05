@@ -1,6 +1,8 @@
+import { createElement } from "react";
 import katex from "katex";
 import type { Block, Formula as FormulaBlock } from "@/content/types";
 import { t, type Locale } from "@/lib/i18n";
+import { figureFor } from "@/components/figures";
 
 /**
  * The inline markup reduced to plain text, for places that cannot hold markup.
@@ -168,26 +170,44 @@ export function Figure({
   src,
   caption,
   alt,
+  locale,
 }: {
   src: string;
   caption: string;
   alt: string;
+  locale: Locale;
 }) {
+  // A registered name is drawn as inline SVG, which keeps its labels as real
+  // text and lets them be in Arabic on /ar. Anything not registered yet falls
+  // back to the exported PNG, so figures convert one at a time.
+  //
+  // A registered figure supplies its own aria-label and <title> from the same
+  // locale-aware strings as its labels, so the block's English `alt` is only
+  // used by the PNG fallback.
+  const Svg = figureFor(src);
+
   return (
     <figure className="my-6">
-      {/* plain <img> rather than next/image: these are fixed-width exported
-          diagrams, and this keeps the page statically rendered with no
-          image optimiser in the request path */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`/figures/${src}`}
-        alt={alt}
-        loading="lazy"
-        decoding="async"
-        width={1400}
-        height={800}
-        className="w-full rounded-lg border border-rule bg-surface shadow-sm"
-      />
+      {Svg ? (
+        // createElement rather than <Svg />: the registry lookup makes the
+        // component reference dynamic, which the React compiler lint rule
+        // rejects as "creating components during render".
+        createElement(Svg, { locale })
+      ) : (
+        /* plain <img> rather than next/image: these are fixed-width exported
+           diagrams, and this keeps the page statically rendered with no
+           image optimiser in the request path */
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={`/figures/${src}`}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          width={1400}
+          height={800}
+          className="w-full rounded-lg border border-rule bg-surface shadow-sm"
+        />
+      )}
       <figcaption className="mt-2 text-[0.84rem] leading-relaxed text-faint">
         <RichText text={caption} />
       </figcaption>
@@ -303,7 +323,12 @@ export function RenderBlock({
       return <Formula tex={block.tex} caption={block.caption} />;
     case "figure":
       return (
-        <Figure src={block.src} caption={block.caption} alt={block.alt} />
+        <Figure
+          src={block.src}
+          caption={block.caption}
+          alt={block.alt}
+          locale={locale}
+        />
       );
     case "table":
       return (

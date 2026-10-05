@@ -9,10 +9,12 @@
     "lint": "eslint",
     "ledger": "npx --yes tsx tools/write-ledger.ts",
     "check": "npm run lint && npx tsc --noEmit && npm run scan:ar && npm run check:glossary && npm run check:parity && npm run check:mcq",
-    "scan:ar": "for f in content/ar/*.ts content/ar/sections/*.ts; do python3 tools/scan_arabic.py \"$f\" || exit 1; done",
+    "scan:ar": "for f in content/ar/*.ts content/ar/sections/*.ts components/figures/*.tsx; do python3 tools/scan_arabic.py \"$f\" || exit 1; done",
     "check:glossary": "npx --yes tsx tools/check_glossary.ts",
     "check:parity": "npx --yes tsx tools/check_section_parity.ts",
-    "check:mcq": "python3 tools/check_translation.py content/ar/fundamentals.mcq.ts content/fundamentals.mcq.ts"
+    "check:mcq": "python3 tools/check_translation.py content/ar/fundamentals.mcq.ts content/fundamentals.mcq.ts",
+    "figures:export": "npx --yes tsx tools/export_figures.tsx",
+    "check:figures": "python3 tools/check_figure_fit.py"
   },
   "dependencies": {
     "@types/katex": "^0.16.8",
