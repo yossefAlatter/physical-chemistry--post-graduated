@@ -45,8 +45,10 @@ LOCALES = [
 ]
 
 
-def get(path: str) -> tuple[int, str]:
-    req = urllib.request.Request(BASE + path, headers={"User-Agent": "check"})
+def get(path: str, method: str = "GET") -> tuple[int, str]:
+    req = urllib.request.Request(
+        BASE + path, headers={"User-Agent": "check"}, method=method
+    )
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
             return r.status, r.read().decode("utf-8", "replace")
@@ -238,8 +240,19 @@ def check_pwa(strict_translation: bool) -> None:
         if code != 200:
             problems.append(f"pwa {path}: HTTP {code}, expected 200")
             continue
-        if kind == "javascript" and "addEventListener" not in body:
-            problems.append("pwa /sw.js: does not look like a service worker")
+        if kind == "javascript":
+            if "addEventListener" not in body:
+                problems.append("pwa /sw.js: does not look like a service worker")
+            rev = re.search(r'const REVISION = "([^"]+)"', body)
+            if not rev:
+                problems.append("pwa /sw.js: no REVISION constant")
+            elif rev.group(1) in ("", "dev", "v1"):
+                problems.append(
+                    f"pwa /sw.js: REVISION is {rev.group(1)!r}, so the worker "
+                    "never changes and a deploy keeps the old precache"
+                )
+            else:
+                notes.append(f"pwa: sw.js REVISION {rev.group(1)}")
         if kind == "json" and path.endswith("precache-manifest"):
             try:
                 data = json.loads(body)
@@ -250,6 +263,35 @@ def check_pwa(strict_translation: bool) -> None:
             notes.append(f"pwa: precache manifest lists {len(urls)} URLs")
             if not urls:
                 problems.append("pwa /precache-manifest: empty list")
+                return
+            # A 404 in the list just burns install time, and a page or hashed
+            # asset missing from it means the reader is offline before they
+            # have ever visited that route. So check the list covers both, and
+            # that every entry resolves.
+            for slug, sections in registry():
+                for want in (
+                    f"/lectures/{slug}",
+                    f"/lectures/{slug}/quiz",
+                    *[f"/lectures/{slug}/{x}" for x in sections],
+                ):
+                    if want not in urls:
+                        problems.append(f"pwa precache: missing {want}")
+            hashed = [u for u in urls if u.startswith("/_next/static/")]
+            if len(hashed) < 5:
+                problems.append(
+                    f"pwa precache: only {len(hashed)} hashed build assets, "
+                    "a fresh install would not be styled or interactive"
+                )
+            notes.append(f"pwa: {len(hashed)} hashed build assets precached")
+
+            bad = []
+            for u in urls:
+                code, _ = get(u, method="HEAD")
+                if code != 200:
+                    bad.append(f"{u} (HTTP {code})")
+            notes.append(f"pwa: {len(urls) - len(bad)}/{len(urls)} precache URLs resolve")
+            for b in bad[:10]:
+                problems.append(f"pwa precache URL {b}")
 
     # the Arabic manifest must point at the Arabic tree
     _, body = get("/ar/manifest.webmanifest")

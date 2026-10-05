@@ -13,11 +13,16 @@ import { localePath, locales } from "@/lib/i18n";
  * with no filesystem dependency on the .next layout, which is what lets it
  * survive deployment unchanged.
  *
- * Hashed build assets (/_next/static/...) are deliberately not listed. Their
- * filenames change on every build, so they are cached at runtime instead -
- * see the fetch handler in public/sw.js.
+ * Hashed build assets (/_next/static/...) are listed too. Their filenames
+ * change on every build, so the route reads the build that is actually being
+ * served rather than baking a list at build time; the service worker then has
+ * the JS, CSS and self-hosted fonts in the precache instead of collecting them
+ * only as the reader happens to visit pages.
+ *
+ * Dynamic for that reason. The worker fetches this during install, so it
+ * costs one request and stays correct across deploys.
  */
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 /** Shell files that are not derived from the content tree. */
 const STATIC_URLS = [
@@ -44,8 +49,37 @@ function publicAssets(): string[] {
   return out;
 }
 
+/**
+ * Every hashed asset in the running build: JS chunks, CSS and the fonts
+ * next/font self-hosts. Without these a freshly installed site renders
+ * unstyled and unscripted until each asset is fetched once.
+ */
+function buildAssets(): string[] {
+  const out: string[] = [];
+  const walk = (dir: string, prefix: string) => {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of entries) {
+      const child = path.join(dir, e.name);
+      if (e.isDirectory()) {
+        walk(child, prefix + "/" + e.name);
+      } else if (/\.(?:js|css|woff2?|ttf|map)$/.test(e.name)) {
+        // Source maps are never needed offline.
+        if (e.name.endsWith(".map")) continue;
+        out.push(prefix + "/" + e.name);
+      }
+    }
+  };
+  walk(path.join(process.cwd(), ".next", "static"), "/_next/static");
+  return out;
+}
+
 export function GET() {
-  const urls = new Set<string>([...STATIC_URLS, ...publicAssets()]);
+  const urls = new Set<string>([...STATIC_URLS, ...publicAssets(), ...buildAssets()]);
 
   for (const locale of locales) {
     const reg = getRegistry(locale);

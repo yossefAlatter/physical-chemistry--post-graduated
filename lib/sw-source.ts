@@ -1,24 +1,33 @@
-/*
- * Service worker for the offline copy of the site.
+/**
+ * Source of the service worker, as a string.
  *
- * Strategy, in one line each:
+ * Why a route handler instead of public/sw.js: the browser only reinstalls a
+ * worker when its bytes change. A static file with a hand-written REVISION
+ * constant therefore never triggers an update, so a deploy would keep serving
+ * yesterday's precache - including pages added since. Serving /sw.js from a
+ * route lets the Next build id be baked into the body on every build, so the
+ * file changes exactly when the site does and the install handler re-runs.
  *
- *   install    precache every page in both languages, plus figures and icons
- *   navigate   network first, fall back to the cached page, then to /offline
+ * Kept here (rather than inlined in the route) so the worker logic can be
+ * linted and read as JavaScript-in-a-string without Next's route scanning
+ * claiming it.
+ *
+ * Style note: this string is a template literal, so the worker body below
+ * deliberately avoids backticks and ${}. It uses string concatenation instead.
+ */
+export function swSource(revision: string): string {
+  return `/*
+ * Offline copy of the site. Generated at build time - edit lib/sw-source.ts.
+ *
+ *   install    precache every page in both languages, plus hashed build
+ *              assets, figures and icons, so a fresh install is fully
+ *              readable with no network and no prior visit
+ *   navigate   network first, fall back to the cached page, then /offline
  *   assets     cache first with a background refresh
- *
- * Precache covers the pages themselves, so a reader who has been online once
- * can open any section in either language without a connection. Hashed build
- * assets under /_next/static are not precached - their names change every
- * build - so they are picked up by the asset strategy on first use.
- *
- * Bump REVISION whenever public/sw.js changes in a way that needs every open
- * tab to drop its old cache. The precache list itself carries the Next build
- * id, so a deploy also invalidates it.
  */
 
-const REVISION = "v1";
-const CACHE = `pc-${REVISION}`;
+const REVISION = ${JSON.stringify(revision)};
+const CACHE = "pc-" + REVISION;
 const MANIFEST_URL = "/precache-manifest";
 
 const OFFLINE_URLS = {
@@ -42,7 +51,7 @@ self.addEventListener("install", (event) => {
         const data = await res.json();
         urls = data.urls || [];
       } catch {
-        // Without the manifest we still register; pages will be cached as the
+        // Without the manifest we still register; pages get cached as the
         // reader visits them.
       }
 
@@ -68,10 +77,11 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
-      // Drop caches from earlier revisions.
       const keys = await caches.keys();
       await Promise.all(
-        keys.filter((k) => k.startsWith("pc-") && k !== CACHE).map((k) => caches.delete(k)),
+        keys
+          .filter((k) => k.startsWith("pc-") && k !== CACHE)
+          .map((k) => caches.delete(k)),
       );
       await self.clients.claim();
     })(),
@@ -121,7 +131,7 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/_next/static/") ||
     url.pathname.startsWith("/icons/") ||
     url.pathname.startsWith("/figures/") ||
-    /\.(?:png|svg|jpg|jpeg|webp|gif|ico|css|js|woff2?|ttf)$/.test(url.pathname)
+    /\\.(?:png|svg|jpg|jpeg|webp|gif|ico|css|js|woff2?|ttf)$/.test(url.pathname)
   ) {
     event.respondWith(
       (async () => {
@@ -141,3 +151,5 @@ self.addEventListener("fetch", (event) => {
     );
   }
 });
+`;
+}
