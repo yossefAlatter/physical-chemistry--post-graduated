@@ -153,6 +153,17 @@ export const GLOSSARY: Record<string, string> = {
   "الشحنة الأولية": "elementary charge",
   "المعايرة الكمّية الكهربائية": "coulometric titration",
   "حد أعلى": "upper bound",
+
+  // What a battery number actually claims.
+  "الطاقة النوعية": "specific energy",
+  "القدرة النوعية": "specific power",
+  "الكفاءة الدورية": "round-trip efficiency",
+  "الجهد العكسي": "reversible potential",
+  "جهد الطرف": "terminal voltage",
+  "الجهد الاسمي": "nominal voltage",
+  "السعة المطلوبة": "discharged capacity",
+  "الطاقة الحرة المخزنة": "stored free energy",
+  "فائق المكثف": "supercapacitor",
 };
 
 /**

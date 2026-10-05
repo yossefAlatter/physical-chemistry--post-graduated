@@ -807,13 +807,15 @@ export const fundamentals: Lecture = {
       title: "Energy, power and what a battery rating means",
       minutes: 6,
       summary:
-        "Volts times coulombs is joules; volts times amps is watts. Every " +
-        "battery number on a label is one of those two.",
+        "Volts times coulombs is joules, volts times amps is watts, and " +
+        "every number on a battery label is one of those two. The subtlety " +
+        "is that the voltage a battery is labelled with is not the voltage " +
+        "it delivers.",
       keyPoints: [
-        "Energy = V × Q. Power = V × I. These are different quantities.",
-        "Ampere-hours measure charge (capacity), not energy.",
-        "Specific energy is Wh/kg; specific power is W/kg. Never quote one as the other.",
-        "For a real battery, energy is the area under the discharge curve.",
+        "Energy = `V × Q`, power = `V × I`. Different quantities, and mixing them is the classic slip.",
+        "Ampere-hours measure charge (capacity), not energy; energy also needs the voltage.",
+        "A label quotes the reversible voltage. Deliver real current and the working voltage is lower by exactly the losses.",
+        "Specific energy (Wh kg⁻¹) decides range; specific power (W kg⁻¹) decides acceleration. Never quote one as the other.",
       ],
       blocks: [
         {
@@ -828,15 +830,23 @@ export const fundamentals: Lecture = {
           kind: "para",
           text:
             "Charge is how much, current is how fast. The same split applies to " +
-            "energy and power, and mixing them up is the classic exam " +
-            "slip in this subject.",
+            "energy and power, and mixing them up is the classic exam slip " +
+            "in this subject. But there is a second, subtler trap here, and " +
+            "it is where this section earns its keep: **the voltage on the " +
+            "label is not the voltage you get.** A cell at rest sits at its " +
+            "reversible potential `E`. The moment you draw current from it, " +
+            "the terminal voltage sags below that, by exactly the three " +
+            "losses from section 3. So the work you can actually take out is " +
+            "always less than the `V × Q` the label implies.",
         },
         {
           kind: "formula",
           tex: String.raw`E = V\,Q, \qquad P = V\,I, \qquad E = \int V \, \mathrm{d}Q`,
           caption:
             "Left two: instantaneous relationships. Right: the general form, " +
-            "which you need once the voltage changes during discharge.",
+            "which you need once the voltage changes during discharge - and " +
+            "the integral runs along whatever curve the cell actually follows, " +
+            "not along its open-circuit voltage.",
         },
         {
           kind: "callout",
@@ -846,7 +856,11 @@ export const fundamentals: Lecture = {
             "A battery marked 7 Ah holds 7 × 3600 = 25 200 C of charge. The " +
             "energy in it also depends on the voltage: a 12 V pack of that " +
             "capacity stores 12 × 7 = 84 Wh. Comparing two batteries by Ah " +
-            "alone is comparing apples with oranges unless the voltages match.",
+            "alone is comparing apples with oranges unless the voltages match. " +
+            "And note what the integral above means for the label: the Ah is " +
+            "read off the *discharged* capacity, so a cell held at 84 Wh " +
+            "nominal delivers less than 84 Wh in practice, because its " +
+            "voltage sags below the nominal value the whole way down.",
         },
         {
           kind: "table",
@@ -858,6 +872,7 @@ export const fundamentals: Lecture = {
             ["Charge / capacity", "I × t", "C, Ah", "60 Ah"],
             ["Specific energy", "energy ÷ mass", "Wh kg⁻¹", "29 Wh kg⁻¹ (lead-acid)"],
             ["Specific power", "power ÷ mass", "W kg⁻¹", "180 W kg⁻¹"],
+            ["Round-trip efficiency", "energy out ÷ energy in", "%", "85–95%"],
           ],
         },
         {
@@ -873,7 +888,9 @@ export const fundamentals: Lecture = {
             "rising from roughly 30 to roughly 150 watt-hours per kilogram.",
           caption:
             "Left: energy is the area under the discharge curve, not the " +
-            "voltage. Right: why chemistry drives the range of a vehicle.",
+            "voltage. That curve is measured at some specific current, and it " +
+            "sits below the open-circuit voltage by more the harder you " +
+            "pull. Right: why chemistry drives the range of a vehicle.",
         },
         {
           kind: "worked",
@@ -886,8 +903,12 @@ export const fundamentals: Lecture = {
             String.raw`E_{\text{specific}} = \frac{720\ \mathrm{Wh}}{25\ \mathrm{kg}} = 28.8\ \mathrm{Wh\,kg^{-1}}`,
           ],
           result:
-            "About 2.4 hours of pumping, at 29 Wh/kg. That low number is " +
-            "exactly why lithium chemistry replaced lead-acid in vehicles.",
+            "About 2.4 hours of pumping, at 29 Wh/kg. That is an upper bound " +
+            "in two separate ways: the voltage falls below 12 V as the cell " +
+            "discharges, and 300 W through a lead-acid cell costs more than " +
+            "the nominal figure because of the losses above. The low specific " +
+            "energy is exactly why lithium chemistry replaced lead-acid in " +
+            "vehicles.",
         },
         {
           kind: "callout",
@@ -901,15 +922,29 @@ export const fundamentals: Lecture = {
             "Power density is a different question, and it is why a phone can " +
             "burst to 20 W for a camera flash but a car battery struggles to " +
             "supply the 100 kW a motor needs - which is why EVs have " +
-            "hundreds of small cells in series rather than one big one.",
+            "hundreds of small cells in series rather than one big one. " +
+            "Current capability scales with electrode *area*, not with " +
+            "amount of material, so a pack that must deliver power is built " +
+            "from many small parallel-connected cells, while a pack that must " +
+            "store energy is built from few large ones. Supercapacitors sit at " +
+            "the opposite extreme: very low specific energy, but enormous " +
+            "specific power, which is why they brake a car and cannot drive " +
+            "it.",
         },
         {
           kind: "para",
           text:
-            "You now have the whole quantitative basis of the subject: charge " +
-            "in coulombs, current in amps, voltage in volts, and mass from " +
-            "Faraday's law. The next stage is what happens when you try to " +
-            "measure that voltage properly.",
+            "One last thing this section should have said earlier. A battery " +
+            "stores free energy, not heat, and the distinction is not pedantry " +
+            "but the reason the whole subject exists: energy can be converted " +
+            "back into work completely, but not once it has been dissipated " +
+            "as heat. Since section 1 gave `ΔG = -nFE`, the label on the cell " +
+            "is a free energy per coulomb, and every ampere-hour you draw " +
+            "spends some of it irreversibly. You now have the whole " +
+            "quantitative basis of the subject: charge in coulombs, current in " +
+            "amps, voltage in volts, mass from Faraday's law, and energy from " +
+            "the area under a curve. The next stage is what happens when you " +
+            "try to measure that voltage properly.",
         },
       ],
     },
