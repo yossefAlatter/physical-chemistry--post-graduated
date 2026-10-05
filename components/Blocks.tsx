@@ -19,7 +19,7 @@ export function Formula({ tex, caption }: Pick<FormulaBlock, "tex" | "caption">)
   return (
     <div className="my-5">
       <div
-        className="overflow-x-auto rounded-lg border border-rule bg-white px-3 py-2 sm:px-5 sm:py-3"
+        className="overflow-x-auto rounded-lg border border-rule bg-surface px-3 py-2 sm:px-5 sm:py-3"
         role="math"
         aria-label={caption ?? tex}
         dangerouslySetInnerHTML={{ __html: html }}
@@ -82,7 +82,7 @@ const CALLOUT_STYLES = {
     text: "text-red",
   },
   term: {
-    box: "border-violet-light bg-violet-light/60",
+    box: "border-violet-soft bg-violet-soft/60",
     bar: "bg-violet",
     label: "Terminology",
     text: "text-violet",
@@ -139,7 +139,7 @@ export function Figure({
         decoding="async"
         width={1400}
         height={800}
-        className="w-full rounded-lg border border-rule bg-white"
+        className="w-full rounded-lg border border-rule bg-surface shadow-sm"
       />
       <figcaption className="mt-2 text-[0.84rem] leading-relaxed text-faint">
         <RichText text={caption} />
@@ -167,7 +167,7 @@ export function TableBlock({
                 key={i}
                 scope="col"
                 style={widths ? { width: `${(widths[i] / widths.reduce((a, b) => a + b, 0)) * 100}%` } : undefined}
-                className="border-b-2 border-accent-dark/25 px-3 py-2 text-left align-bottom font-semibold text-ink"
+                className="border-b-2 border-[color:var(--tone-line)] px-3 py-2 text-left align-bottom font-semibold text-ink"
               >
                 {h}
               </th>
@@ -203,10 +203,8 @@ export function Worked({
 }) {
   const maths = steps.every((s) => /[\\^_{}]/.test(s));
   return (
-    <section className="my-6 rounded-lg border border-rule bg-white p-4 sm:p-5">
-      <h4 className="text-[0.72rem] font-bold uppercase tracking-wider text-gold">
-        Worked example
-      </h4>
+    <section className="card-tone my-6 rounded-lg border p-4 sm:p-5">
+      <h4 className="eyebrow">Worked example</h4>
       <p className="mt-1 font-semibold text-ink">{title}</p>
       <p className="mt-1.5 text-[0.9rem] leading-relaxed text-ink-soft">
         <span className="font-semibold text-ink">Given. </span>
@@ -273,8 +271,8 @@ export function RenderBlock({ block }: { block: Block }) {
               <span
                 className={
                   block.ordered
-                    ? "font-semibold text-accent tabular-nums"
-                    : "mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/60"
+                    ? "font-semibold text-[color:var(--tone)] tabular-nums"
+                    : "mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--tone)]"
                 }
               >
                 {block.ordered ? `${i + 1}.` : null}

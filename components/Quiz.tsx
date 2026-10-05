@@ -112,7 +112,7 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
               <li key={s.id}>
                 <Link
                   href={`?topic=${s.id}`}
-                  className="flex min-h-11 items-center justify-between gap-3 rounded-lg border border-rule bg-white px-3.5 py-2.5 transition-colors hover:border-accent"
+                  className="flex min-h-11 items-center justify-between gap-3 rounded-lg border border-rule bg-surface px-3.5 py-2.5 transition-colors hover:border-accent hover:bg-accent-light/40"
                 >
                   <span className="text-[0.93rem] text-ink-soft">{s.title}</span>
                   <span className="shrink-0 text-[0.8rem] font-semibold text-faint tabular-nums">
@@ -127,7 +127,7 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
         <button
           type="button"
           onClick={start}
-          className="mt-7 min-h-12 w-full rounded-lg bg-accent px-5 text-[1rem] font-semibold text-white transition-colors hover:bg-accent-dark sm:w-auto"
+          className="mt-7 min-h-12 w-full rounded-lg bg-accent px-5 text-[1rem] font-semibold text-on-accent transition-colors hover:bg-accent-dark sm:w-auto"
         >
           Start with all {pool.length} questions
         </button>
@@ -166,7 +166,7 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
           </h1>
         </header>
 
-        <div className="mt-5 rounded-xl border border-rule bg-white p-5 text-center">
+        <div className="mt-5 rounded-xl border border-rule bg-surface p-5 text-center">
           <p className={`font-serif text-[3.2rem] leading-none font-semibold ${toneClass}`}>
             {correct}
             <span className="text-[1.6rem] text-faint">/{answered}</span>
@@ -192,13 +192,13 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
           <button
             type="button"
             onClick={start}
-            className="min-h-12 rounded-lg bg-accent px-5 text-[0.98rem] font-semibold text-white transition-colors hover:bg-accent-dark"
+            className="min-h-12 rounded-lg bg-accent px-5 text-[0.98rem] font-semibold text-on-accent transition-colors hover:bg-accent-dark"
           >
             Try again
           </button>
           <Link
             href={`/lectures/${lecture.slug}`}
-            className="inline-flex min-h-12 items-center justify-center rounded-lg border border-rule bg-white px-5 text-[0.98rem] font-semibold text-ink-soft transition-colors hover:border-accent"
+            className="inline-flex min-h-12 items-center justify-center rounded-lg border border-rule bg-surface px-5 text-[0.98rem] font-semibold text-ink-soft transition-colors hover:border-accent"
           >
             Back to the notes
           </Link>
@@ -222,9 +222,9 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
                 return (
                   <li
                     key={q.id}
-                    className="rounded-lg border border-red/25 bg-red-light/40 p-4"
+                    className="rounded-lg border border-bad/25 bg-bad-light/50 p-4"
                   >
-                    <p className="text-[0.7rem] font-bold uppercase tracking-wider text-red">
+                    <p className="text-[0.7rem] font-bold uppercase tracking-wider text-bad">
                       {section?.title ?? q.topicId}
                     </p>
                     <p className="mt-1.5 text-[0.97rem] font-medium text-ink">
@@ -246,7 +246,7 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
         )}
 
         {missed.length === 0 && answered > 0 && (
-          <p className="mt-7 rounded-lg bg-green-light px-4 py-3 text-[0.95rem] text-green">
+          <p className="mt-7 rounded-lg bg-good-light px-4 py-3 text-[0.95rem] text-good">
             Full marks. Nothing to review, but skim the explanations anyway.
           </p>
         )}
@@ -295,11 +295,11 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
           const isAnswer = i === current.answer;
           const isPicked = i === picked;
           let cls =
-            "border-rule bg-white text-ink hover:border-accent hover:bg-accent-light/40";
+            "border-rule bg-surface text-ink hover:border-accent hover:bg-accent-light/40";
           if (picked !== null) {
-            if (isAnswer) cls = "border-green bg-green-light text-ink";
-            else if (isPicked) cls = "border-red bg-red-light text-ink";
-            else cls = "border-rule bg-white text-faint opacity-60";
+            if (isAnswer) cls = "border-good bg-good-light text-ink";
+            else if (isPicked) cls = "border-bad bg-bad-light text-ink";
+            else cls = "border-rule bg-surface text-faint opacity-60";
           }
           return (
             <li key={i}>
@@ -341,7 +341,7 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
               ? "Correct."
               : `Not quite — the answer is ${letters[current.answer]}.`}
           </div>
-          <div className="mt-3 rounded-lg border border-rule bg-white p-4">
+          <div className="mt-3 rounded-lg border border-rule bg-surface p-4">
             <p className="text-[0.7rem] font-bold uppercase tracking-wider text-accent">
               Why
             </p>
@@ -353,7 +353,7 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
           <button
             type="button"
             onClick={next}
-            className="mt-4 min-h-12 w-full rounded-lg bg-accent px-5 text-[1rem] font-semibold text-white transition-colors hover:bg-accent-dark"
+            className="mt-4 min-h-12 w-full rounded-lg bg-accent px-5 text-[1rem] font-semibold text-on-accent transition-colors hover:bg-accent-dark"
           >
             {at + 1 < live.length ? "Next question" : "See your score"}
           </button>

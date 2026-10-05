@@ -55,7 +55,7 @@ export default function QuickCheck({
   return (
     <section
       aria-labelledby="quickcheck"
-      className="no-print mt-10 rounded-xl border border-accent/30 bg-tint/40 p-4 sm:p-5"
+      className="card-tone no-print mt-10 rounded-xl border p-4 sm:p-5"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h2
@@ -64,6 +64,7 @@ export default function QuickCheck({
         >
           Quick check
         </h2>
+        <span className="sr-only">on {sectionTitle}</span>
         <span className="text-[0.78rem] text-faint">
           {done
             ? `${right} of ${questions.length} correct`
@@ -73,7 +74,7 @@ export default function QuickCheck({
 
       {done ? (
         <div className="mt-4">
-          <p className="font-serif text-[1.6rem] leading-none font-semibold text-accent-dark">
+          <p className="numeral text-[1.9rem] leading-none font-semibold text-[color:var(--tone)]">
             {right}/{questions.length}
           </p>
           <div
@@ -82,7 +83,7 @@ export default function QuickCheck({
             aria-label={`${pct} per cent correct`}
           >
             <div
-              className="h-full rounded-full bg-accent transition-[width] duration-300"
+              className="h-full rounded-full bg-[color:var(--tone)] transition-[width] duration-300"
               style={{ width: `${pct}%` }}
             />
           </div>
@@ -94,7 +95,7 @@ export default function QuickCheck({
           <button
             type="button"
             onClick={restart}
-            className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-rule bg-white px-4 text-[0.9rem] font-semibold text-ink-soft transition-colors hover:border-accent hover:text-accent-dark"
+            className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-rule bg-surface px-4 text-[0.9rem] font-semibold text-ink-soft transition-colors hover:border-[color:var(--tone)] hover:text-[color:var(--tone)]"
           >
             Try again
           </button>
@@ -111,12 +112,12 @@ export default function QuickCheck({
               const isPicked = i === picked;
               const show = picked !== null;
               const tone = !show
-                ? "border-rule bg-white hover:border-accent"
+                ? "border-rule bg-surface hover:border-[color:var(--tone)]"
                 : isAnswer
                   ? "border-good bg-good/10"
                   : isPicked
                     ? "border-bad bg-bad/10"
-                    : "border-rule bg-white opacity-55";
+                    : "border-rule bg-surface opacity-55";
               return (
                 <li key={i}>
                   <button
@@ -129,11 +130,11 @@ export default function QuickCheck({
                       aria-hidden="true"
                       className={`mt-px grid h-6 w-6 shrink-0 place-items-center rounded-full text-[0.75rem] font-bold ${
                         !show
-                          ? "bg-tint text-ink-soft"
+                          ? "bg-[color:var(--tone-soft)] text-[color:var(--tone)]"
                           : isAnswer
-                            ? "bg-good text-white"
+                            ? "bg-good text-on-good"
                             : isPicked
-                              ? "bg-bad text-white"
+                              ? "bg-bad text-on-bad"
                               : "bg-tint text-faint"
                       }`}
                     >
@@ -153,7 +154,7 @@ export default function QuickCheck({
               Pick an option to see the explanation.
             </p>
           ) : (
-            <div className="mt-4 border-t border-accent/20 pt-4">
+            <div className="mt-4 border-t border-[color:var(--tone-line)] pt-4">
               <p
                 className={`text-[0.95rem] font-semibold ${picked === q.answer ? "text-good" : "text-bad"}`}
               >
@@ -168,7 +169,7 @@ export default function QuickCheck({
               <button
                 type="button"
                 onClick={next}
-                className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-accent px-4 text-[0.92rem] font-semibold text-white transition-colors hover:bg-accent-dark sm:w-auto"
+                className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[color:var(--tone)] px-4 text-[0.92rem] font-semibold text-on-accent transition-opacity hover:opacity-90 sm:w-auto"
               >
                 {at + 1 >= questions.length ? "See result" : "Next question"}
                 <span aria-hidden="true" className="ml-1.5">

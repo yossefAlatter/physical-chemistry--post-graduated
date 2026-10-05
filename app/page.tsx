@@ -12,30 +12,41 @@ export default function HomePage() {
   return (
     <div className="pb-10">
       {/* ---------------- hero ---------------- */}
-      <section className="overflow-hidden rounded-xl bg-gradient-to-br from-ink via-[#0d3a52] to-accent px-5 py-8 text-white sm:px-8 sm:py-10">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.17em] text-[#f0b27a]">
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#10192b] via-[#123a52] to-[#0b6e99] px-5 py-8 text-white shadow-lg sm:px-8 sm:py-10">
+        {/* colour wash so the hero is not one flat navy block */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-24 -right-20 h-72 w-72 rounded-full bg-[#7c3aed] opacity-25 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-28 -left-16 h-72 w-72 rounded-full bg-[#f59e0b] opacity-20 blur-3xl"
+        />
+
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.17em] text-[#fcd34d]">
           Postgraduate · Yossef Hafez Alatter
         </p>
-        <h1 className="mt-2 font-serif text-[2rem] leading-[1.15] font-semibold tracking-tight sm:text-[2.6rem]">
-          Physical chemistry, one short section at a time.
+        <h1 className="mt-2 max-w-[20ch] font-serif text-[2.1rem] leading-[1.1] font-semibold sm:text-[2.8rem]">
+          <span className="text-shine-hero">Physical chemistry,</span> one short
+          section at a time.
         </h1>
-        <p className="mt-3 max-w-[52ch] text-[1.02rem] leading-relaxed text-[#c6d6e2]">
+        <p className="mt-3 max-w-[52ch] text-[1.02rem] leading-relaxed text-[#cfdeeb]">
           Nothing here is a wall of text. Every topic is a page you can finish
           in a few minutes, with an illustration, the points worth memorising,
           and three questions answered on the spot.
         </p>
 
-        <dl className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-lg bg-white/15 sm:max-w-md">
+        <dl className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-xl bg-white/15 sm:max-w-md">
           {[
             [String(allLectures.length), "Lectures"],
             [String(totalSections), "Sections"],
             [String(totalQuestions), "Questions"],
           ].map(([n, l]) => (
-            <div key={l} className="bg-ink/35 px-3 py-3 text-center">
-              <dt className="font-serif text-[1.5rem] leading-none font-semibold">
+            <div key={l} className="bg-[#10192b]/45 px-3 py-3 text-center">
+              <dt className="numeral text-[1.6rem] leading-none font-semibold">
                 {n}
               </dt>
-              <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-[#9fb4c6]">
+              <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-[#a9c2d6]">
                 {l}
               </dd>
             </div>
@@ -45,7 +56,7 @@ export default function HomePage() {
         {start && (
           <Link
             href={`/lectures/${start.slug}`}
-            className="mt-6 inline-flex min-h-12 items-center rounded-lg bg-[#f0b27a] px-5 text-[0.95rem] font-semibold text-ink transition-colors hover:bg-[#f5c496]"
+            className="mt-6 inline-flex min-h-12 items-center rounded-lg bg-[#fcd34d] px-5 text-[0.95rem] font-semibold text-[#1a1206] shadow-sm transition-colors hover:bg-[#fde68a]"
           >
             Start from zero
             <span aria-hidden="true" className="ml-1.5">
@@ -58,10 +69,10 @@ export default function HomePage() {
       {/* ---------------- subjects, courses, lectures ---------------- */}
       {subjects.map((subject) => (
         <section key={subject.slug} className="mt-9">
-          <h2 className="font-serif text-[1.4rem] font-semibold text-ink">
+          <h2 className="font-serif text-[1.45rem] font-semibold text-ink">
             {subject.title}
           </h2>
-          <p className="mt-1 text-[0.85rem] font-semibold uppercase tracking-wider text-accent">
+          <p className="eyebrow mt-1">
             {subject.tagline}
           </p>
           <p className="mt-2 max-w-[62ch] text-[0.95rem] leading-relaxed text-ink-soft">
@@ -73,6 +84,17 @@ export default function HomePage() {
               <h3 className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-faint">
                 {course.title}
               </h3>
+              <div aria-hidden="true" className="mt-2 flex gap-1">
+                {course.lectures.flatMap((l) =>
+                  l.sections.map((s) => (
+                    <span
+                      key={`${l.slug}-${s.id}`}
+                      data-tone={s.tone}
+                      className="h-1.5 w-6 rounded-full bg-[color:var(--tone)]"
+                    />
+                  )),
+                )}
+              </div>
               <p className="mt-1 max-w-[60ch] text-[0.9rem] leading-relaxed text-ink-soft">
                 {course.description}
               </p>
@@ -87,7 +109,7 @@ export default function HomePage() {
                     <li key={lecture.slug}>
                       <Link
                         href={`/lectures/${lecture.slug}`}
-                        className="block rounded-xl border border-rule bg-white p-4 transition-colors hover:border-accent sm:p-5"
+                        className="block rounded-xl border border-rule bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-accent hover:shadow-md sm:p-5"
                       >
                         <div className="flex items-baseline justify-between gap-3">
                           <span className="text-[0.7rem] font-bold uppercase tracking-[0.13em] text-accent">
@@ -111,8 +133,13 @@ export default function HomePage() {
                           {lecture.sections.map((s, i) => (
                             <li
                               key={s.id}
+                              data-tone={s.tone}
                               className="flex items-baseline gap-2.5 py-1.5 text-[0.86rem]"
                             >
+                              <span
+                                aria-hidden="true"
+                                className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--tone)]"
+                              />
                               <span className="shrink-0 text-[0.74rem] font-semibold text-faint tabular-nums">
                                 {String(i + 1).padStart(2, "0")}
                               </span>
@@ -138,7 +165,7 @@ export default function HomePage() {
       ))}
 
       {/* ---------------- how to use ---------------- */}
-      <section className="mt-9 rounded-xl border border-rule bg-white p-5">
+      <section className="card-tone mt-9 rounded-xl border p-5">
         <h2 className="font-serif text-[1.2rem] font-semibold text-ink">
           How to use this site
         </h2>

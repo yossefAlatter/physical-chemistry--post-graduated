@@ -51,11 +51,11 @@ export default async function LecturePage({
   );
 
   return (
-    <div className="pb-12">
+    <div className="relative isolate pb-12">
+      <div aria-hidden="true" className="page-wash" />
+
       <header className="border-b border-rule pb-6">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-accent">
-          {lecture.label}
-        </p>
+        <p className="eyebrow">{lecture.label}</p>
         <h1 className="mt-1.5 font-serif text-[1.7rem] leading-tight font-semibold tracking-tight text-ink sm:text-[2.1rem]">
           {lecture.title}
         </h1>
@@ -86,7 +86,7 @@ export default async function LecturePage({
         <div className="mt-5 flex flex-wrap gap-2.5">
           <Link
             href={lecture.sections[0] ? sectionHref(lecture, lecture.sections[0]) : "#"}
-            className="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 py-2.5 text-[0.92rem] font-semibold text-white transition-colors hover:bg-accent-dark"
+            className="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 py-2.5 text-[0.92rem] font-semibold text-on-accent transition-colors hover:bg-accent-dark"
           >
             {lecture.slug === "fundamentals" ? "Start reading" : "Continue reading"}
             <span aria-hidden="true" className="ml-1.5">
@@ -95,7 +95,7 @@ export default async function LecturePage({
           </Link>
           <Link
             href={quizHref(lecture)}
-            className="inline-flex min-h-11 items-center rounded-lg border border-rule bg-white px-4 py-2.5 text-[0.92rem] font-semibold text-ink-soft transition-colors hover:border-accent hover:text-accent-dark"
+            className="inline-flex min-h-11 items-center rounded-lg border border-rule bg-surface px-4 py-2.5 text-[0.92rem] font-semibold text-ink-soft transition-colors hover:border-accent hover:text-accent-dark"
           >
             All {lecture.mcq.length} questions
           </Link>
@@ -115,10 +115,11 @@ export default async function LecturePage({
               <li key={s.id}>
                 <Link
                   href={sectionHref(lecture, s)}
-                  className="group flex h-full flex-col rounded-lg border border-rule bg-white p-4 transition-colors hover:border-accent hover:bg-tint/40"
+                  data-tone={s.tone}
+                  className="group flex h-full flex-col rounded-lg border border-rule bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-[color:var(--tone)] hover:shadow-md"
                 >
                   <span className="flex items-baseline gap-2.5">
-                    <span className="text-[0.85rem] font-bold text-accent tabular-nums">
+                    <span className="numeral text-[1rem] leading-none font-semibold text-[color:var(--tone)] tabular-nums">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span className="font-serif text-[1.08rem] leading-snug font-semibold text-ink">
@@ -134,7 +135,7 @@ export default async function LecturePage({
                       <span>{quick} quick {quick === 1 ? "check" : "checks"}</span>
                     )}
                     {n > 0 && <span>{n} in quiz</span>}
-                    <span className="ml-auto font-semibold text-accent-dark opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="ml-auto font-semibold text-[color:var(--tone)] opacity-0 transition-opacity group-hover:opacity-100">
                       Read →
                     </span>
                   </span>
@@ -146,7 +147,7 @@ export default async function LecturePage({
       </section>
 
       {lecture.constants && lecture.constants.length > 0 && (
-        <details className="mt-8 rounded-lg border border-rule bg-white">
+        <details className="mt-8 overflow-hidden rounded-lg border border-rule bg-surface">
           <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 px-4 py-3 text-[0.92rem] font-semibold text-ink">
             Constants you will need
             <span aria-hidden="true" className="text-faint">
@@ -155,7 +156,7 @@ export default async function LecturePage({
           </summary>
           <dl className="grid gap-px border-t border-rule bg-rule sm:grid-cols-2">
             {lecture.constants.map((c) => (
-              <div key={c.symbol} className="bg-white px-4 py-2.5">
+              <div key={c.symbol} className="bg-surface px-4 py-2.5">
                 <dt className="font-mono text-[0.9rem] font-semibold text-accent-dark">
                   {c.symbol}
                 </dt>
@@ -169,7 +170,7 @@ export default async function LecturePage({
       )}
 
       {lecture.mcq.length > 0 && (
-        <div className="mt-8 rounded-lg border border-accent/25 bg-tint/50 p-5">
+        <div className="mt-8 rounded-lg border border-accent/25 bg-accent-light/45 p-5">
           <h2 className="font-serif text-[1.15rem] font-semibold text-ink">
             {quickTotal} quick checks, {lecture.mcq.length} questions in total
           </h2>
@@ -180,7 +181,7 @@ export default async function LecturePage({
           </p>
           <Link
             href={quizHref(lecture)}
-            className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-accent px-4 py-2.5 text-[0.92rem] font-semibold text-white transition-colors hover:bg-accent-dark"
+            className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-accent px-4 py-2.5 text-[0.92rem] font-semibold text-on-accent transition-colors hover:bg-accent-dark"
           >
             Take the full quiz
             <span aria-hidden="true" className="ml-1.5">
@@ -195,7 +196,7 @@ export default async function LecturePage({
           {prev && (
             <Link
               href={`/lectures/${prev.slug}`}
-              className="rounded-lg border border-rule bg-white px-4 py-3 transition-colors hover:border-accent"
+              className="rounded-lg border border-rule bg-surface px-4 py-3 transition-colors hover:border-accent hover:shadow-sm"
             >
               <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
                 ← Previous
@@ -208,7 +209,7 @@ export default async function LecturePage({
           {next && (
             <Link
               href={`/lectures/${next.slug}`}
-              className="rounded-lg border border-rule bg-white px-4 py-3 text-right transition-colors hover:border-accent sm:col-start-2"
+              className="rounded-lg border border-rule bg-surface px-4 py-3 text-right transition-colors hover:border-accent hover:shadow-sm sm:col-start-2"
             >
               <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
                 Next →

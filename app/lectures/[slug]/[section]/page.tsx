@@ -53,7 +53,10 @@ export default async function SectionPage({
   const quizCount = questionsForSection(lecture, section.id).length;
 
   return (
-    <div className="pb-12">
+    <div data-tone={section.tone} className="relative isolate pb-12">
+      {/* soft wash in this topic's colour, behind the header */}
+      <div aria-hidden="true" className="page-wash" />
+
       {/* ---------------- breadcrumb ---------------- */}
       <nav aria-label="Breadcrumb" className="no-print text-[0.8rem]">
         <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-faint">
@@ -72,7 +75,7 @@ export default async function SectionPage({
             </Link>
           </li>
           <li aria-hidden="true">/</li>
-          <li className="font-medium text-ink-soft">
+          <li className="font-semibold text-[color:var(--tone)]">
             {String(index).padStart(2, "0")} {section.title}
           </li>
         </ol>
@@ -80,11 +83,12 @@ export default async function SectionPage({
 
       {/* ---------------- header ---------------- */}
       <header className="mt-3 border-b border-rule pb-5">
-        <div className="flex items-baseline gap-2.5">
-          <span className="text-[0.95rem] font-bold text-accent tabular-nums">
+        <p className="eyebrow">{lecture.label}</p>
+        <div className="mt-1.5 flex items-baseline gap-2.5">
+          <span className="numeral text-[1.35rem] leading-none font-semibold text-[color:var(--tone)] tabular-nums">
             {String(index).padStart(2, "0")}
           </span>
-          <h1 className="font-serif text-[1.6rem] leading-tight font-semibold tracking-tight text-ink sm:text-[2rem]">
+          <h1 className="font-serif text-[1.6rem] leading-tight font-semibold text-ink sm:text-[2rem]">
             {section.title}
           </h1>
         </div>
@@ -95,16 +99,16 @@ export default async function SectionPage({
         )}
 
         <div className="mt-3.5 flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-tint px-2.5 py-1 text-[0.76rem] text-ink-soft">
+          <span className="rounded-full border border-[color:var(--tone-line)] bg-[color:var(--tone-soft)] px-2.5 py-1 text-[0.76rem] font-semibold text-[color:var(--tone)]">
             Section {index} of {total}
           </span>
           {section.minutes && (
-            <span className="rounded-full bg-tint px-2.5 py-1 text-[0.76rem] text-ink-soft">
+            <span className="rounded-full border border-rule bg-surface px-2.5 py-1 text-[0.76rem] text-ink-soft">
               {section.minutes} min
             </span>
           )}
           {quick.length > 0 && (
-            <span className="rounded-full bg-tint px-2.5 py-1 text-[0.76rem] text-ink-soft">
+            <span className="rounded-full border border-rule bg-surface px-2.5 py-1 text-[0.76rem] text-ink-soft">
               {quick.length} quick {quick.length === 1 ? "check" : "checks"}
             </span>
           )}
@@ -117,7 +121,7 @@ export default async function SectionPage({
           aria-label={`Section ${index} of ${total}`}
         >
           <div
-            className="h-full rounded-full bg-accent"
+            className="h-full rounded-full bg-[color:var(--tone)]"
             style={{ width: `${(100 * index) / total}%` }}
           />
         </div>
@@ -131,17 +135,15 @@ export default async function SectionPage({
       </div>
 
       {section.keyPoints && section.keyPoints.length > 0 && (
-        <div className="mt-7 max-w-[68ch] rounded-lg border border-gold/25 bg-gold-light/60 p-4">
-          <p className="text-[0.72rem] font-bold uppercase tracking-wider text-gold">
-            Worth memorising
-          </p>
+        <div className="card-tone mt-7 max-w-[68ch] rounded-lg border p-4">
+          <p className="eyebrow">Worth memorising</p>
           <ul className="mt-2 space-y-1.5">
             {section.keyPoints.map((k, i) => (
               <li
                 key={i}
                 className="flex gap-2.5 text-[0.94rem] leading-relaxed text-ink-soft"
               >
-                <span className="mt-[0.55em] h-1.5 w-1.5 shrink-0 rounded-full bg-gold/70" />
+                <span className="mt-[0.55em] h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--tone)]" />
                 <span>{k}</span>
               </li>
             ))}
@@ -154,7 +156,7 @@ export default async function SectionPage({
           {quizCount} questions in the full bank cover this topic.{" "}
           <Link
             href={`/lectures/${lecture.slug}/quiz?topic=${section.id}`}
-            className="font-medium text-accent-dark underline underline-offset-2"
+            className="font-semibold text-[color:var(--tone)] underline underline-offset-2"
           >
             Open all {quizCount}
           </Link>
@@ -168,7 +170,7 @@ export default async function SectionPage({
 
       {/* ---------------- closing call to action ---------------- */}
       {section.cta && (
-        <div className="no-print mt-8 max-w-[68ch] rounded-xl border border-accent/35 bg-tint/60 p-5">
+        <div className="card-tone no-print mt-8 max-w-[68ch] rounded-xl border p-5">
           <h2 className="font-serif text-[1.25rem] leading-snug font-semibold text-ink">
             {section.cta.title}
           </h2>
@@ -178,7 +180,7 @@ export default async function SectionPage({
           <div className="mt-4 flex flex-wrap gap-2.5">
             <Link
               href={section.cta.href}
-              className="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 py-2.5 text-[0.92rem] font-semibold text-white transition-colors hover:bg-accent-dark"
+              className="inline-flex min-h-11 items-center rounded-lg bg-[color:var(--tone)] px-4 py-2.5 text-[0.92rem] font-semibold text-on-accent transition-opacity hover:opacity-90"
             >
               {section.cta.linkLabel}
               <span aria-hidden="true" className="ml-1.5">
@@ -188,7 +190,7 @@ export default async function SectionPage({
             {section.cta.secondaryHref && section.cta.secondaryLabel && (
               <Link
                 href={section.cta.secondaryHref}
-                className="inline-flex min-h-11 items-center rounded-lg border border-rule bg-white px-4 py-2.5 text-[0.92rem] font-semibold text-ink-soft transition-colors hover:border-accent hover:text-accent-dark"
+                className="inline-flex min-h-11 items-center rounded-lg border border-rule bg-surface px-4 py-2.5 text-[0.92rem] font-semibold text-ink-soft transition-colors hover:border-[color:var(--tone)] hover:text-[color:var(--tone)]"
               >
                 {section.cta.secondaryLabel}
               </Link>
@@ -205,7 +207,7 @@ export default async function SectionPage({
         {prev ? (
           <Link
             href={sectionHref(lecture, prev)}
-            className="group rounded-lg border border-rule bg-white px-4 py-3 transition-colors hover:border-accent"
+            className="group rounded-lg border border-rule bg-surface px-4 py-3 transition-colors hover:border-accent hover:shadow-sm"
           >
             <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
               ← Previous
@@ -220,7 +222,7 @@ export default async function SectionPage({
         ) : (
           <Link
             href={`/lectures/${lecture.slug}`}
-            className="group rounded-lg border border-rule bg-white px-4 py-3 transition-colors hover:border-accent"
+            className="group rounded-lg border border-rule bg-surface px-4 py-3 transition-colors hover:border-accent hover:shadow-sm"
           >
             <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
               ← Contents
@@ -234,9 +236,9 @@ export default async function SectionPage({
         {next ? (
           <Link
             href={sectionHref(lecture, next)}
-            className="group rounded-lg border border-accent/40 bg-tint/40 px-4 py-3 text-right transition-colors hover:border-accent"
+            className="group rounded-lg border border-[color:var(--tone-line)] bg-[color:var(--tone-soft)] px-4 py-3 text-right transition-colors hover:shadow-sm"
           >
-            <span className="text-[0.7rem] font-bold uppercase tracking-wider text-accent-dark">
+            <span className="text-[0.7rem] font-bold uppercase tracking-wider text-[color:var(--tone)]">
               Next →
             </span>
             <span className="mt-0.5 block text-[0.92rem] leading-snug font-semibold text-ink">
@@ -249,7 +251,7 @@ export default async function SectionPage({
         ) : (
           <Link
             href={`/lectures/${lecture.slug}`}
-            className="group rounded-lg border border-rule bg-white px-4 py-3 text-right transition-colors hover:border-accent sm:col-start-2"
+            className="group rounded-lg border border-rule bg-surface px-4 py-3 text-right transition-colors hover:border-accent hover:shadow-sm sm:col-start-2"
           >
             <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
               Finish →

@@ -45,6 +45,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 1 --
     {
       id: "cell-anatomy",
+      tone: "teal",
       minutes: 8,
       title: "Cell anatomy and sign conventions",
       summary:
@@ -137,6 +138,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 2 --
     {
       id: "double-layer",
+      tone: "indigo",
       minutes: 7,
       title: "The electrical double layer",
       summary:
@@ -214,6 +216,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 3 --
     {
       id: "mass-transport",
+      tone: "azure",
       minutes: 9,
       title: "Mass transport and the Levich equation",
       summary:
@@ -338,6 +341,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 4 --
     {
       id: "polarisation",
+      tone: "violet",
       minutes: 7,
       title: "Polarisation curves",
       summary:
@@ -433,6 +437,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 5 --
     {
       id: "overpotentials",
+      tone: "rose",
       minutes: 6,
       title: "Overpotentials",
       summary:
@@ -514,6 +519,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 6 --
     {
       id: "nernst",
+      tone: "azure",
       minutes: 10,
       title: "The Nernst equation and reference electrodes",
       summary:
@@ -613,6 +619,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 7 --
     {
       id: "kinetics",
+      tone: "violet",
       minutes: 10,
       title: "Butler-Volmer kinetics and Tafel analysis",
       summary:
@@ -733,6 +740,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 8 --
     {
       id: "her",
+      tone: "emerald",
       minutes: 7,
       title: "The hydrogen evolution reaction",
       summary:
@@ -821,6 +829,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 9 --
     {
       id: "corrosion",
+      tone: "coral",
       minutes: 6,
       title: "Corrosion",
       summary:
@@ -919,6 +928,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 10 --
     {
       id: "electrolysis",
+      tone: "amber",
       minutes: 7,
       title: "Electrolysis and metal extraction",
       summary:
@@ -1017,6 +1027,7 @@ export const lecture1: Lecture = {
     // ------------------------------------------------------------------ 11 --
     {
       id: "batteries",
+      tone: "emerald",
       minutes: 7,
       title: "Batteries and fuel cells",
       summary:

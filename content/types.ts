@@ -97,10 +97,31 @@ export interface SectionCta {
  * One topic within a lecture. A section is a page in its own right, so it is
  * kept short on purpose.
  */
+/** The nine reusable accent hues, one per topic. See app/globals.css. */
+export const TONES = [
+  "azure",
+  "indigo",
+  "violet",
+  "rose",
+  "coral",
+  "amber",
+  "emerald",
+  "teal",
+  "slate",
+] as const;
+
+export type Tone = (typeof TONES)[number];
+
 export interface Section {
   /** URL segment and the anchor used by MCQs; unique inside the lecture. */
   id: string;
   title: string;
+  /**
+   * Accent hue for this topic. It follows the section through the sidebar,
+   * the cards, its heading and its callouts, so a topic keeps one colour
+   * everywhere. Adjacent sections are given different tones.
+   */
+  tone: Tone;
   /** One-line summary shown on section cards and in the sidebar. */
   summary: string;
   /** Rough reading time for this section alone, in minutes. */

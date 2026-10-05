@@ -34,6 +34,7 @@ export const fundamentals: Lecture = {
   sections: [
     {
       id: "what-is-it",
+      tone: "azure",
       title: "What electrochemistry actually is",
       minutes: 5,
       summary:
@@ -138,6 +139,7 @@ export const fundamentals: Lecture = {
     },
     {
       id: "cell-anatomy",
+      tone: "teal",
       title: "Anatomy of a cell",
       minutes: 6,
       summary:
@@ -222,6 +224,7 @@ export const fundamentals: Lecture = {
     },
     {
       id: "charge-and-current",
+      tone: "indigo",
       title: "Charge, current and resistance",
       minutes: 5,
       summary:
@@ -305,6 +308,7 @@ export const fundamentals: Lecture = {
     },
     {
       id: "faradays-laws",
+      tone: "violet",
       title: "Faraday's laws: charge becomes mass",
       minutes: 6,
       summary:
@@ -392,6 +396,7 @@ export const fundamentals: Lecture = {
     },
     {
       id: "energy-and-power",
+      tone: "amber",
       title: "Energy, power and what a battery rating means",
       minutes: 5,
       summary:
@@ -480,6 +485,7 @@ export const fundamentals: Lecture = {
     },
     {
       id: "lab-cell",
+      tone: "emerald",
       title: "Reading a real cell in the laboratory",
       minutes: 5,
       summary:
@@ -555,6 +561,7 @@ export const fundamentals: Lecture = {
     },
     {
       id: "units-and-glossary",
+      tone: "slate",
       title: "Units, symbols and the words you will meet",
       minutes: 4,
       summary:

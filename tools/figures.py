@@ -29,19 +29,22 @@ from matplotlib.patches import Circle, FancyBboxPatch, Rectangle  # noqa: E402
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                    "public", "figures")
 
+# Mirrors the light-theme tone tokens in app/globals.css, so a figure and the
+# section it illustrates share a hue. tools/advanced_figures.py does the same
+# for the 16 imported advanced diagrams.
 S = {
-    "ink": "#16233A", "soft": "#41526B", "accent": "#0B6E99",
-    "cath": "#2563EB", "anod": "#DC2626", "pos": "#DC2626", "neg": "#1D4ED8",
-    "good": "#0F7B5A", "warn": "#B45309", "bad": "#C0392B",
-    "grid": "#DCE5ED", "metal": "#8A96A3", "sol": "#EAF4FA",
-    "surface": "#C3CCD6", "lilac": "#EDE9FE", "gold": "#D97706",
+    "ink": "#10192B", "soft": "#3D4C63", "accent": "#0B6E99",
+    "cath": "#0B6E99", "anod": "#BE123C", "pos": "#C2410C", "neg": "#4338CA",
+    "good": "#0F7B5A", "warn": "#9C4708", "bad": "#C0392B",
+    "grid": "#D5DFEA", "metal": "#5B6879", "sol": "#E4F2FA",
+    "surface": "#C3CCD6", "lilac": "#F2ECFE", "gold": "#9C4708",
 }
 
 matplotlib.rcParams.update({
     "font.family": "DejaVu Sans",
     "font.size": 10.5,
     "mathtext.fontset": "stix",
-    "axes.edgecolor": "#5A6B80",
+    "axes.edgecolor": "#64748B",
     "axes.linewidth": 0.9,
     "axes.labelsize": 11,
     "axes.titlesize": 12.5,
