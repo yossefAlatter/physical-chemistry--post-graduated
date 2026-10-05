@@ -1,69 +1,121 @@
-import Image from "next/image";
+import Link from "next/link";
+import { allLectures, courses } from "@/content";
 
-export default function Home() {
+export default function HomePage() {
+  const totalQuestions = allLectures.reduce((n, l) => n + l.mcq.length, 0);
+  const totalSections = allLectures.reduce((n, l) => n + l.sections.length, 0);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="pb-10">
+      {/* ---------------- hero ---------------- */}
+      <section className="overflow-hidden rounded-xl bg-gradient-to-br from-ink via-[#0d3a52] to-accent px-5 py-8 text-white sm:px-8 sm:py-10">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.17em] text-[#f0b27a]">
+          Fundamentals · Yossef Hafez Alatter
+        </p>
+        <h1 className="mt-2 font-serif text-[2rem] leading-[1.15] font-semibold tracking-tight sm:text-[2.6rem]">
+          Electrochemistry, one lecture at a time.
+        </h1>
+        <p className="mt-3 max-w-[52ch] text-[1.02rem] leading-relaxed text-[#c6d6e2]">
+          Full notes with worked examples and illustrations, then a multiple
+          choice quiz on everything in the lecture. Read the notes first —
+          every question is answerable from them.
+        </p>
+
+        <dl className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-lg bg-white/15 sm:max-w-md">
+          {[
+            [String(allLectures.length), "Lectures"],
+            [String(totalSections), "Topics"],
+            [String(totalQuestions), "Questions"],
+          ].map(([n, l]) => (
+            <div key={l} className="bg-ink/35 px-3 py-3 text-center">
+              <dt className="font-serif text-[1.5rem] leading-none font-semibold">
+                {n}
+              </dt>
+              <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-[#9fb4c6]">
+                {l}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      {/* ---------------- courses ---------------- */}
+      {courses.map((course) => (
+        <section key={course.id} className="mt-9">
+          <h2 className="font-serif text-[1.4rem] font-semibold text-ink">
+            {course.title}
+          </h2>
+          <p className="mt-1 max-w-[60ch] text-[0.95rem] leading-relaxed text-ink-soft">
+            {course.description}
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+          <ul className="mt-4 space-y-3">
+            {course.lectures.map((lecture) => (
+              <li key={lecture.slug}>
+                <Link
+                  href={`/lectures/${lecture.slug}`}
+                  className="block rounded-xl border border-rule bg-white p-4 transition-colors hover:border-accent sm:p-5"
+                >
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-[0.7rem] font-bold uppercase tracking-[0.13em] text-accent">
+                      {lecture.label}
+                    </span>
+                    <span className="shrink-0 text-[0.72rem] text-faint tabular-nums">
+                      {lecture.minutes} min · {lecture.mcq.length} questions
+                    </span>
+                  </div>
+
+                  <h3 className="mt-1 font-serif text-[1.2rem] leading-snug font-semibold text-ink">
+                    {lecture.title}
+                  </h3>
+                  <p className="mt-1.5 text-[0.93rem] leading-relaxed text-ink-soft">
+                    {lecture.summary}
+                  </p>
+
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {lecture.sections.slice(0, 6).map((s) => (
+                      <span
+                        key={s.id}
+                        className="rounded-full bg-tint px-2.5 py-1 text-[0.74rem] text-ink-soft"
+                      >
+                        {s.title}
+                      </span>
+                    ))}
+                    {lecture.sections.length > 6 && (
+                      <span className="rounded-full bg-tint px-2.5 py-1 text-[0.74rem] text-faint">
+                        +{lecture.sections.length - 6} more
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+
+      {/* ---------------- how to use ---------------- */}
+      <section className="mt-9 rounded-xl border border-rule bg-white p-5">
+        <h2 className="font-serif text-[1.2rem] font-semibold text-ink">
+          How to use this site
+        </h2>
+        <ol className="mt-3 space-y-2.5 text-[0.95rem] leading-relaxed text-ink-soft">
+          <li>
+            <span className="font-semibold text-ink">1.</span> Work through
+            the lecture notes. Each topic ends with the points worth
+            memorising.
+          </li>
+          <li>
+            <span className="font-semibold text-ink">2.</span> Take the quiz.
+            You get the explanation straight after you commit to an answer, so
+            guessing first is the point.
+          </li>
+          <li>
+            <span className="font-semibold text-ink">3.</span> Read the
+            explanation even when you were right. A lucky guess comes back.
+          </li>
+        </ol>
+      </section>
     </div>
   );
 }
