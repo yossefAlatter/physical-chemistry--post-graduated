@@ -1,50 +1,29 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RenderBlock } from "@/components/Blocks";
-import {
-  allLectures,
-  countQuickChecks,
-  getLecture,
-  nextLecture,
-  prevLecture,
-  quizHref,
-  questionsForSection,
-  sectionHref,
-} from "@/content";
+import { getRegistry, lectureHref, quizHref, sectionHref } from "@/content/registry";
+import { fill, t, type Locale } from "@/lib/i18n";
 
-type Params = { slug: string };
-
-export function generateStaticParams(): Params[] {
-  return allLectures.map((l) => ({ slug: l.slug }));
-}
-
-export async function generateMetadata({
-  params,
+/**
+ * The lecture overview page: intro prose, section index, constants panel and
+ * previous/next navigation. Shared by both languages.
+ */
+export default function LectureView({
+  locale,
+  slug,
 }: {
-  params: Promise<Params>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-  const lecture = getLecture(slug);
-  if (!lecture) return { title: "Lecture not found" };
-  return {
-    title: `${lecture.label}: ${lecture.title}`,
-    description: lecture.summary,
-  };
-}
-
-export default async function LecturePage({
-  params,
-}: {
-  params: Promise<Params>;
+  locale: Locale;
+  slug: string;
 }) {
-  const { slug } = await params;
-  const lecture = getLecture(slug);
+  const reg = getRegistry(locale);
+  const d = t(locale);
+
+  const lecture = reg.getLecture(slug);
   if (!lecture) notFound();
 
-  const prev = prevLecture(slug);
-  const next = nextLecture(slug);
-  const quickTotal = countQuickChecks(lecture);
+  const prev = reg.prevLecture(slug);
+  const next = reg.nextLecture(slug);
+  const quickTotal = reg.countQuickChecks(lecture);
   const totalMinutes = lecture.sections.reduce(
     (n, s) => n + (s.minutes ?? 0),
     0,
@@ -65,39 +44,43 @@ export default async function LecturePage({
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-tint px-2.5 py-1 text-[0.78rem] text-ink-soft">
-            {lecture.sections.length} short sections
+            {fill(d.lectureSectionsCount, { n: lecture.sections.length })}
           </span>
           <span className="rounded-full bg-tint px-2.5 py-1 text-[0.78rem] text-ink-soft">
-            {totalMinutes || lecture.minutes} min total
+            {fill(d.lectureMinTotal, { n: totalMinutes || lecture.minutes })}
           </span>
           <span className="rounded-full bg-tint px-2.5 py-1 text-[0.78rem] text-ink-soft">
-            {lecture.mcq.length} questions
+            {fill(d.lectureQuestions, { n: lecture.mcq.length })}
           </span>
         </div>
 
         {lecture.intro && lecture.intro.length > 0 && (
           <div className="prose-lecture mt-6 max-w-[62ch]">
             {lecture.intro.map((b, i) => (
-              <RenderBlock key={i} block={b} />
+              <RenderBlock key={i} block={b} locale={locale} />
             ))}
           </div>
         )}
 
         <div className="mt-5 flex flex-wrap gap-2.5">
           <Link
-            href={lecture.sections[0] ? sectionHref(lecture, lecture.sections[0]) : "#"}
+            href={
+              lecture.sections[0]
+                ? sectionHref(locale, lecture, lecture.sections[0])
+                : "#"
+            }
             className="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 py-2.5 text-[0.92rem] font-semibold text-on-accent transition-colors hover:bg-accent-dark"
           >
-            {lecture.slug === "fundamentals" ? "Start reading" : "Continue reading"}
-            <span aria-hidden="true" className="ml-1.5">
+            {lecture.slug === "fundamentals" ? d.startReading : d.continueReading}
+            <span aria-hidden="true" className="ms-1.5 flow-arrow">
               →
             </span>
           </Link>
           <Link
-            href={quizHref(lecture)}
+            href={quizHref(locale, lecture)}
             className="inline-flex min-h-11 items-center rounded-lg border border-rule bg-surface px-4 py-2.5 text-[0.92rem] font-semibold text-ink-soft transition-colors hover:border-accent hover:text-accent-dark"
           >
-            All {lecture.mcq.length} questions
+            {fill(d.allQuestionsLink, { n: lecture.mcq.length })}
           </Link>
         </div>
       </header>
@@ -105,16 +88,16 @@ export default async function LecturePage({
       {/* ---------------- section index ---------------- */}
       <section className="mt-8">
         <h2 className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-faint">
-          Sections
+          {d.sectionsHeading}
         </h2>
         <ul className="mt-3 grid gap-3 sm:grid-cols-2">
           {lecture.sections.map((s, i) => {
-            const n = questionsForSection(lecture, s.id).length;
+            const n = reg.questionsForSection(lecture, s.id).length;
             const quick = Math.min(3, n);
             return (
               <li key={s.id}>
                 <Link
-                  href={sectionHref(lecture, s)}
+                  href={sectionHref(locale, lecture, s)}
                   data-tone={s.tone}
                   className="group flex h-full flex-col rounded-lg border border-rule bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-[color:var(--tone)] hover:shadow-md"
                 >
@@ -130,13 +113,17 @@ export default async function LecturePage({
                     {s.summary}
                   </span>
                   <span className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.76rem] text-faint">
-                    {s.minutes && <span>{s.minutes} min</span>}
+                    {s.minutes && <span>{fill(d.minutes, { n: s.minutes })}</span>}
                     {quick > 0 && (
-                      <span>{quick} quick {quick === 1 ? "check" : "checks"}</span>
+                      <span>
+                        {fill(quick === 1 ? d.quickCheckOne : d.quickChecks, {
+                          n: quick,
+                        })}
+                      </span>
                     )}
-                    {n > 0 && <span>{n} in quiz</span>}
-                    <span className="ml-auto font-semibold text-[color:var(--tone)] opacity-0 transition-opacity group-hover:opacity-100">
-                      Read →
+                    {n > 0 && <span>{fill(d.inQuiz, { n })}</span>}
+                    <span className="ms-auto font-semibold text-[color:var(--tone)] opacity-0 transition-opacity group-hover:opacity-100">
+                      {d.readLink}
                     </span>
                   </span>
                 </Link>
@@ -149,7 +136,7 @@ export default async function LecturePage({
       {lecture.constants && lecture.constants.length > 0 && (
         <details className="mt-8 overflow-hidden rounded-lg border border-rule bg-surface">
           <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 px-4 py-3 text-[0.92rem] font-semibold text-ink">
-            Constants you will need
+            {d.constantsHeading}
             <span aria-hidden="true" className="text-faint">
               ▾
             </span>
@@ -172,19 +159,20 @@ export default async function LecturePage({
       {lecture.mcq.length > 0 && (
         <div className="mt-8 rounded-lg border border-accent/25 bg-accent-light/45 p-5">
           <h2 className="font-serif text-[1.15rem] font-semibold text-ink">
-            {quickTotal} quick checks, {lecture.mcq.length} questions in total
+            {fill(d.quickTotalTitle, {
+              a: quickTotal,
+              b: lecture.mcq.length,
+            })}
           </h2>
           <p className="mt-1.5 max-w-[58ch] text-[0.92rem] leading-relaxed text-ink-soft">
-            Every section ends with three questions answered on the spot. When
-            you want the whole bank at once, including everything shuffled into
-            one sitting, take the full quiz.
+            {d.quickTotalBody}
           </p>
           <Link
-            href={quizHref(lecture)}
+            href={quizHref(locale, lecture)}
             className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-accent px-4 py-2.5 text-[0.92rem] font-semibold text-on-accent transition-colors hover:bg-accent-dark"
           >
-            Take the full quiz
-            <span aria-hidden="true" className="ml-1.5">
+            {d.takeFullQuiz}
+            <span aria-hidden="true" className="ms-1.5 flow-arrow">
               →
             </span>
           </Link>
@@ -195,11 +183,11 @@ export default async function LecturePage({
         <nav className="mt-8 grid gap-2.5 border-t border-rule pt-6 sm:grid-cols-2">
           {prev && (
             <Link
-              href={`/lectures/${prev.slug}`}
+              href={lectureHref(locale, prev)}
               className="rounded-lg border border-rule bg-surface px-4 py-3 transition-colors hover:border-accent hover:shadow-sm"
             >
               <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
-                ← Previous
+                {d.prev}
               </span>
               <span className="mt-0.5 block text-[0.92rem] font-semibold text-ink">
                 {prev.label}: {prev.title}
@@ -208,11 +196,11 @@ export default async function LecturePage({
           )}
           {next && (
             <Link
-              href={`/lectures/${next.slug}`}
-              className="rounded-lg border border-rule bg-surface px-4 py-3 text-right transition-colors hover:border-accent hover:shadow-sm sm:col-start-2"
+              href={lectureHref(locale, next)}
+              className="rounded-lg border border-rule bg-surface px-4 py-3 text-end transition-colors hover:border-accent hover:shadow-sm sm:col-start-2"
             >
               <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
-                Next →
+                {d.next}
               </span>
               <span className="mt-0.5 block text-[0.92rem] font-semibold text-ink">
                 {next.label}: {next.title}

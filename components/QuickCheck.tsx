@@ -8,16 +8,19 @@
 
 import { useState } from "react";
 import type { Mcq } from "@/content/types";
-
-const LETTERS = ["A", "B", "C", "D"];
+import { fill, optionLetters, t, type Locale } from "@/lib/i18n";
 
 export default function QuickCheck({
+  locale,
   questions,
   sectionTitle,
 }: {
+  locale: Locale;
   questions: Mcq[];
   sectionTitle: string;
 }) {
+  const d = t(locale);
+  const LETTERS = optionLetters[locale];
   const [at, setAt] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [got, setGot] = useState<boolean[]>([]);
@@ -62,13 +65,13 @@ export default function QuickCheck({
           id="quickcheck"
           className="font-serif text-[1.15rem] font-semibold text-ink"
         >
-          Quick check
+          {d.qcTitle}
         </h2>
-        <span className="sr-only">on {sectionTitle}</span>
+        <span className="sr-only">{fill(d.qcOn, { title: sectionTitle })}</span>
         <span className="text-[0.78rem] text-faint">
           {done
-            ? `${right} of ${questions.length} correct`
-            : `Question ${at + 1} of ${questions.length}`}
+            ? fill(d.qcScore, { right, n: questions.length })
+            : fill(d.qcQuestionOf, { i: at + 1, n: questions.length })}
         </span>
       </div>
 
@@ -80,7 +83,7 @@ export default function QuickCheck({
           <div
             className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-rule"
             role="img"
-            aria-label={`${pct} per cent correct`}
+            aria-label={fill(d.qcPercentAria, { p: pct })}
           >
             <div
               className="h-full rounded-full bg-[color:var(--tone)] transition-[width] duration-300"
@@ -89,15 +92,15 @@ export default function QuickCheck({
           </div>
           <p className="mt-3 text-[0.92rem] leading-relaxed text-ink-soft">
             {right === questions.length
-              ? "All correct. The explanation still matters - it is the wording you will meet in the full quiz."
-              : `Reread the ${sectionTitle.toLowerCase()} section for the ones you missed, then try again.`}
+              ? d.qcAllCorrect
+              : fill(d.qcReread, { title: sectionTitle })}
           </p>
           <button
             type="button"
             onClick={restart}
             className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-rule bg-surface px-4 text-[0.9rem] font-semibold text-ink-soft transition-colors hover:border-[color:var(--tone)] hover:text-[color:var(--tone)]"
           >
-            Try again
+            {d.tryAgain}
           </button>
         </div>
       ) : (
@@ -124,7 +127,7 @@ export default function QuickCheck({
                     type="button"
                     onClick={() => choose(i)}
                     aria-pressed={isPicked}
-                    className={`flex w-full items-start gap-3 rounded-lg border px-3.5 py-3 text-left transition-colors ${tone}`}
+                    className={`flex w-full items-start gap-3 rounded-lg border px-3.5 py-3 text-start transition-colors ${tone}`}
                   >
                     <span
                       aria-hidden="true"
@@ -151,17 +154,17 @@ export default function QuickCheck({
 
           {picked === null ? (
             <p className="mt-3 text-[0.85rem] text-faint">
-              Pick an option to see the explanation.
+              {d.pickOption}
             </p>
           ) : (
             <div className="mt-4 border-t border-[color:var(--tone-line)] pt-4">
               <p
                 className={`text-[0.95rem] font-semibold ${picked === q.answer ? "text-good" : "text-bad"}`}
               >
-                {picked === q.answer ? "✓ Correct." : "✗ Not correct."}
+                {picked === q.answer ? d.correctShort : d.notCorrectShort}
               </p>
               <p className="mt-1 text-[0.72rem] font-bold uppercase tracking-wider text-faint">
-                Why
+                {d.why}
               </p>
               <p className="mt-1 text-[0.92rem] leading-relaxed text-ink-soft">
                 {q.explanation}
@@ -171,8 +174,8 @@ export default function QuickCheck({
                 onClick={next}
                 className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[color:var(--tone)] px-4 text-[0.92rem] font-semibold text-on-accent transition-opacity hover:opacity-90 sm:w-auto"
               >
-                {at + 1 >= questions.length ? "See result" : "Next question"}
-                <span aria-hidden="true" className="ml-1.5">
+                {at + 1 >= questions.length ? d.seeResult : d.nextQuestion}
+                <span aria-hidden="true" className="ms-1.5 flow-arrow">
                   →
                 </span>
               </button>

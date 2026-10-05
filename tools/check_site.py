@@ -48,10 +48,15 @@ def get(path: str) -> tuple[int, str]:
 def registry() -> list[tuple[str, list[str]]]:
     """(lecture slug, [section ids]) read straight from the TS sources."""
     out = []
-    for fn in sorted(os.listdir(os.path.join(ROOT, "content"))):
+    content_dir = os.path.join(ROOT, "content")
+    for fn in sorted(os.listdir(content_dir)):
+        # content/ar holds the translations; skip it here and check it
+        # separately against the English tree.
+        if not os.path.isfile(os.path.join(content_dir, fn)):
+            continue
         if fn in ("index.ts", "types.ts") or fn.endswith(".mcq.ts"):
             continue
-        body = open(os.path.join(ROOT, "content", fn), encoding="utf-8").read()
+        body = open(os.path.join(content_dir, fn), encoding="utf-8").read()
         slug = re.search(r'slug:\s*"([a-z0-9-]+)"', body)
         if not slug:
             continue

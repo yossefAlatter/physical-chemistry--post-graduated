@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { t, type Locale } from "@/lib/i18n";
 
 const KEY = "pc-theme";
 
@@ -23,9 +24,15 @@ function isDark() {
   return document.documentElement.classList.contains("dark");
 }
 
-export default function ThemeToggle({ className = "" }: { className?: string }) {
-  // server renders the light icon; the store corrects it after hydration
+export default function ThemeToggle({
+  className = "",
+  locale,
+}: {
+  className?: string;
+  locale: Locale;
+}) {
   const dark = useSyncExternalStore(subscribe, isDark, () => false);
+  const label = t(locale)[dark ? "themeToLight" : "themeToDark"];
 
   function toggle() {
     const next = !document.documentElement.classList.contains("dark");
@@ -41,8 +48,8 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
     <button
       type="button"
       onClick={toggle}
-      aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
-      title={dark ? "Switch to light theme" : "Switch to dark theme"}
+      aria-label={label}
+      title={label}
       className={[
         "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-rule",
         "bg-surface text-ink-soft transition-colors",

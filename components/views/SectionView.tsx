@@ -1,56 +1,42 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RenderBlock } from "@/components/Blocks";
 import QuickCheck from "@/components/QuickCheck";
 import {
-  allLectures,
-  getLecture,
-  getSection,
-  quickCheckFor,
-  questionsForSection,
+  getRegistry,
+  homeHref,
+  lectureHref,
+  quizHref,
   sectionHref,
-  sectionNeighbours,
-} from "@/content";
+} from "@/content/registry";
+import { fill, t, type Locale } from "@/lib/i18n";
 
-type Params = { slug: string; section: string };
-
-export function generateStaticParams(): Params[] {
-  return allLectures.flatMap((l) =>
-    l.sections.map((s) => ({ slug: l.slug, section: s.id })),
-  );
-}
-
-export async function generateMetadata({
-  params,
+/**
+ * One section: the unit of study. Every section is its own page with its own
+ * header, body blocks, key points, quick check and previous/next navigation.
+ * Shared by both languages.
+ */
+export default function SectionView({
+  locale,
+  slug,
+  sectionId,
 }: {
-  params: Promise<Params>;
-}): Promise<Metadata> {
-  const { slug, section } = await params;
-  const lecture = getLecture(slug);
-  const s = getSection(lecture, section);
-  if (!s || !lecture) return { title: "Section not found" };
-  return {
-    title: `${s.title} — ${lecture.label}`,
-    description: s.summary,
-  };
-}
-
-export default async function SectionPage({
-  params,
-}: {
-  params: Promise<Params>;
+  locale: Locale;
+  slug: string;
+  sectionId: string;
 }) {
-  const { slug, section: sectionId } = await params;
-  const lecture = getLecture(slug);
+  const reg = getRegistry(locale);
+  const d = t(locale);
+
+  const lecture = reg.getLecture(slug);
   if (!lecture) notFound();
 
-  const nav = sectionNeighbours(lecture, sectionId);
+  const nav = reg.sectionNeighbours(lecture, sectionId);
   if (!nav) notFound();
   const { section, index, total, prev, next } = nav;
 
-  const quick = quickCheckFor(lecture, section.id);
-  const quizCount = questionsForSection(lecture, section.id).length;
+  const quick = reg.quickCheckFor(lecture, section.id);
+  const quizCount = reg.questionsForSection(lecture, section.id).length;
 
   return (
     <div data-tone={section.tone} className="relative isolate pb-12">
@@ -58,17 +44,17 @@ export default async function SectionPage({
       <div aria-hidden="true" className="page-wash" />
 
       {/* ---------------- breadcrumb ---------------- */}
-      <nav aria-label="Breadcrumb" className="no-print text-[0.8rem]">
+      <nav aria-label={d.breadcrumbAria} className="no-print text-[0.8rem]">
         <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-faint">
           <li>
-            <Link href="/" className="hover:text-accent-dark">
-              Home
+            <Link href={homeHref(locale)} className="hover:text-accent-dark">
+              {d.navHome}
             </Link>
           </li>
           <li aria-hidden="true">/</li>
           <li>
             <Link
-              href={`/lectures/${lecture.slug}`}
+              href={lectureHref(locale, lecture)}
               className="hover:text-accent-dark"
             >
               {lecture.label}
@@ -100,16 +86,18 @@ export default async function SectionPage({
 
         <div className="mt-3.5 flex flex-wrap items-center gap-2">
           <span className="rounded-full border border-[color:var(--tone-line)] bg-[color:var(--tone-soft)] px-2.5 py-1 text-[0.76rem] font-semibold text-[color:var(--tone)]">
-            Section {index} of {total}
+            {fill(d.sectionOf, { i: index, n: total })}
           </span>
           {section.minutes && (
             <span className="rounded-full border border-rule bg-surface px-2.5 py-1 text-[0.76rem] text-ink-soft">
-              {section.minutes} min
+              {fill(d.minutes, { n: section.minutes })}
             </span>
           )}
           {quick.length > 0 && (
             <span className="rounded-full border border-rule bg-surface px-2.5 py-1 text-[0.76rem] text-ink-soft">
-              {quick.length} quick {quick.length === 1 ? "check" : "checks"}
+              {fill(quick.length === 1 ? d.quickCheckOne : d.quickChecks, {
+                n: quick.length,
+              })}
             </span>
           )}
         </div>
@@ -118,7 +106,7 @@ export default async function SectionPage({
         <div
           className="mt-4 h-1 overflow-hidden rounded-full bg-rule"
           role="img"
-          aria-label={`Section ${index} of ${total}`}
+          aria-label={fill(d.sectionOf, { i: index, n: total })}
         >
           <div
             className="h-full rounded-full bg-[color:var(--tone)]"
@@ -130,13 +118,13 @@ export default async function SectionPage({
       {/* ---------------- body ---------------- */}
       <div className="prose-lecture mt-6 max-w-[68ch]">
         {section.blocks.map((block, i) => (
-          <RenderBlock key={i} block={block} />
+          <RenderBlock key={i} block={block} locale={locale} />
         ))}
       </div>
 
       {section.keyPoints && section.keyPoints.length > 0 && (
         <div className="card-tone mt-7 max-w-[68ch] rounded-lg border p-4">
-          <p className="eyebrow">Worth memorising</p>
+          <p className="eyebrow">{d.worthMemorising}</p>
           <ul className="mt-2 space-y-1.5">
             {section.keyPoints.map((k, i) => (
               <li
@@ -153,19 +141,23 @@ export default async function SectionPage({
 
       {quizCount > 0 && (
         <p className="mt-4 text-[0.88rem] text-faint">
-          {quizCount} questions in the full bank cover this topic.{" "}
+          {fill(d.bankCovers, { n: quizCount })}{" "}
           <Link
-            href={`/lectures/${lecture.slug}/quiz?topic=${section.id}`}
+            href={`${quizHref(locale, lecture)}?topic=${section.id}`}
             className="font-semibold text-[color:var(--tone)] underline underline-offset-2"
           >
-            Open all {quizCount}
+            {fill(d.openAll, { n: quizCount })}
           </Link>
         </p>
       )}
 
       {/* ---------------- quick check ---------------- */}
       <div className="max-w-[68ch]">
-        <QuickCheck questions={quick} sectionTitle={section.title} />
+        <QuickCheck
+          locale={locale}
+          questions={quick}
+          sectionTitle={section.title}
+        />
       </div>
 
       {/* ---------------- closing call to action ---------------- */}
@@ -183,7 +175,7 @@ export default async function SectionPage({
               className="inline-flex min-h-11 items-center rounded-lg bg-[color:var(--tone)] px-4 py-2.5 text-[0.92rem] font-semibold text-on-accent transition-opacity hover:opacity-90"
             >
               {section.cta.linkLabel}
-              <span aria-hidden="true" className="ml-1.5">
+              <span aria-hidden="true" className="ms-1.5 flow-arrow">
                 →
               </span>
             </Link>
@@ -201,16 +193,16 @@ export default async function SectionPage({
 
       {/* ---------------- previous / next section ---------------- */}
       <nav
-        aria-label="Section navigation"
+        aria-label={d.sectionNavAria}
         className="no-print mt-10 grid gap-2.5 border-t border-rule pt-6 sm:grid-cols-2"
       >
         {prev ? (
           <Link
-            href={sectionHref(lecture, prev)}
+            href={sectionHref(locale, lecture, prev)}
             className="group rounded-lg border border-rule bg-surface px-4 py-3 transition-colors hover:border-accent hover:shadow-sm"
           >
             <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
-              ← Previous
+              {d.prev}
             </span>
             <span className="mt-0.5 block text-[0.92rem] leading-snug font-semibold text-ink">
               {String(index - 1).padStart(2, "0")} {prev.title}
@@ -221,25 +213,25 @@ export default async function SectionPage({
           </Link>
         ) : (
           <Link
-            href={`/lectures/${lecture.slug}`}
+            href={lectureHref(locale, lecture)}
             className="group rounded-lg border border-rule bg-surface px-4 py-3 transition-colors hover:border-accent hover:shadow-sm"
           >
             <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
-              ← Contents
+              {d.contents}
             </span>
             <span className="mt-0.5 block text-[0.92rem] font-semibold text-ink">
-              All {total} sections of {lecture.label}
+              {fill(d.allSectionsOf, { n: total, label: lecture.label })}
             </span>
           </Link>
         )}
 
         {next ? (
           <Link
-            href={sectionHref(lecture, next)}
-            className="group rounded-lg border border-[color:var(--tone-line)] bg-[color:var(--tone-soft)] px-4 py-3 text-right transition-colors hover:shadow-sm"
+            href={sectionHref(locale, lecture, next)}
+            className="group rounded-lg border border-[color:var(--tone-line)] bg-[color:var(--tone-soft)] px-4 py-3 text-end transition-colors hover:shadow-sm"
           >
             <span className="text-[0.7rem] font-bold uppercase tracking-wider text-[color:var(--tone)]">
-              Next →
+              {d.next}
             </span>
             <span className="mt-0.5 block text-[0.92rem] leading-snug font-semibold text-ink">
               {String(index + 1).padStart(2, "0")} {next.title}
@@ -250,14 +242,14 @@ export default async function SectionPage({
           </Link>
         ) : (
           <Link
-            href={`/lectures/${lecture.slug}`}
-            className="group rounded-lg border border-rule bg-surface px-4 py-3 text-right transition-colors hover:border-accent hover:shadow-sm sm:col-start-2"
+            href={lectureHref(locale, lecture)}
+            className="group rounded-lg border border-rule bg-surface px-4 py-3 text-end transition-colors hover:border-accent hover:shadow-sm sm:col-start-2"
           >
             <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
-              Finish →
+              {d.finish}
             </span>
             <span className="mt-0.5 block text-[0.92rem] font-semibold text-ink">
-              Back to {lecture.label} contents
+              {fill(d.backToContents, { label: lecture.label })}
             </span>
           </Link>
         )}

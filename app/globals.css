@@ -282,9 +282,10 @@ a {
   border-color: var(--tone-line);
 }
 
-/* A left colour rule, used to tie a panel to its topic. */
+/* A colour rule on the inline-start edge, used to tie a panel to its topic.
+   Logical, so in Arabic it lands on the right without a second rule. */
 .rule-tone {
-  border-left: 4px solid var(--tone);
+  border-inline-start: 4px solid var(--tone);
 }
 
 /* The soft hue wash behind a page header, in the section's own colour.
@@ -384,4 +385,57 @@ a {
   body {
     background: white;
   }
+}
+/* ==========================================================================
+   Bidirectional layout
+   ==========================================================================
+
+   The Arabic tree sets dir="rtl" on <html> and everything else follows from
+   there. Components are written with CSS logical properties (ms-/me-, ps-/pe-,
+   start/end, text-start), so the same markup reads correctly in both
+   languages and there is no per-language branching in the JSX.
+
+   What is left for this section is the handful of things CSS cannot infer:
+   genuinely physical decorations, and elements that must stay LTR.
+   ========================================================================== */
+
+/* A decorative arrow that means "forwards". It points along the reading
+   direction, so it is mirrored rather than merely re-aligned. */
+[dir="rtl"] .flow-arrow {
+  transform: scaleX(-1);
+}
+
+/* Maths, formulae, chemical symbols and code are not bidirectional. An
+   Arabic sentence containing E = mc^2 must still render that fragment
+   left-to-right, and the line must not reorder around it. */
+[dir="rtl"] .katex,
+[dir="rtl"] code,
+[dir="rtl"] pre,
+[dir="rtl"] .font-mono,
+[dir="rtl"] [role="math"] {
+  direction: ltr;
+  text-align: start;
+}
+
+/* Keep numerals and option letters in reading order inside a line of Arabic. */
+[dir="rtl"] .numeral,
+[dir="rtl"] .tabular-nums {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Latin words embedded in Arabic text (Nernst, Butler-Volmer, Tafel) are
+   already handled by the Unicode bidirectional algorithm; this only stops
+   long unbroken Latin runs from being broken mid-word. */
+[dir="rtl"] .prose-lecture {
+  overflow-wrap: break-word;
+  word-break: normal;
+  line-break: auto;
+}
+
+/* The sidebar drawer hangs off the inline-start edge. Tailwind's rtl:
+   variant handles the offset; this covers the shadow so it falls away from
+   the page on the correct side. */
+[dir="rtl"] .prose-lecture ul {
+  padding-inline-start: 1.25rem;
 }

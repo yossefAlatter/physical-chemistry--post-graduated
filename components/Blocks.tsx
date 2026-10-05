@@ -1,5 +1,6 @@
 import katex from "katex";
 import type { Block, Formula as FormulaBlock } from "@/content/types";
+import { t, type Locale } from "@/lib/i18n";
 
 /** Renders LaTeX on the server, so no maths library ships to the browser. */
 export function Formula({ tex, caption }: Pick<FormulaBlock, "tex" | "caption">) {
@@ -21,6 +22,7 @@ export function Formula({ tex, caption }: Pick<FormulaBlock, "tex" | "caption">)
       <div
         className="overflow-x-auto rounded-lg border border-rule bg-surface px-3 py-2 sm:px-5 sm:py-3"
         role="math"
+        dir="ltr"
         aria-label={caption ?? tex}
         dangerouslySetInnerHTML={{ __html: html }}
       />
@@ -72,19 +74,16 @@ const CALLOUT_STYLES = {
   key: {
     box: "border-accent-light bg-accent-light/50",
     bar: "bg-accent",
-    label: "Key idea",
     text: "text-accent-dark",
   },
   warn: {
     box: "border-red-light bg-red-light/60",
     bar: "bg-red",
-    label: "Common pitfall",
     text: "text-red",
   },
   term: {
     box: "border-violet-soft bg-violet-soft/60",
     bar: "bg-violet",
-    label: "Terminology",
     text: "text-violet",
   },
 } as const;
@@ -93,21 +92,26 @@ export function Callout({
   variant,
   title,
   body,
+  locale,
 }: {
   variant: "key" | "warn" | "term";
   title: string;
   body: string;
+  locale: Locale;
 }) {
   const s = CALLOUT_STYLES[variant];
+  const d = t(locale);
+  const label =
+    variant === "key" ? d.keyIdea : variant === "warn" ? d.commonPitfall : d.terminology;
   return (
     <aside
-      className={`my-5 flex gap-3 rounded-lg border-l-4 py-3 pr-3 pl-3.5 ${s.box}`}
-      style={{ borderLeftColor: "currentColor" }}
+      className={`my-5 flex gap-3 rounded-lg border-s-4 py-3 pe-3 ps-3.5 ${s.box}`}
+      style={{ borderInlineStartColor: "currentColor" }}
     >
       <span className={`mt-1 hidden h-full w-1 shrink-0 rounded-full sm:block ${s.bar}`} />
       <div className="min-w-0">
         <p className={`text-[0.72rem] font-bold uppercase tracking-wider ${s.text}`}>
-          {title || s.label}
+          {title || label}
         </p>
         <div className="mt-1 text-[0.95rem] leading-relaxed text-ink-soft">
           <RichText text={body} />
@@ -167,7 +171,7 @@ export function TableBlock({
                 key={i}
                 scope="col"
                 style={widths ? { width: `${(widths[i] / widths.reduce((a, b) => a + b, 0)) * 100}%` } : undefined}
-                className="border-b-2 border-[color:var(--tone-line)] px-3 py-2 text-left align-bottom font-semibold text-ink"
+                className="border-b-2 border-[color:var(--tone-line)] px-3 py-2 text-start align-bottom font-semibold text-ink"
               >
                 {h}
               </th>
@@ -195,19 +199,21 @@ export function Worked({
   given,
   steps,
   result,
+  locale,
 }: {
   title: string;
   given: string;
+  locale: Locale;
   steps: string[];
   result: string;
 }) {
   const maths = steps.every((s) => /[\\^_{}]/.test(s));
   return (
     <section className="card-tone my-6 rounded-lg border p-4 sm:p-5">
-      <h4 className="eyebrow">Worked example</h4>
+      <h4 className="eyebrow">{t(locale).workedExample}</h4>
       <p className="mt-1 font-semibold text-ink">{title}</p>
       <p className="mt-1.5 text-[0.9rem] leading-relaxed text-ink-soft">
-        <span className="font-semibold text-ink">Given. </span>
+        <span className="font-semibold text-ink">{t(locale).given}. </span>
         <RichText text={given} />
       </p>
       <ol className="mt-3 space-y-2">
@@ -236,7 +242,13 @@ export function Worked({
 }
 
 /** Renders one content block. */
-export function RenderBlock({ block }: { block: Block }) {
+export function RenderBlock({
+  block,
+  locale,
+}: {
+  block: Block;
+  locale: Locale;
+}) {
   switch (block.kind) {
     case "para":
       return (
@@ -260,12 +272,13 @@ export function RenderBlock({ block }: { block: Block }) {
           variant={block.variant}
           title={block.title}
           body={block.body}
+          locale={locale}
         />
       );
     case "list": {
       const Tag = block.ordered ? "ol" : "ul";
       return (
-        <Tag className="my-4 space-y-2 pl-1">
+        <Tag className="my-4 space-y-2 ps-1">
           {block.items.map((item, i) => (
             <li key={i} className="flex gap-2.5 leading-relaxed text-ink-soft">
               <span
@@ -292,6 +305,7 @@ export function RenderBlock({ block }: { block: Block }) {
           given={block.given}
           steps={block.steps}
           result={block.result}
+          locale={locale}
         />
       );
   }

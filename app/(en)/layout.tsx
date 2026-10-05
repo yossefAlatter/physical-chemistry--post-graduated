@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import { SiteShell } from "@/components/SiteShell";
+import { themeScript } from "@/components/themeScript";
 
 const display = Fraunces({
   subsets: ["latin"],
@@ -53,15 +54,22 @@ export const viewport: Viewport = {
 };
 
 /**
- * Applied before first paint so a dark-mode reader never sees a white flash.
- * Kept inline and tiny on purpose: it has to run synchronously in <head>.
+ * The English tree of the site. It owns the root <html> element, which is why
+ * the Arabic side needs a second root layout under app/(ar): `lang` and `dir`
+ * are document-level, so they cannot be set by a nested layout.
+ *
+ * English is served from the root of the domain, with no /en prefix, so every
+ * URL that existed before the Arabic translation was added still resolves here.
  */
-const themeScript = `(()=>{try{var s=localStorage.getItem("pc-theme");var d=s?s==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
-
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function EnglishLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"
+      dir="ltr"
       className={`h-full ${display.variable} ${body.variable} ${code.variable}`}
       suppressHydrationWarning
     >
@@ -69,7 +77,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-full">
-        <SiteShell>{children}</SiteShell>
+        <SiteShell locale="en">{children}</SiteShell>
       </body>
     </html>
   );

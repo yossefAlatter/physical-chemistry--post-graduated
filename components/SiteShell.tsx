@@ -3,19 +3,40 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { subjects } from "@/content";
+import {
+  alternateLocalePath,
+  getSubjects,
+  homeHref,
+  lectureHref,
+  quizHref,
+  sectionHref,
+} from "@/content/registry";
 import ThemeToggle from "@/components/ThemeToggle";
+import { fill, localeName, locales, t, type Locale } from "@/lib/i18n";
 
 /**
  * App shell: a permanent sidebar from `lg` up, and a slide-in drawer with a
  * hamburger below it. The drawer closes on navigation and on Escape, and it
  * traps the page behind an overlay so a stray tap cannot scroll it.
  *
- * The sidebar is generated from the subject registry in content/index.ts, so
- * a new subject, course, lecture or section appears here without edits here.
+ * The sidebar is generated from the subject registry for `locale`, so a new
+ * subject, course, lecture or section appears here without edits here - and
+ * the same code serves both languages, reading the tree and the links that
+ * belong to the language currently being viewed.
+ *
+ * Side placement follows the text direction: the drawer hangs off the inline
+ * start edge, which is the left in English and the right in Arabic. The
+ * `rtl:` variants below flip both the anchor and the off-screen offset.
  */
-export function SiteShell({ children }: { children: React.ReactNode }) {
+export function SiteShell({
+  locale,
+  children,
+}: {
+  locale: Locale;
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
+  const d = t(locale);
 
   // Escape closes the drawer
   useEffect(() => {
@@ -41,7 +62,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            aria-label="Open navigation"
+            aria-label={d.navOpen}
             aria-expanded={open}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-rule text-ink transition-colors active:bg-tint"
           >
@@ -54,15 +75,16 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
               />
             </svg>
           </button>
-          <Link href="/" className="min-w-0 flex-1">
+          <Link href={homeHref(locale)} className="min-w-0 flex-1">
             <span className="block truncate font-serif text-[1.05rem] font-semibold text-ink">
-              Physical Chemistry
+              {d.siteTitle}
             </span>
             <span className="block truncate text-[0.66rem] font-bold uppercase tracking-[0.16em] text-accent">
-              Postgraduate
+              {d.siteTagline}
             </span>
           </Link>
-          <ThemeToggle />
+          <LangSwitch locale={locale} />
+          <ThemeToggle locale={locale} />
         </div>
       </header>
 
@@ -70,7 +92,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       {open && (
         <button
           type="button"
-          aria-label="Close navigation"
+          aria-label={d.navClose}
           onClick={() => setOpen(false)}
           className="no-print fixed inset-0 z-40 bg-ink/55 backdrop-blur-[2px] lg:hidden"
         />
@@ -78,21 +100,24 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
       {/* ---------- sidebar ---------- */}
       <nav
-        aria-label="Course navigation"
+        aria-label={d.navCourseNavigation}
         className={[
-          "no-print fixed inset-y-0 left-0 z-50 w-[17rem] max-w-[85vw]",
-          "overflow-y-auto overscroll-contain border-r border-rule bg-surface",
+          "no-print fixed inset-y-0 start-0 z-50 w-[17rem] max-w-[85vw]",
+          "overflow-y-auto overscroll-contain border-e border-rule bg-surface",
           "transition-transform duration-200 ease-out",
           "lg:translate-x-0",
-          open ? "translate-x-0 shadow-2xl" : "-translate-x-full",
+          open ? "translate-x-0 shadow-2xl" : "-translate-x-full rtl:translate-x-full",
         ].join(" ")}
       >
-        <SidebarBody onNavigate={() => setOpen(false)} />
+        <SidebarBody locale={locale} onNavigate={() => setOpen(false)} />
       </nav>
 
       {/* ---------- page ---------- */}
-      <div className="lg:pl-[17rem]">
-        <main id="main" className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
+      <div className="lg:ps-[17rem]">
+        <main
+          id="main"
+          className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8 lg:px-10"
+        >
           {children}
         </main>
       </div>
@@ -100,26 +125,64 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SidebarBody({ onNavigate }: { onNavigate: () => void }) {
+/**
+ * Switch to the same page in the other language. There is no Arabic page for
+ * a URL that has not been written yet, so the link always points at the
+ * matching path rather than at a locale index.
+ */
+function LangSwitch({ locale }: { locale: Locale }) {
   const pathname = usePathname();
+  const other = locales.find((l) => l !== locale) ?? "en";
+  const href = alternateLocalePath(locale, pathname);
+  const label = fill(t(locale).switchTo, { name: localeName[other] });
+
+  return (
+    <Link
+      href={href}
+      hrefLang={other}
+      lang={other}
+      aria-label={t(locale).switchLanguage}
+      title={label}
+      className={[
+        "flex h-9 min-w-9 items-center justify-center rounded-lg border border-rule px-2",
+        "text-[0.8rem] font-semibold text-ink-soft",
+        "transition-colors hover:border-accent hover:text-accent",
+      ].join(" ")}
+    >
+      {localeName[other]}
+    </Link>
+  );
+}
+
+function SidebarBody({
+  locale,
+  onNavigate,
+}: {
+  locale: Locale;
+  onNavigate: () => void;
+}) {
+  const pathname = usePathname();
+  const subjects = getSubjects(locale);
+  const d = t(locale);
 
   return (
     <div className="flex min-h-full flex-col">
       <div className="flex items-start justify-between gap-2 border-b border-rule bg-surface-2 px-5 py-4">
-        <Link href="/" onClick={onNavigate} className="min-w-0">
+        <Link href={homeHref(locale)} onClick={onNavigate} className="min-w-0">
           <span className="text-shine block font-serif text-lg leading-tight font-semibold">
-            Physical Chemistry
+            {d.siteTitle}
           </span>
           <span className="mt-0.5 block text-[0.68rem] font-bold uppercase tracking-[0.16em] text-accent">
-            Postgraduate
+            {d.siteTagline}
           </span>
         </Link>
         <div className="flex shrink-0 items-center gap-1.5">
-          <ThemeToggle />
+          <LangSwitch locale={locale} />
+          <ThemeToggle locale={locale} />
           <button
             type="button"
             onClick={onNavigate}
-            aria-label="Close navigation"
+            aria-label={d.navClose}
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-rule text-ink-soft lg:hidden"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
@@ -150,7 +213,7 @@ function SidebarBody({ onNavigate }: { onNavigate: () => void }) {
                 </h3>
                 <ul className="space-y-0.5">
                   {course.lectures.map((lecture) => {
-                    const lectureBase = `/lectures/${lecture.slug}`;
+                    const lectureBase = lectureHref(locale, lecture);
                     const onLecture =
                       pathname === lectureBase ||
                       pathname.startsWith(`${lectureBase}/`);
@@ -180,22 +243,22 @@ function SidebarBody({ onNavigate }: { onNavigate: () => void }) {
                         </Link>
 
                         {onLecture && (
-                          <ul className="mb-1 ml-2.5 mt-0.5 space-y-0.5 border-l border-rule pl-2">
+                          <ul className="mb-1 ms-2.5 mt-0.5 space-y-0.5 border-s border-rule ps-2">
                             {lecture.sections.map((s) => (
                               <SubLink
                                 key={s.id}
-                                href={`${lectureBase}/${s.id}`}
+                                href={sectionHref(locale, lecture, s)}
                                 label={s.title}
                                 tone={s.tone}
-                                active={pathname === `${lectureBase}/${s.id}`}
+                                active={pathname === sectionHref(locale, lecture, s)}
                                 onNavigate={onNavigate}
                               />
                             ))}
                             <SubLink
-                              href={`${lectureBase}/quiz`}
-                              label="All questions"
+                              href={quizHref(locale, lecture)}
+                              label={d.navAllQuestions}
                               tone={undefined}
-                              active={pathname === `${lectureBase}/quiz`}
+                              active={pathname === quizHref(locale, lecture)}
                               onNavigate={onNavigate}
                             />
                           </ul>
@@ -210,18 +273,14 @@ function SidebarBody({ onNavigate }: { onNavigate: () => void }) {
         ))}
 
         <div className="rounded-lg border border-rule bg-surface-2 px-3 py-3 text-[0.8rem] leading-relaxed text-ink-soft">
-          <p className="font-semibold text-ink">How this site is built</p>
-          <p className="mt-1">
-            Every lecture is a short set of section pages, each ending in its
-            own quick check. Content is stored in the project files, so a
-            correction lands on every copy at once.
-          </p>
+          <p className="font-semibold text-ink">{d.navHowBuiltTitle}</p>
+          <p className="mt-1">{d.navHowBuiltBody}</p>
         </div>
       </div>
 
       <div className="border-t border-rule px-5 py-4 text-[0.75rem] text-faint">
         <p className="font-semibold text-ink-soft">Yossef Hafez Alatter</p>
-        <p>Abla Hathout</p>
+        <p>{d.navSecondAuthor}</p>
       </div>
     </div>
   );

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { Lecture, Mcq } from "@/content/types";
+import { lectureHref } from "@/content/registry";
+import { fill, optionLetters, t, type Locale } from "@/lib/i18n";
 
 type Phase = "intro" | "quiz" | "results";
 
@@ -23,7 +25,14 @@ function shuffle<T>(items: T[]): T[] {
  * own full-width row. Progress is kept in component state so the page stays
  * a server component.
  */
-export function Quiz({ lecture }: { lecture: Lecture }) {
+export function Quiz({
+  locale,
+  lecture,
+}: {
+  locale: Locale;
+  lecture: Lecture;
+}) {
+  const d = t(locale);
   const params = useSearchParams();
   const topicParam = params.get("topic");
 
@@ -94,18 +103,16 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
             {lecture.label}
           </p>
           <h1 className="mt-1.5 font-serif text-[1.7rem] leading-tight font-semibold text-ink sm:text-[2.1rem]">
-            Quiz: {lecture.title}
+            {fill(d.quizTitle, { title: lecture.title })}
           </h1>
           <p className="mt-2 max-w-[58ch] text-[1rem] leading-relaxed text-ink-soft">
-            {pool.length} questions, one at a time. You get the
-            explanation as soon as you commit to an answer, so read every
-            one — including the ones you got right.
+            {fill(d.quizLede, { n: pool.length })}
           </p>
         </header>
 
         <div className="mt-6">
           <p className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-faint">
-            Test a single topic
+            {d.testSingleTopic}
           </p>
           <ul className="mt-2 space-y-1.5">
             {counts.map((s) => (
@@ -129,7 +136,7 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
           onClick={start}
           className="mt-7 min-h-12 w-full rounded-lg bg-accent px-5 text-[1rem] font-semibold text-on-accent transition-colors hover:bg-accent-dark sm:w-auto"
         >
-          Start with all {pool.length} questions
+          {fill(d.startWithAll, { n: pool.length })}
         </button>
       </div>
     );
@@ -146,11 +153,7 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
           ? "text-gold"
           : "text-red";
     const message =
-      pct >= 80
-        ? "Solid. Reread only the explanations you disagreed with."
-        : pct >= 50
-          ? "Halfway there. The explanations below are where the marks are."
-          : "Work through the notes again, then retake it. The explanations matter more than the score.";
+      pct >= 80 ? d.scoreHigh : pct >= 50 ? d.scoreMid : d.scoreLow;
 
     const missed = live.filter((q) => answers[q.id] === false);
     const unseen = live.filter((q) => !(q.id in answers));
@@ -159,10 +162,10 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
       <div className="pb-10">
         <header className="border-b border-rule pb-5">
           <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-accent">
-            {lecture.label} · finished
+            {fill(d.finishedLabel, { label: lecture.label })}
           </p>
           <h1 className="mt-1.5 font-serif text-[1.7rem] leading-tight font-semibold text-ink sm:text-[2.1rem]">
-            Your score
+            {d.yourScore}
           </h1>
         </header>
 
@@ -197,7 +200,7 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
             Try again
           </button>
           <Link
-            href={`/lectures/${lecture.slug}`}
+            href={lectureHref(locale, lecture)}
             className="inline-flex min-h-12 items-center justify-center rounded-lg border border-rule bg-surface px-5 text-[0.98rem] font-semibold text-ink-soft transition-colors hover:border-accent"
           >
             Back to the notes
@@ -257,7 +260,7 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
   // ------------------------- question -------------------------
   if (!current) return null;
 
-  const letters = "ABCD";
+  const letters = optionLetters[locale];
   const section = sections.find((s) => s.id === current.topicId);
   const pct = ((at + 1) / live.length) * 100;
 
@@ -338,12 +341,12 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
             }`}
           >
             {picked === current.answer
-              ? "Correct."
-              : `Not quite — the answer is ${letters[current.answer]}.`}
+              ? d.correct
+              : fill(d.notQuite, { letter: letters[current.answer] })}
           </div>
           <div className="mt-3 rounded-lg border border-rule bg-surface p-4">
             <p className="text-[0.7rem] font-bold uppercase tracking-wider text-accent">
-              Why
+              {d.why}
             </p>
             <p className="mt-1.5 text-[0.95rem] leading-relaxed text-ink-soft">
               {current.explanation}
@@ -355,14 +358,14 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
             onClick={next}
             className="mt-4 min-h-12 w-full rounded-lg bg-accent px-5 text-[1rem] font-semibold text-on-accent transition-colors hover:bg-accent-dark"
           >
-            {at + 1 < live.length ? "Next question" : "See your score"}
+            {at + 1 < live.length ? d.nextQuestion : d.seeScore}
           </button>
         </div>
       )}
 
       {picked === null && (
         <p className="mt-5 text-[0.85rem] text-faint">
-          Pick an option to see the explanation.
+          {d.pickOption}
         </p>
       )}
 
@@ -373,13 +376,13 @@ export function Quiz({ lecture }: { lecture: Lecture }) {
           disabled={at === 0}
           className="min-h-11 px-1 font-medium text-accent-dark disabled:opacity-35"
         >
-          ← Previous
+          {d.prev}
         </button>
         <Link
           href={`/lectures/${lecture.slug}`}
           className="min-h-11 py-2.5 text-faint hover:text-ink-soft"
         >
-          Notes
+          {d.notes}
         </Link>
       </div>
     </div>

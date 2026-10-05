@@ -1,7 +1,18 @@
 import Link from "next/link";
-import { subjects } from "@/content";
+import { getSubjects, lectureHref } from "@/content/registry";
+import { fill, t, type Locale } from "@/lib/i18n";
 
-export default function HomePage() {
+/**
+ * The home page, shared by both languages.
+ *
+ * All it needs is a locale: the subject tree comes from that language's
+ * registry and every string from its dictionary, so there is exactly one
+ * implementation of this page. Nothing below is hard-coded English.
+ */
+export default function HomeView({ locale }: { locale: Locale }) {
+  const subjects = getSubjects(locale);
+  const d = t(locale);
+
   const allLectures = subjects.flatMap((s) =>
     s.courses.flatMap((c) => c.lectures),
   );
@@ -16,31 +27,29 @@ export default function HomePage() {
         {/* colour wash so the hero is not one flat navy block */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-24 -right-20 h-72 w-72 rounded-full bg-[#7c3aed] opacity-25 blur-3xl"
+          className="pointer-events-none absolute -top-24 -end-20 h-72 w-72 rounded-full bg-[#7c3aed] opacity-25 blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-28 -left-16 h-72 w-72 rounded-full bg-[#f59e0b] opacity-20 blur-3xl"
+          className="pointer-events-none absolute -bottom-28 -start-16 h-72 w-72 rounded-full bg-[#f59e0b] opacity-20 blur-3xl"
         />
 
         <p className="text-[0.7rem] font-bold uppercase tracking-[0.17em] text-[#fcd34d]">
-          Postgraduate · Yossef Hafez Alatter
+          {d.siteAuthorLine}
         </p>
         <h1 className="mt-2 max-w-[20ch] font-serif text-[2.1rem] leading-[1.1] font-semibold sm:text-[2.8rem]">
-          <span className="text-shine-hero">Physical chemistry,</span> one short
-          section at a time.
+          <span className="text-shine-hero">{d.homeLedeLead}</span>{" "}
+          {d.homeLedeRest}
         </h1>
         <p className="mt-3 max-w-[52ch] text-[1.02rem] leading-relaxed text-[#cfdeeb]">
-          Nothing here is a wall of text. Every topic is a page you can finish
-          in a few minutes, with an illustration, the points worth memorising,
-          and three questions answered on the spot.
+          {d.homeSub}
         </p>
 
         <dl className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-xl bg-white/15 sm:max-w-md">
           {[
-            [String(allLectures.length), "Lectures"],
-            [String(totalSections), "Sections"],
-            [String(totalQuestions), "Questions"],
+            [String(allLectures.length), d.statLectures],
+            [String(totalSections), d.statSections],
+            [String(totalQuestions), d.statQuestions],
           ].map(([n, l]) => (
             <div key={l} className="bg-[#10192b]/45 px-3 py-3 text-center">
               <dt className="numeral text-[1.6rem] leading-none font-semibold">
@@ -55,11 +64,11 @@ export default function HomePage() {
 
         {start && (
           <Link
-            href={`/lectures/${start.slug}`}
+            href={lectureHref(locale, start)}
             className="mt-6 inline-flex min-h-12 items-center rounded-lg bg-[#fcd34d] px-5 text-[0.95rem] font-semibold text-[#1a1206] shadow-sm transition-colors hover:bg-[#fde68a]"
           >
-            Start from zero
-            <span aria-hidden="true" className="ml-1.5">
+            {d.startFromZero}
+            <span aria-hidden="true" className="ms-1.5 flow-arrow">
               →
             </span>
           </Link>
@@ -72,9 +81,7 @@ export default function HomePage() {
           <h2 className="font-serif text-[1.45rem] font-semibold text-ink">
             {subject.title}
           </h2>
-          <p className="eyebrow mt-1">
-            {subject.tagline}
-          </p>
+          <p className="eyebrow mt-1">{subject.tagline}</p>
           <p className="mt-2 max-w-[62ch] text-[0.95rem] leading-relaxed text-ink-soft">
             {subject.description}
           </p>
@@ -108,7 +115,7 @@ export default function HomePage() {
                   return (
                     <li key={lecture.slug}>
                       <Link
-                        href={`/lectures/${lecture.slug}`}
+                        href={lectureHref(locale, lecture)}
                         className="block rounded-xl border border-rule bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-accent hover:shadow-md sm:p-5"
                       >
                         <div className="flex items-baseline justify-between gap-3">
@@ -116,9 +123,11 @@ export default function HomePage() {
                             {lecture.label}
                           </span>
                           <span className="shrink-0 text-[0.72rem] text-faint tabular-nums">
-                            {lecture.sections.length} sections ·{" "}
-                            {mins || lecture.minutes} min ·{" "}
-                            {lecture.mcq.length} questions
+                            {fill(d.cardMeta, {
+                              n: lecture.sections.length,
+                              m: mins || lecture.minutes,
+                              k: lecture.mcq.length,
+                            })}
                           </span>
                         </div>
 
@@ -147,8 +156,8 @@ export default function HomePage() {
                                 {s.title}
                               </span>
                               {s.minutes && (
-                                <span className="ml-auto shrink-0 text-[0.74rem] text-faint">
-                                  {s.minutes} min
+                                <span className="ms-auto shrink-0 text-[0.74rem] text-faint">
+                                  {fill(d.minutes, { n: s.minutes })}
                                 </span>
                               )}
                             </li>
@@ -167,26 +176,14 @@ export default function HomePage() {
       {/* ---------------- how to use ---------------- */}
       <section className="card-tone mt-9 rounded-xl border p-5">
         <h2 className="font-serif text-[1.2rem] font-semibold text-ink">
-          How to use this site
+          {d.howToUseTitle}
         </h2>
         <ol className="mt-3 space-y-2.5 text-[0.95rem] leading-relaxed text-ink-soft">
-          <li>
-            <span className="font-semibold text-ink">1.</span> Begin with
-            Fundamentals. It assumes nothing and takes about half an hour.
-          </li>
-          <li>
-            <span className="font-semibold text-ink">2.</span> Read one
-            section, then use the Next button. Never two screens at once.
-          </li>
-          <li>
-            <span className="font-semibold text-ink">3.</span> Answer the
-            three quick checks at the bottom before moving on. The explanation
-            tells you which paragraph to reread if you got one wrong.
-          </li>
-          <li>
-            <span className="font-semibold text-ink">4.</span> Only then try
-            the full quiz, which mixes every section together.
-          </li>
+          {[d.howStep1, d.howStep2, d.howStep3, d.howStep4].map((step, i) => (
+            <li key={i}>
+              <span className="font-semibold text-ink">{i + 1}.</span> {step}
+            </li>
+          ))}
         </ol>
       </section>
     </div>
