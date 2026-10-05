@@ -626,17 +626,18 @@ export const fundamentals: Lecture = {
     },
     {
       id: "faradays-laws",
-      tone: "violet",
       title: "Faraday's laws: charge becomes mass",
+      tone: "violet",
       minutes: 7,
       summary:
-        "The bridge between what you measure and what you make: how much " +
-        "material a given charge will deposit.",
+        "The bridge between a meter reading and a physical object: charge " +
+        "in, mass out. And the honest version is that this is not an " +
+        "empirical law but charge conservation plus stoichiometry.",
       keyPoints: [
-        "Faraday's first law: deposited mass is proportional to charge passed.",
-        "Faraday's second law: deposited mass is proportional to molar mass, and inversely proportional to electrons per ion.",
-        "m = M Q / (n F), with F = 96 485 C mol⁻¹.",
-        "n is the number of electrons in the half-reaction; a 2+ ion needs two.",
+        "One mole of reaction moves `nF` coulombs, so `m = M Q / (nF)` - a consequence of bookkeeping, not an experimental discovery.",
+        "The empirical content is the assumption that all the current goes into one reaction; that is what current efficiency measures.",
+        "`F` is the charge on one mole of electrons, 96 485 C mol⁻¹, and since 2019 it is an exact constant.",
+        "Because Faraday gives an upper bound on the mass, it is a reference quantity - which is the whole idea behind coulometric titration.",
       ],
       blocks: [
         {
@@ -655,7 +656,8 @@ export const fundamentals: Lecture = {
             "proportional to the charge passed. Double the charge, double the " +
             "metal. There is no dependence on current: a small current for a " +
             "long time and a large current for a short time deposit the same " +
-            "mass, provided the reaction runs at 100% efficiency.",
+            "mass, provided the reaction runs at 100% efficiency. Hold on to " +
+            "that proviso, because the whole section turns on it.",
         },
         {
           kind: "para",
@@ -674,12 +676,29 @@ export const fundamentals: Lecture = {
         {
           kind: "para",
           text:
+            "Here is the part worth being precise about. Both of Faraday's " +
+            "laws follow from two things you already have. The previous " +
+            "section established that the charge is proportional to the " +
+            "extent of reaction, `Q = nF ξ`. Chemistry then says how much " +
+            "mass an extent of `ξ` is worth: `m = M ξ / n`. Substitute one " +
+            "into the other and the law above appears, with no experimental " +
+            "content at all. Faraday's contribution was not discovering a " +
+            "law of nature; it was stating the relationship in a form that " +
+            "an instrument could read. What *is* empirical is the assumption " +
+            "buried in the proviso above - that every coulomb went into the " +
+            "reaction you are watching.",
+        },
+        {
+          kind: "para",
+          text:
             "The four symbols, once and for all: **M** is the molar mass of " +
             "whatever is being deposited, in g mol⁻¹. **n** is the number of " +
             "electrons in the half-reaction - 1 for Ag⁺ → Ag, 2 for " +
             "Cu²⁺ → Cu, 3 for Au³⁺ → Au. **F** is the Faraday constant, the " +
-            "charge carried by one mole of electrons, 96 485 C mol⁻¹. **Q** is " +
-            "the charge you measured from the previous section. Get n from the " +
+            "charge carried by one mole of electrons, 96 485 C mol⁻¹; it is " +
+            "`N_A` times the elementary charge, and since the 2019 revision " +
+            "of the SI those two are exact, so `F` is too. **Q** is the " +
+            "charge you measured from the previous section. Get n from the " +
             "half-reaction and the rest is arithmetic.",
         },
         {
@@ -693,9 +712,11 @@ export const fundamentals: Lecture = {
             "coulombs at 6.71, 4.08 and 1.98 grams respectively, and a note " +
             "gives the slope as molar mass over n times Faraday.",
           caption:
-            "Straight lines through the origin. The slope is M / nF and does " +
-            "not depend on current - so silver deposits fastest here, but " +
-            "that is not the same as depositing most efficiently.",
+            "Straight lines through the origin, and the slope of each line is " +
+            "that metal's electrochemical equivalent `M / nF`. Note what the " +
+            "graph does not show: silver has the steepest slope here, so it " +
+            "deposits most mass per coulomb, which is a different claim from " +
+            "depositing most efficiently.",
         },
         {
           kind: "worked",
@@ -710,7 +731,9 @@ export const fundamentals: Lecture = {
           result:
             "0.99 g of copper, assuming 100% current efficiency. In practice " +
             "side reactions such as hydrogen evolution mean you always plate " +
-            "less than this, which is why efficiency is quoted.",
+            "less than this, which is why efficiency is quoted - and note the " +
+            "direction of the error: the calculation is an upper bound, so a " +
+            "shortfall against it is diagnostic rather than disappointing.",
         },
         {
           kind: "callout",
@@ -719,9 +742,15 @@ export const fundamentals: Lecture = {
           body:
             "Compare the mass you actually weighed with the mass Faraday's " +
             "law predicts. The ratio is the current efficiency, usually given " +
-            "as a percentage. A copper plating bath running at 95% passes five " +
-            "per cent of its current into hydrogen evolution instead - which " +
-            "is also five per cent wasted power.",
+            "as a percentage. The name is a slight misnomer - nothing about " +
+            "the current itself is being measured, since it is the same " +
+            "current in both cases. What is being compared is where the " +
+            "charge went: how much of it went into the reaction you wanted " +
+            "and how much into hydrogen evolution or dissolution of the " +
+            "substrate. So this is a selectivity between competing reactions. " +
+            "A copper plating bath running at 95% passes five per cent of its " +
+            "charge into hydrogen, which is also five per cent of the power " +
+            "wasted.",
         },
         {
           kind: "worked",
@@ -737,7 +766,10 @@ export const fundamentals: Lecture = {
           ],
           result:
             "About 50 minutes of plating at 2 A to reach 10 μm. This is the " +
-            "calculation that sets the length of a real production line.",
+            "calculation that sets the length of a real production line, and " +
+            "note that it is only the current that is free: raise `I` and " +
+            "the time falls in proportion, until mass transport at the " +
+            "surface can no longer keep up and the coating goes rough.",
         },
         {
           kind: "callout",
@@ -749,16 +781,23 @@ export const fundamentals: Lecture = {
             "Electrorefining of copper uses the same equation in reverse: " +
             "weigh the cathode before and after, and the mass gain tells you " +
             "exactly how much copper was deposited - which is how the purity " +
-            "of the refined metal is certified. The reason gold plating uses a " +
-            "thin layer is arithmetic, not thrift: gold is expensive and n = 3, " +
-            "so each gram of it needs three times the charge of a gram of silver.",
+            "of the refined metal is certified. That trick is worth naming, " +
+            "because the deposit is a physical record of every coulomb that " +
+            "passed: run a known current until the mass gain tells you the " +
+            "metal is complete, and you have performed a titration with " +
+            "charge instead of with volume. The reason gold plating uses a " +
+            "thin layer is arithmetic, not thrift: gold is expensive and " +
+            "n = 3, so each gram of it needs three times the charge of a gram " +
+            "of silver.",
         },
         {
           kind: "para",
           text:
-            "Charge in, mass out - that is the applied half of the subject. " +
-            "The other half asks the reverse question: how much energy was " +
-            "stored, and how fast can you get it back? That is the next section.",
+            "Charge in, mass out - and that is the applied half of the " +
+            "subject, because Faraday's law lets you make a quantity you can " +
+            "weigh out of a quantity you can only meter. The other half asks " +
+            "the reverse question: how much energy was stored, and how fast " +
+            "can you get it back? That is the next section.",
         },
       ],
     },

@@ -1,7 +1,6 @@
 # Content still served in English under /ar.
 # Regenerate with: npm run ledger
 # Read by tools/check_site.py; --strict-translation turns these into failures.
-fundamentals/faradays-laws
 fundamentals/energy-and-power
 fundamentals/lab-cell
 fundamentals/units-and-glossary

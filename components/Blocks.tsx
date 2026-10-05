@@ -300,7 +300,7 @@ export function Worked({
         ))}
       </ol>
       <p className="mt-3.5 rounded-md bg-green-light px-3 py-2 text-[0.92rem] font-medium text-green">
-        {result}
+        <RichText text={result} />
       </p>
     </section>
   );

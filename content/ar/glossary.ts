@@ -144,6 +144,15 @@ export const GLOSSARY: Record<string, string> = {
   "الانتشار": "diffusion",
   "المحفّز الكهربائي": "electrocatalyst",
   "معدل الشحن": "C-rate",
+
+  // What a charge is worth in material, and the assumption behind it.
+  "الكتلة المولية": "molar mass",
+  "المكافئ الكهربائي": "electrochemical equivalent",
+  "كفاءة التيار": "current efficiency",
+  "الانتقائية": "selectivity",
+  "الشحنة الأولية": "elementary charge",
+  "المعايرة الكمّية الكهربائية": "coulometric titration",
+  "حد أعلى": "upper bound",
 };
 
 /**
