@@ -142,6 +142,27 @@ its own - no change to `SiteShell` is needed.
 | `list` | bullets or numbers | `items`, `ordered?` |
 | `worked` | worked calculation | `title`, `given`, `steps`, `result` |
 
+### How to structure a section
+
+Sections are read for study, in order, so every section follows the same
+skeleton. Keeping it means a reader always knows where they are.
+
+1. **Open with the question.** First `para` states what the section answers,
+   and what it needs from earlier sections.
+2. **Teach in order of dependence.** Define a symbol at first use, in the
+   sentence that needs it. Never use `i`, `η`, `n` or `δ` before the paragraph
+   that defines it.
+3. **Show a worked example.** At least one `worked` block per section that
+   involves a calculation, including the unit conversions.
+4. **Say where you meet this in real life.** A `key` callout: a concrete
+   application - a datasheet number, a product, an industry, a failure.
+5. **Name the trap.** A `warn` callout for the mistake that section invites.
+6. **Bridge to the next.** Close with what the reader can now do and what
+   comes next, so the lecture reads as one argument.
+
+Use `variant: "term"` for definitions of a specific term, `key` for rules worth
+remembering, `warn` for mistakes.
+
 ### Text formatting
 
 `text`, `body`, `caption` and `result` accept a small inline subset:

@@ -4,6 +4,10 @@
 // runtime fetch. To add Lecture 2, copy this file's shape into
 // lecture-2.ts, write lecture-2.mcq.ts for its questions, then register both
 // in content/index.ts. See ADDING_A_LECTURE.md.
+//
+// Section order is a teaching order, not a catalogue. Each section opens by
+// naming the question it answers and the ideas it needs, and closes by
+// pointing at the section that comes next.
 
 import type { Lecture } from "./types";
 import { lecture1Mcq } from "./lecture-1.mcq";
@@ -17,7 +21,7 @@ export const lecture1: Lecture = {
     "currents are limited, how potentials are measured, and how the same " +
     "ideas explain batteries, corrosion and metal extraction.",
   order: 1,
-  minutes: 75,
+  minutes: 95,
   mcq: lecture1Mcq,
 
   constants: [
@@ -35,7 +39,8 @@ export const lecture1: Lecture = {
       name: "Saturated silver chloride electrode",
       value: "+0.197 V",
     },
-    { symbol: "T",
+    {
+      symbol: "T",
       name: "Absolute temperature",
       value: "K (use 298.15 for 25 °C)",
     },
@@ -57,8 +62,17 @@ export const lecture1: Lecture = {
           "driven by an external supply.",
         "Electrons flow through the external wire, ions through the " +
           "electrolyte. Neither crosses the interface.",
+        "Lowercase i is current *density* (A cm⁻²), uppercase I is current (A).",
       ],
       blocks: [
+        {
+          kind: "para",
+          text:
+            "**What this section needs from before:** the four parts of a cell " +
+            "and the rule that anode oxidises while cathode reduces. **What " +
+            "it adds:** the notation used everywhere else in the lecture, and " +
+            "the first two equations you will use constantly.",
+        },
         {
           kind: "para",
           text:
@@ -99,7 +113,22 @@ export const lecture1: Lecture = {
         {
           kind: "para",
           text:
-            "Faraday's law links charge passed to the amount of substance:",
+            "**Three symbols, defined once here so the rest of the lecture can " +
+            "assume them.** *Capital* **I** is current in amperes, the total " +
+            "flow of charge. *Lowercase* **i** is **current density** in A " +
+            "cm⁻², the current divided by the electrode area: i = I/A. Almost " +
+            "every plot and every formula in this lecture is in current " +
+            "density, because electrochemists compare electrodes of different " +
+            "sizes and only the density is comparable. **ξ** is the extent of " +
+            "reaction in moles, meaning how many moles of reaction have run.",
+        },
+        {
+          kind: "para",
+          text:
+            "**n** is the number of electrons in the half-reaction: 2 for " +
+            "Cu²⁺ → Cu, 4 for O₂ + 4H⁺ + 4e⁻ → 2H₂O. It is not a number you " +
+            "choose, it is read off the balanced equation, and it is the single " +
+            "most common thing to get wrong in a calculation.",
         },
         {
           kind: "formula",
@@ -132,6 +161,27 @@ export const lecture1: Lecture = {
             "falls depends on the cell potential, which we meet in " +
             "[electrolysis](#electrolysis).",
         },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Why current density is the normal currency",
+          body:
+            "It is because electrode area is a design choice. A cell that " +
+            "plates a large panel at 50 mA cm⁻² is a good factory; the same " +
+            "cell at 5 cm² doing the same total current is running at five " +
+            "hundred mA cm⁻² and will behave completely differently. Density " +
+            "removes the geometry so the *chemistry* can be compared. Every " +
+            "rotating-disk, Tafel and polarisation result in this lecture is a " +
+            "current density for exactly this reason.",
+        },
+        {
+          kind: "para",
+          text:
+            "You now have the hardware and the notation. But the electrode " +
+            "surface itself is not bare metal - the instant it touches a " +
+            "liquid it grows a structured charge layer, and that layer carries " +
+            "current before any reaction is possible. That is the next section.",
+        },
       ],
     },
 
@@ -139,7 +189,7 @@ export const lecture1: Lecture = {
     {
       id: "double-layer",
       tone: "indigo",
-      minutes: 7,
+      minutes: 8,
       title: "The electrical double layer",
       summary:
         "Every electrode in every electrolyte carries a structured charge " +
@@ -149,8 +199,19 @@ export const lecture1: Lecture = {
         "Near E_rev the current is almost all capacitive, not Faradaic.",
         "Screening the layer with salt changes the capacitance, not the " +
           "reversible potential.",
+        "Capacitive current is transient - it dies away. Faradaic current " +
+          "persists.",
       ],
       blocks: [
+        {
+          kind: "para",
+          text:
+            "**What this section needs:** that ions move in the electrolyte " +
+            "and electrons in the metal, and nothing crosses between them. " +
+            "**Why it matters:** without this section, every polarisation " +
+            "curve in section 4 looks wrong, because you cannot tell " +
+            "capacitive current from real current.",
+        },
         {
           kind: "para",
           text:
@@ -173,6 +234,17 @@ export const lecture1: Lecture = {
             "Almost all of the change happens within a few nanometres.",
         },
         {
+          kind: "para",
+          text:
+            "Two names for the two zones. The **compact (Helmholtz) layer** " +
+            "is the first solvent molecule or two, held tight against the " +
+            "surface - IONS do not all sit here. Beyond it is the **diffuse " +
+            "(Gouy-Chapman) layer**, where the concentration of counter-ions " +
+            "decays smoothly back to the bulk value. The Stern model simply " +
+            "puts the compact layer in series with the diffuse one, in " +
+            "electrical terms.",
+        },
+        {
           kind: "formula",
           tex: String.raw`C_{dl} = \frac{d\sigma}{dE} \qquad
             \text{and at low frequency}\qquad C_{dl} \approx \varepsilon_r\varepsilon_0\frac{\kappa}{\lambda_D}`,
@@ -189,6 +261,16 @@ export const lecture1: Lecture = {
             "sqrt(inverse ionic strength).",
         },
         {
+          kind: "para",
+          text:
+            "Here **c** is the bulk concentration of electrolyte and **I** is " +
+            "the ionic strength. Both matter for one practical reason: the " +
+            "Debye length sets how far the field from the electrode reaches. " +
+            "In water it is roughly 3 nm at 0.01 mol L⁻¹ and about 0.3 nm at " +
+            "1 mol L⁻¹. The field is screened within that distance and is " +
+            "effectively zero beyond it.",
+        },
+        {
           kind: "callout",
           variant: "key",
           title: "Why adding salt removes migration",
@@ -202,6 +284,24 @@ export const lecture1: Lecture = {
             "transport to pure diffusion.",
         },
         {
+          kind: "worked",
+          title: "Charging a bare electrode: how much current is not reaction?",
+          given:
+            "A platinum disc of 1.0 cm² in 0.1 mol L⁻¹ KCl, stepped 50 mV " +
+            "at 100 mV s⁻¹. Take C_dl ≈ 20 μF cm⁻².",
+          steps: [
+            "Capacitive charge needed: Q = C_dl·A·ΔE = 20 × 10⁻⁶ F cm⁻² × 1.0 cm² × 0.050 V = 1.0 × 10⁻⁶ C.",
+            "Time for the step at a sweep rate v: t = ΔE / v = 0.050 V / 0.100 V s⁻¹ = 0.50 s.",
+            String.raw`i_c = \frac{Q}{A t} = \frac{1.0\times10^{-6}}{1.0 \times 0.50} = 2.0\times10^{-6}\ \text{A cm}^{-2}`,
+            "If the measured current is 2.1 × 10⁻⁶ A cm⁻², then almost all " +
+              "of it was charging the layer and none of it was reaction.",
+          ],
+          result:
+            "About 2 μA cm⁻², and it is transient: stand the electrode at " +
+            "open circuit and it decays to zero. A current that persists at " +
+            "fixed potential cannot be capacitive.",
+        },
+        {
           kind: "para",
           text:
             "Distinguish a **non-polarised** electrode, where the potential " +
@@ -210,6 +310,27 @@ export const lecture1: Lecture = {
             "must be discharged; single-electron redox couples at inert " +
             "electrodes are easy to polarise.",
         },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Why this is not an academic nicety",
+          body:
+            "Measuring a reaction's onset potential means separating the " +
+            "small Faradaic current from the capacitive background, which is " +
+            "usually larger near the start of a sweep. In battery work the " +
+            "same effect sets the minimum voltage a capacitor-type electrode " +
+            "needs before it will store anything, and in electroanalysis it " +
+            "is the reason a supporting electrolyte is added at all - a " +
+            "concentrated salt shrinks the layer and removes the migration " +
+            "current that would otherwise corrupt a concentration measurement.",
+        },
+        {
+          kind: "para",
+          text:
+            "The double layer explains why current appears at all. The next " +
+            "question is what limits it: once the surface is swept clean, " +
+            "no reaction can go any faster than the reactant arrives.",
+        },
       ],
     },
 
@@ -217,7 +338,7 @@ export const lecture1: Lecture = {
     {
       id: "mass-transport",
       tone: "azure",
-      minutes: 9,
+      minutes: 10,
       title: "Mass transport and the Levich equation",
       summary:
         "Diffusion, migration and convection: how reactants reach the " +
@@ -227,8 +348,17 @@ export const lecture1: Lecture = {
         "The rotating-disk electrode removes the diffusion layer " +
           "predictably, which is why it is the workhorse.",
         "i_L is a current density; I_L = i_L · A.",
+        "Three different layers give three different δ. Do not mix them up.",
       ],
       blocks: [
+        {
+          kind: "para",
+          text:
+            "**What this section needs:** current density i, and the idea that " +
+            "ions arrive at the surface from the solution. **What it adds:** " +
+            "the ceiling on current, and the single most-used equation in " +
+            "experimental electrochemistry.",
+        },
         {
           kind: "para",
           text:
@@ -250,11 +380,31 @@ export const lecture1: Lecture = {
             "convection needs fluid that is actually moving.",
         },
         {
+          kind: "para",
+          text:
+            "**Diffusion** is movement down a concentration gradient and " +
+            "always acts. **Migration** is movement of a charged species " +
+            "along the electric field, so it needs both a charged species and " +
+            "an unscreened field. **Convection** is bulk movement of the " +
+            "fluid, from stirring, a rotating electrode, or natural convection " +
+            "from temperature differences. Only diffusion is guaranteed to " +
+            "operate, which is why it is the one to analyse.",
+        },
+        {
           kind: "formula",
           tex: String.raw`J = -D\frac{\partial C}{\partial x} \approx D\frac{C_b - C_s}{\delta}`,
           caption:
             "Fick's first law with a linear profile across the depleted " +
             "layer of thickness δ.",
+        },
+        {
+          kind: "para",
+          text:
+            "**D** is the diffusion coefficient, C_b the bulk concentration, " +
+            "C_s the concentration right at the metal surface, and **δ** the " +
+            "thickness of the depleted layer between them. At a consuming " +
+            "electrode C_s has been driven to nearly zero, which is the case " +
+            "that produces a limiting current.",
         },
         {
           kind: "para",
@@ -304,6 +454,17 @@ export const lecture1: Lecture = {
             "quantity instead of a nuisance.",
         },
         {
+          kind: "para",
+          text:
+            "The rotating disk is clever because it fixes the geometry. A " +
+            "stirred beaker has no predictable layer thickness at all - the δ " +
+            "depends on how fast you stir and where you put the electrode. A " +
+            "disc rotating at a known rate ω drags solution up the face of " +
+            "the disc and across its edge, which produces a thin, *renewed* " +
+            "layer of the same thickness every time. That makes δ a " +
+            "controlled variable instead of a nuisance.",
+        },
+        {
           kind: "formula",
           tex: String.raw`i_L = 0.620\,nF\,D^{2/3}\,\omega^{1/2}\,\nu^{-1/6}\,C^{*}`,
           caption:
@@ -335,6 +496,29 @@ export const lecture1: Lecture = {
           ],
           result: "9.2 mA cm⁻², or 9.2 mA on a 1 cm² electrode.",
         },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "A rotating disk electrode is the oxygen sensor in a dissolved " +
+            "oxygen probe - it measures how much O₂ is in wastewater or " +
+            "drinking water, which is the single most important number for " +
+            "whether water is fit to discharge. The same physics limits the " +
+            "current in every electrolytic cell: dissolve oxygen on a cathode " +
+            "for water treatment, or reduce metal ions for electrorefining, " +
+            "and once the surface is swept clean you simply cannot go faster " +
+            "without stirring harder. In a refinery, that is why the last few " +
+            "percent of purity are won by rotating the anode rather than by " +
+            "raising the voltage.",
+        },
+        {
+          kind: "para",
+          text:
+            "We now know the transport ceiling. Next we put it on a graph " +
+            "together with kinetics and capacitance, and read off which one is " +
+            "limiting at any point on the curve.",
+        },
       ],
     },
 
@@ -342,7 +526,7 @@ export const lecture1: Lecture = {
     {
       id: "polarisation",
       tone: "violet",
-      minutes: 7,
+      minutes: 8,
       title: "Polarisation curves",
       summary:
         "One plot, three regimes: capacitive, kinetic and " +
@@ -352,8 +536,18 @@ export const lecture1: Lecture = {
         "The Tafel region is the exponential middle of the curve.",
         "A diffusion plateau tells you the transport limit, not the " +
           "kinetics.",
+        "Polarisation means the potential has moved away from its " +
+          "reversible value.",
       ],
       blocks: [
+        {
+          kind: "para",
+          text:
+            "**What this section needs:** the transport ceiling from the last " +
+            "section and the capacitive current from section 2. **What it " +
+            "adds:** the single plot that every electrochemist reads, and the " +
+            "vocabulary for describing it.",
+        },
         {
           kind: "para",
           text:
@@ -386,6 +580,16 @@ export const lecture1: Lecture = {
             "and capacitive; at moderate overpotential it grows " +
             "exponentially; at large overpotential it flattens onto the " +
             "transport plateau.",
+        },
+        {
+          kind: "para",
+          text:
+            "Two words to fix before reading the figure. **E_rev** is the " +
+            "**reversible potential**: where the electrode would sit with no " +
+            "current flowing at all. **Overpotential**, written **η** (eta), " +
+            "is how far the actual potential has been pushed away from E_rev " +
+            "to get the current you want. Polarisation is simply the general " +
+            "word for that displacement, and the next section takes it apart.",
         },
         {
           kind: "table",
@@ -431,6 +635,27 @@ export const lecture1: Lecture = {
             "overpotential* comes from reactant depletion at the surface and " +
             "*increases* the voltage you must apply.",
         },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "Every fuel cell polarisation curve sold in a datasheet has this " +
+            "same shape, and the point of the low-voltage region is honest: " +
+            "at 0.6 V a PEM fuel cell typically delivers only a fraction of " +
+            "its current density, and the rest is lost to activation and " +
+            "resistance. A electrolyser does the same in reverse - its " +
+            "operating voltage sits well above the 1.23 V thermodynamics " +
+            "needs, and the excess is exactly the overpotential and ohmic " +
+            "loss that section 5 accounts for.",
+        },
+        {
+          kind: "para",
+          text:
+            "The curve told us *that* we are losing voltage. The next section " +
+            "names the loss, adds it up, and tells you what supply voltage a " +
+            "real cell actually needs.",
+        },
       ],
     },
 
@@ -438,7 +663,7 @@ export const lecture1: Lecture = {
     {
       id: "overpotentials",
       tone: "rose",
-      minutes: 6,
+      minutes: 7,
       title: "Overpotentials",
       summary:
         "The extra voltage you actually have to apply, and how to break it " +
@@ -448,8 +673,16 @@ export const lecture1: Lecture = {
         "η = η_activation + η_concentration + iR.",
         "Ohmic drop is linear in i and is not an overpotential at the " +
           "interface.",
+        "Overpotential, not thermodynamics, decides which process is economic.",
       ],
       blocks: [
+        {
+          kind: "para",
+          text:
+            "**What this section needs:** E_rev and η from the last section. " +
+            "**What it adds:** an accounting identity you can put numbers " +
+            "into, and the reason a 1.1 V cell needs a 2 V supply.",
+        },
         {
           kind: "para",
           text:
@@ -476,6 +709,19 @@ export const lecture1: Lecture = {
           caption:
             "An electrolysis cell has to supply E_rev plus both " +
             "overpotentials plus iR before anything happens.",
+        },
+        {
+          kind: "para",
+          text:
+            "The three terms, and which is which. **η_act** is the " +
+            "activation overpotential: the barrier the electrons have to " +
+            "climb to get the reaction started, paid by both electrodes. " +
+            "**η_conc** is the concentration overpotential: extra voltage " +
+            "needed because the reactant has been used up at the surface and " +
+            "the next layer is now the bottleneck. **iR** is the ohmic drop " +
+            "in the solution, cables and contacts - not an interfacial " +
+            "overpotential at all, but it is paid per ampere, so it scales " +
+            "with how hard you drive the cell.",
         },
         {
           kind: "para",
@@ -513,6 +759,28 @@ export const lecture1: Lecture = {
             "1.80 V, about 64 % of which is being lost to polarisation " +
             "rather than doing useful work.",
         },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "Aluminium smelting runs at roughly 4 V against a reversible " +
+            "requirement near 2.1 V - over half the electricity bought for a " +
+            "tonne of aluminium is lost to overpotential and resistance. " +
+            "That is why the industry is built next to cheap power: electricity " +
+            "is the product, and every volt above E_rev is margin. The same " +
+            "identity explains why a fuel cell's datasheet quote at 0.6 V " +
+            "rather than 1.2 V, and why battery designers obsess over internal " +
+            "resistance even though it is not a reaction at all.",
+        },
+        {
+          kind: "para",
+          text:
+            "So overpotentials are losses you must pay in volts. But the " +
+            "thermodynamic part, E_rev, is not fixed either - it moves with " +
+            "concentration. That relationship is the Nernst equation, and it " +
+            "is what makes potentiometry possible at all.",
+        },
       ],
     },
 
@@ -529,8 +797,17 @@ export const lecture1: Lecture = {
         "E = E° + (0.05916/n) log Q at 25 °C.",
         "The standard hydrogen electrode defines 0.000 V.",
         "Compare potentials against the same reference or not at all.",
+        "Use log₁₀ with the 0.05916 coefficient, ln with RT/F. Mixing them is a standard error.",
       ],
       blocks: [
+        {
+          kind: "para",
+          text:
+            "**What this section needs:** E_rev from sections 4 and 5, and " +
+            "the three-electrode cell from the Fundamentals primer so that " +
+            "there is something to measure against. **What it adds:** the " +
+            "equation that converts a measured voltage into a concentration.",
+        },
         {
           kind: "para",
           text:
@@ -547,6 +824,18 @@ export const lecture1: Lecture = {
           caption:
             "For aA + bB → cC + dD, Q = [C]^c[D]^d / [A]^a[B]^b. Pure " +
             "solids and liquids are omitted.",
+        },
+        {
+          kind: "callout",
+          variant: "term",
+          title: "Read the two forms as one",
+          body:
+            "The natural-log form uses R and T and is valid at any " +
+            "temperature. The 0.05916 form is the same equation at 25 °C " +
+            "with the logarithm in base 10. Since 2.303RT/F = 0.05916 V at " +
+            "298.15 K, the coefficient is not magic - it just spares you the " +
+            "arithmetic. Use ln with RT/F and log₁₀ with 0.05916; mixing them " +
+            "is one of the most common numerical errors in this subject.",
         },
         {
           kind: "figure",
@@ -569,6 +858,16 @@ export const lecture1: Lecture = {
             "solutions are not, so the working potential shifts. Always " +
             "state which reference electrode you used: potentials quoted " +
             "against different references are not comparable.",
+        },
+        {
+          kind: "para",
+          text:
+            "Which brings us to the reference itself. **One electrode on its " +
+            "own cannot be measured**, because a voltmeter needs two " +
+            "terminals and any second electrode contributes its own unknown " +
+            "potential. The solution is a convention: choose one electrode " +
+            "and *define* its potential as zero. That is the standard hydrogen " +
+            "electrode, and every potential in every table is quoted against it.",
         },
         {
           kind: "table",
@@ -613,6 +912,27 @@ export const lecture1: Lecture = {
           ],
           result: "0.077 mol L⁻¹ copper(II).",
         },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "A pH meter is a Nernst equation with n = 1. The glass membrane " +
+            "develops about 59 mV per pH unit, the electronics invert that " +
+            "into a number you read. Glucose meters use the same principle " +
+            "with a glucose oxidase enzyme providing the selectivity. In " +
+            "industry, online Nernst probes measure dissolved copper or " +
+            "sulphide in a leaching circuit continuously, which is how a " +
+            "plant adjusts its pH without waiting for a laboratory result.",
+        },
+        {
+          kind: "para",
+          text:
+            "Nernst tells us where the potential *should* sit at a given " +
+            "concentration - but says nothing about how fast the electrode " +
+            "gets there. That question is kinetics, and its equation is " +
+            "Butler-Volmer.",
+        },
       ],
     },
 
@@ -620,7 +940,7 @@ export const lecture1: Lecture = {
     {
       id: "kinetics",
       tone: "violet",
-      minutes: 10,
+      minutes: 11,
       title: "Butler-Volmer kinetics and Tafel analysis",
       summary:
         "Exponential kinetics, the Tafel plot, and the diagnostics that " +
@@ -629,8 +949,18 @@ export const lecture1: Lecture = {
         "i = i₀[exp(αnFη/RT) − exp(−(1−α)nFη/RT)].",
         "Tafel slope b = 2.303RT/(αnF); at 25 °C, b = 59.16/(αn) mV.",
         "i₀ is the rate at E = E_rev, not the current at some large η.",
+        "α is the transfer coefficient, between 0 and 1 — the fraction of the " +
+          "driving force that helps the forward reaction.",
       ],
       blocks: [
+        {
+          kind: "para",
+          text:
+            "**What this section needs:** η from section 5, so you can talk " +
+            "about how far the electrode has been pushed. **What it adds:** " +
+            "why current depends on potential *exponentially*, and how that " +
+            "exponent is turned into a straight line you can measure.",
+        },
         {
           kind: "para",
           text:
@@ -646,6 +976,27 @@ export const lecture1: Lecture = {
           caption:
             "i₀ is the exchange current density: the rate at which the " +
             "reaction runs both ways at equal speed at η = 0.",
+        },
+        {
+          kind: "para",
+          text:
+            "Read it as a subtraction of two half-reactions. Oxidation runs " +
+            "one way at rate i₀·exp(αnFη/RT), reduction runs the other at " +
+            "i₀·exp(−(1−α)nFη/RT), and you observe the difference. **i₀** is " +
+            "the **exchange current density**, and its meaning is worth " +
+            "dwelling on: it is the current density at which oxidation and " +
+            "reduction run at *equal* speed, so there is no net current at " +
+            "all. It measures how easy the reaction is to drive in either " +
+            "direction - a large i₀ means a fast, facile electrode.",
+        },
+        {
+          kind: "para",
+          text:
+            "**α**, the transfer coefficient, is a number between 0 and 1 " +
+            "saying what fraction of the applied potential drop actually helps " +
+            "the reaction over the barrier. α = 0.5 is the textbook symmetry; " +
+            "real surfaces are lopsided. It is not measurable directly - only " +
+            "the product αn can be extracted.",
         },
         {
           kind: "figure",
@@ -734,6 +1085,29 @@ export const lecture1: Lecture = {
             "A Tafel slope is only as trustworthy as the compensation " +
             "behind it.",
         },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "Electrocatalyst development is run on exactly this analysis. " +
+            "A research paper reports a Tafel slope and an i₀ for a new " +
+            "hydrogen-evolution catalyst, and the claim is always that a low " +
+            "overpotential at high i₀ means a better material - because low " +
+            "overpotential means you need a smaller electrolyser, and high i₀ " +
+            "means less expensive catalyst. Platinum is the benchmark at " +
+            "roughly 30 mV dec⁻¹; the search for a cheap replacement is " +
+            "precisely a search for a Tafel slope close to that while " +
+            "surviving thousands of cycles.",
+        },
+        {
+          kind: "para",
+          text:
+            "Kinetics tells you how fast an electrode reacts, but it is " +
+            "worth checking the model against the one reaction everyone can " +
+            "control precisely - hydrogen evolution, which is the next " +
+            "section.",
+        },
       ],
     },
 
@@ -750,8 +1124,18 @@ export const lecture1: Lecture = {
         "2H⁺ + 2e⁻ → H₂; measured well below the reversible potential.",
         "η scales with log i; Tafel behaviour is expected either way.",
         "The mechanism differs between metals, and coverage can change b.",
+        "Catalysts that bind H too weakly or too strongly are both poor.",
       ],
       blocks: [
+        {
+          kind: "para",
+          text:
+            "**What this section needs:** the Tafel slope from section 7, " +
+            "because this reaction is used to *test* that analysis. **What it " +
+            "adds:** a worked case where the mechanism is still argued over, " +
+            "which is why this reaction became the standard test of an " +
+            "electrocatalyst.",
+        },
         {
           kind: "para",
           text:
@@ -823,6 +1207,27 @@ export const lecture1: Lecture = {
             "and why the search for cheaper ones is about getting the " +
             "binding energy right.",
         },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "Electrolysis of water makes green hydrogen, and the whole cost " +
+            "of that process is this reaction: hydrogen forms about 100 to " +
+            "200 mV below the reversible potential, and that gap is paid for " +
+            "in kilowatt-hours across the entire plant. It is also why " +
+            "platinum loading in a fuel cell is set by hydrogen evolution at " +
+            "the anode - and why the durability of a million hydrogen " +
+            "refuelling stations depends on not poisoning that catalyst with " +
+            "carbon monoxide from a badly chosen fuel supply.",
+        },
+        {
+          kind: "para",
+          text:
+            "Hydrogen evolution was an accident you might do on purpose. " +
+            "The next section is the other half: the corrosion that happens " +
+            "when nobody designed it.",
+        },
       ],
     },
 
@@ -830,7 +1235,7 @@ export const lecture1: Lecture = {
     {
       id: "corrosion",
       tone: "coral",
-      minutes: 6,
+      minutes: 7,
       title: "Corrosion",
       summary:
         "Every metal corrodes back toward its thermodynamic state; the job " +
@@ -840,8 +1245,18 @@ export const lecture1: Lecture = {
         "Removing any one of the four stops it.",
         "Galvanic series, not the standard potentials, predicts real " +
           "behaviour.",
+        "Small cathode with large anode is the dangerous area ratio.",
       ],
       blocks: [
+        {
+          kind: "para",
+          text:
+            "**What this section needs:** everything from section 1, because " +
+            "corrosion is a galvanic cell with no useful purpose. **What it " +
+            "adds:** why the standard potentials you learned are not enough " +
+            "to predict real corrosion, and what engineers actually do about " +
+            "it.",
+        },
         {
           kind: "para",
           text:
@@ -922,6 +1337,27 @@ export const lecture1: Lecture = {
             "Isolate dissimilar metals, or make the area of the more noble " +
             "metal large relative to the less noble one.",
         },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "A zinc-galvanised bolt on a steel bridge is sacrificial zinc " +
+            "doing exactly what the table says: it corrodes so the bridge " +
+            "does not. Offshore platforms use impressed-current cathodic " +
+            "protection, dragging the potential of the whole structure " +
+            "negative so nothing on it can be the anode. The classic failure " +
+            "to this day is a stainless steel bolt on aluminium - exactly the " +
+            "worked example above - where the tiny cathode under the bolt " +
+            "head attacks a large aluminium surface around it.",
+        },
+        {
+          kind: "para",
+          text:
+            "Corrosion is the cell you did not want. The next section is the " +
+            "cell you build on purpose: forcing a reaction that cannot " +
+            "happen by itself, and extracting metals with it.",
+        },
       ],
     },
 
@@ -929,7 +1365,7 @@ export const lecture1: Lecture = {
     {
       id: "electrolysis",
       tone: "amber",
-      minutes: 7,
+      minutes: 8,
       title: "Electrolysis and metal extraction",
       summary:
         "Using an external supply to drive an uphill reaction, and why " +
@@ -945,6 +1381,14 @@ export const lecture1: Lecture = {
         {
           kind: "para",
           text:
+            "**What this section needs:** E_rev and the overpotential budget " +
+            "from section 5, because both appear in the decision here. **What " +
+            "it adds:** which metals industry actually makes by electrolysis, " +
+            "and why that list is shorter than the chemistry allows.",
+        },
+        {
+          kind: "para",
+          text:
             "Voltaic cells convert chemical energy to electrical energy; " +
             "electrolytic cells do the reverse, forcing a reaction that is " +
             "not spontaneous. You pay in volts and amperes for it.",
@@ -957,6 +1401,16 @@ export const lecture1: Lecture = {
           caption:
             "E_cell < 0 means the reaction will not run unaided, which is " +
             "exactly when you connect a supply.",
+        },
+        {
+          kind: "para",
+          text:
+            "**The governing rule of this section:** if a metal is more " +
+            "reactive than carbon, carbon will not reduce its oxide - " +
+            "carbon is itself the reducing agent and simply cannot take " +
+            "electrons from anything above it in reactivity. Those metals " +
+            "must be won by electrolysis. Everything less reactive is cheaper " +
+            "to reduce with carbon in a furnace, and is.",
         },
         {
           kind: "callout",
@@ -1021,6 +1475,26 @@ export const lecture1: Lecture = {
             "anode sludge instead. The impurities never have to be separated " +
             "chemically at all.",
         },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "Aluminium is the clearest case. Mining it is cheap; turning " +
+            "bauxite into metal needs molten cryolite at about 4 V, which is " +
+            "why smelters are built beside power stations and why aluminium " +
+            "recycling is far more energy-efficient than primary production. " +
+            "Gold refining is the opposite: electrorefining moves ounces of " +
+            "metal from anode sludge, which is what gives a tonne of copper " +
+            "ore its silver and gold byproduct credit.",
+        },
+        {
+          kind: "para",
+          text:
+            "So the final section takes everything and asks the only question " +
+            "an engineer really cares about: how do you store that energy, " +
+            "and how do you get it back out?",
+        },
       ],
     },
 
@@ -1028,7 +1502,7 @@ export const lecture1: Lecture = {
     {
       id: "batteries",
       tone: "emerald",
-      minutes: 7,
+      minutes: 8,
       title: "Batteries and fuel cells",
       summary:
         "The same electrochemistry, run in reverse: store energy as " +
@@ -1037,8 +1511,18 @@ export const lecture1: Lecture = {
         "Capacity in Ah; energy density in Wh kg⁻¹.",
         "Energy density and power density are different problems.",
         "Reversible cell potential sets the ceiling on energy density.",
+        "A fuel cell is a continuously fed battery; its limits are transport and water.",
       ],
       blocks: [
+        {
+          kind: "para",
+          text:
+            "**What this section needs:** everything. It is where " +
+            "electrochemistry stops being a science and becomes a product. " +
+            "**What it adds:** which numbers decide whether a battery is any " +
+            "good, and why the same chemistry is used for a coin cell and an " +
+            "electric car.",
+        },
         {
           kind: "para",
           text:
@@ -1101,15 +1585,22 @@ export const lecture1: Lecture = {
             "alone does not make a good battery.",
         },
         {
-          kind: "para",
-          text:
-            "A lithium-ion cell at 4 V and 2500 mAh stores 4 × 2.5 = 10 W h, " +
-            "which is about 36 kJ. At 150 g for the cell alone that is " +
-            "67 W h kg⁻¹; a real 18650 at about 45 g reaches 220 W h kg⁻¹, " +
-            "and a whole pack reaches less again because casing, separators " +
-            "and current collectors weigh nothing useful. Lead-acid sits " +
-            "near 35 W h kg⁻¹, so the honest comparison is a factor of two " +
-            "to six, not an order of magnitude.",
+          kind: "worked",
+          title: "Why one cell in a pack is bigger than you expect",
+          given:
+            "A single pouch cell rated 4.0 V, 5.0 Ah, mass 70 g. A pack of " +
+            "100 of them in series is used in an EV.",
+          steps: [
+            String.raw`E_{\text{cell}} = 4.0 \times 5.0 = 20\ \mathrm{Wh}`,
+            String.raw`E_{\text{spec}} = \frac{20}{0.070} = 286\ \mathrm{Wh\,kg^{-1}}`,
+            String.raw`E_{\text{pack}} = 100 \times 20 = 2000\ \mathrm{Wh} = 2\ \mathrm{kWh}`,
+            String.raw`E_{\text{spec, pack}} = \frac{2000}{100 \times 0.070} = 286\ \mathrm{Wh\,kg^{-1}}`,
+          ],
+          result:
+            "286 Wh kg⁻¹ for the cells - close to the best commercially " +
+            "available. The pack as a whole lands nearer 150 to 200 Wh kg⁻¹ " +
+            "because the housing, cooling, wiring and control electronics add " +
+            "mass that stores nothing. That gap is the packaging penalty.",
         },
         {
           kind: "callout",
@@ -1120,6 +1611,31 @@ export const lecture1: Lecture = {
             "rather than being stored inside, so it does not discharge in " +
             "the usual sense. Its practical limits are transport and water " +
             "management, not cell potential.",
+        },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "Your phone, an electric car, an aircraft and a laptop are four " +
+            "answers to the same trade-off between energy density and power " +
+            "density. A phone battery is optimised for energy density and " +
+            "quietly throttled for power, so it lasts a day but cannot drive " +
+            "a motor. A car pack inverts that: hundreds of cells in series so " +
+            "the current is manageable, at lower energy density but far " +
+            "higher power. A fuel cell bus carries compressed hydrogen and a " +
+            "small battery, because a pure fuel cell cannot recover energy " +
+            "under braking and has poor power at low speed. The table above " +
+            "explains which is which.",
+        },
+        {
+          kind: "para",
+          text:
+            "That is the end of the lecture, and the top of the concept map. " +
+            "Everything from cell anatomy to fuel cells is one story told in " +
+            "eleven steps: a reaction happens at a surface, the surface is " +
+            "limited by transport, it loses voltage to overpotential, and the " +
+            "difference between theory and practice is what engineers fight.",
         },
       ],
     },

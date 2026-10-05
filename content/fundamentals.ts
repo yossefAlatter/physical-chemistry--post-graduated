@@ -9,7 +9,7 @@ export const fundamentals: Lecture = {
     "The vocabulary, the units and the four relations that everything else " +
     "in this subject is built on. No prior chemistry assumed.",
   order: 0,
-  minutes: 35,
+  minutes: 45,
   mcq: fundamentalsMcq,
   intro: [
     {
@@ -19,6 +19,26 @@ export const fundamentals: Lecture = {
         "already have - charge and current - and builds the electrochemistry " +
         "vocabulary on top of them. Nothing here needs a university chemistry " +
         "course; everything later does.",
+    },
+    {
+      kind: "para",
+      text:
+        "The seven sections below are ordered so that each one only uses " +
+        "ideas the previous ones have already given you. There is no reason " +
+        "to jump ahead, and every section names what it depends on.",
+    },
+    {
+      kind: "list",
+      ordered: true,
+      items: [
+        "**What electrochemistry actually is** - the one idea the whole subject rests on. No prior knowledge.",
+        "**Anatomy of a cell** - the four moving parts. Needs only section 1.",
+        "**Charge, current and resistance** - the three quantities and how they differ. Needs 1.",
+        "**Faraday's laws** - turning a charge into a mass of metal. Needs 3.",
+        "**Energy and power** - what the numbers on a battery label mean. Needs 3.",
+        "**Reading a real cell in the laboratory** - the three-electrode setup. Needs 2 and 4.",
+        "**Units, symbols and the words you will meet** - the reference sheet to keep open.",
+      ],
     },
     {
       kind: "callout",
@@ -36,7 +56,7 @@ export const fundamentals: Lecture = {
       id: "what-is-it",
       tone: "azure",
       title: "What electrochemistry actually is",
-      minutes: 5,
+      minutes: 7,
       summary:
         "One idea: move electrons through a wire and you get chemistry you " +
         "can measure, control and use.",
@@ -44,20 +64,33 @@ export const fundamentals: Lecture = {
         "Anode is oxidation. Cathode is reduction. Those names never swap.",
         "Anode is negative in a galvanic cell, positive in an electrolytic one.",
         "Galvanic runs on its own; electrolytic has to be forced by an outside power supply.",
+        "Electron flow through the wire is anode to cathode, always.",
       ],
       blocks: [
         {
           kind: "para",
           text:
+            "**The question this section answers:** you have a chemical " +
+            "reaction. How do you turn it into something you can read on a " +
+            "meter?",
+        },
+        {
+          kind: "para",
+          text:
             "In an ordinary chemical reaction, molecules meet each other and " +
-            "rearrange. You cannot see the electrons, and you cannot hold them back.",
+            "rearrange. You cannot see the electrons, and you cannot hold " +
+            "them back. The reaction happens wherever the reactants happen to " +
+            "touch, at whatever rate the temperature dictates.",
         },
         {
           kind: "para",
           text:
             "An electrochemical reaction is the same chemistry with the two " +
-            "halves pulled apart and joined by a wire. That single change buys " +
-            "you three things, and together they are the entire subject:",
+            "halves pulled apart and joined by a wire. Instead of electrons " +
+            "hopping directly from one molecule to the next, they are forced " +
+            "to travel down a conductor you can put a meter in. That single " +
+            "change buys you three things, and together they are the entire " +
+            "subject:",
         },
         {
           kind: "list",
@@ -71,7 +104,8 @@ export const fundamentals: Lecture = {
           kind: "para",
           text:
             "So there are two families of cell, and the difference is simply " +
-            "where the energy comes from.",
+            "where the energy comes from. Everything else in this course is a " +
+            "detail of one of these two arrangements.",
         },
         {
           kind: "figure",
@@ -99,15 +133,25 @@ export const fundamentals: Lecture = {
           ],
         },
         {
+          kind: "para",
+          text:
+            "The two columns differ in signs but never in names. That is the " +
+            "single most important thing on this page, so here is how to say it " +
+            "in a way that cannot be got wrong: **the anode is where atoms lose " +
+            "electrons, the cathode is where atoms gain them.** If you know " +
+            "only that sentence, you can work out the sign of anything.",
+        },
+        {
           kind: "callout",
           variant: "warn",
           title: "The one trap in this table",
           body:
             "The words **anode** and **cathode** are tied to the *reaction*, not " +
-            "to the sign of the wire. Anode always means oxidation; cathode " +
-            "always means reduction. But whether that electrode is positive or " +
-            "negative flips between the two families. If you memorise only " +
-            "\"anode loses electrons, cathode gains them\", you cannot go wrong.",
+            "to the sign of the wire. Whether that electrode is positive or " +
+            "negative flips between the two families. Two phrases fix it: " +
+            "\"Red Cat\" (reduction at the cathode) and \"An Ox\" (oxidation at " +
+            "the anode). Never memorise \"anode is negative\" - it is only true " +
+            "for the top row.",
         },
         {
           kind: "figure",
@@ -138,6 +182,19 @@ export const fundamentals: Lecture = {
             "Three phrases worth memorising before you memorise anything else.",
         },
         {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "Every AA battery in a remote control is a galvanic cell: zinc " +
+            "gives up electrons at one end, manganese dioxide takes them at " +
+            "the other, and the wire is the path. Charging your phone is an " +
+            "electrolytic cell doing the same chemistry backwards. The rust " +
+            "on a damp steel gate is a galvanic cell that nobody connected to " +
+            "anything, and the entire corrosion industry exists to stop it. " +
+            "One idea, three very different-looking problems.",
+        },
+        {
           kind: "figure",
           src: "fund_roadmap.png",
           alt:
@@ -149,13 +206,20 @@ export const fundamentals: Lecture = {
           caption:
             "Where you are going. Lecture 1 follows these sections in order.",
         },
+        {
+          kind: "para",
+          text:
+            "That is the idea. You now know *what* the subject is. The next " +
+            "section takes the cell apart and names the four pieces it is " +
+            "built from.",
+        },
       ],
     },
     {
       id: "cell-anatomy",
       tone: "teal",
       title: "Anatomy of a cell",
-      minutes: 6,
+      minutes: 7,
       summary:
         "Two electrodes, one electrolyte, one wire - and a route for the " +
         "ions so the solution does not charge up.",
@@ -163,13 +227,23 @@ export const fundamentals: Lecture = {
         "Electrode = a conducting surface where electrons are exchanged. Electrolyte = a solution that lets ions move.",
         "Oxidation happens at the anode, reduction at the cathode.",
         "Something must carry the ions; otherwise charge builds up and the current stops.",
+        "Cell notation is always written oxidation side first, anode on the left.",
       ],
       blocks: [
         {
           kind: "para",
           text:
+            "**The question this section answers:** if the two halves of the " +
+            "reaction are pulled apart, what exactly do you need to build, and " +
+            "what does each part do?",
+        },
+        {
+          kind: "para",
+          text:
             "Every cell in this subject is an assembly of the same four " +
-            "parts. Learn them once.",
+            "parts. Learn them once. You already know from the previous " +
+            "section that oxidation happens at the anode and reduction at the " +
+            "cathode; this is the hardware that makes that happen.",
         },
         {
           kind: "figure",
@@ -203,6 +277,17 @@ export const fundamentals: Lecture = {
             "reduction side, anode always on the left.",
         },
         {
+          kind: "para",
+          text:
+            "Read the notation rule carefully, because it is pure convention " +
+            "and examiners assume you know it. One vertical bar `|` marks a " +
+            "boundary between two *phases* - say, metal touching solution. A " +
+            "double bar `||` marks the salt bridge, which is the cell's own " +
+            "internal connection. `(s)` means solid, `(aq)` means dissolved in " +
+            "water, `(l)` means liquid. And the oxidation side is always " +
+            "written first, on the left, whatever the cell is used for.",
+        },
+        {
           kind: "table",
           head: ["Part", "What it is", "Job in the cell"],
           widths: [1.2, 2, 2.2],
@@ -217,21 +302,22 @@ export const fundamentals: Lecture = {
         {
           kind: "para",
           text:
-            "Follow the electrons and the whole cell explains itself. The " +
-            "zinc oxidises, so electrons leave it and travel down the wire. " +
-            "They arrive at the copper and are consumed, so the wire is a " +
-            "one-way street and no charge piles up in it.",
+            "Follow the electrons and the external circuit explains itself. " +
+            "The zinc oxidises, so electrons leave it and travel down the " +
+            "wire. They arrive at the copper and are consumed, so the wire is " +
+            "a one-way street and no charge piles up in it.",
         },
         {
           kind: "para",
           text:
-            "Now the solution. Zinc ions go into solution at the anode, so " +
-            "positive charge accumulates there; copper ions are removed at the " +
-            "cathode, so negative charge accumulates there. Within about a " +
-            "millimetre the electric field opposes further ion motion and the " +
-            "current stops. The salt bridge exists purely to repair this: " +
-            "anions migrate toward the anode and cations toward the cathode, " +
-            "keeping both solutions electrically neutral.",
+            "Now the solution, which is the half people forget. Zinc ions go " +
+            "into solution at the anode, so positive charge accumulates there; " +
+            "copper ions are removed at the cathode, so negative charge " +
+            "accumulates there. Within about a millimetre the electric field " +
+            "this builds opposes further ion motion, and the current stops. " +
+            "The salt bridge exists purely to repair this: anions migrate " +
+            "toward the anode and cations toward the cathode, keeping both " +
+            "solutions electrically neutral.",
         },
         {
           kind: "callout",
@@ -242,6 +328,28 @@ export const fundamentals: Lecture = {
             "that is *already* ionic can supply them. That is why the " +
             "electrolyte is a molten salt or a salt solution, and why pure " +
             "water is a hopeless conductor - it has almost no mobile ions.",
+        },
+        {
+          kind: "worked",
+          title: "Which way do the ions go?",
+          given:
+            "A zinc-copper cell running. 5 mmol of Zn²⁺ has just dissolved " +
+            "into the left-hand beaker.",
+          steps: [
+            "The anode has just gained 5 mmol of positive charge, so it " +
+              "needs 5 mmol of negative charge to stay neutral.",
+            "Negative ions - the bridge's anions, e.g. NO₃⁻ or SO₄²⁻ - " +
+              "therefore migrate **toward the anode**.",
+            "The cathode has just lost 5 mmol of positive charge (Cu²⁺ " +
+              "plated out), so it needs positive charge: cations migrate " +
+              "**toward the cathode**.",
+            "Both halves now run at the same number of equivalents per " +
+              "second, so no charge builds up anywhere and the current " +
+              "keeps flowing.",
+          ],
+          result:
+            "Anions to the anode, cations to the cathode. Swap them and the " +
+            "cell stops within milliseconds.",
         },
         {
           kind: "para",
@@ -266,13 +374,33 @@ export const fundamentals: Lecture = {
             "Every potential is quoted against the same reference, which is " +
             "what makes the subtraction possible.",
         },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "A lead-acid car battery has the same four parts in a different " +
+            "form: two lead plates in sulfuric acid, and instead of a salt " +
+            "bridge it uses a porous plastic separator that lets ions " +
+            "through while keeping the plates apart. Lithium-ion cells go " +
+            "further and use no liquid bridge at all - a solid or gel " +
+            "electrolyte between the electrodes. If the ions cannot get from " +
+            "one plate to the other, every battery ever made simply stops.",
+        },
+        {
+          kind: "para",
+          text:
+            "You now know the parts and the shape of a cell. But a cell does " +
+            "not simply produce electrons - it produces them at a *rate*, and " +
+            "the next section fixes the three numbers that rate depends on.",
+        },
       ],
     },
     {
       id: "charge-and-current",
       tone: "indigo",
       title: "Charge, current and resistance",
-      minutes: 5,
+      minutes: 6,
       summary:
         "Coulombs are how much, amps are how fast. Get that distinction " +
         "right and half the confusion in the subject disappears.",
@@ -280,12 +408,15 @@ export const fundamentals: Lecture = {
         "1 amp = 1 coulomb per second.",
         "Current tells you how fast charge moves; charge tells you how much has moved.",
         "Ohm's law links them: V = IR, with resistance depending on the electrode, the solution and the geometry.",
+        "Voltage is energy per coulomb, so you need to know the charge before you know the energy.",
       ],
       blocks: [
         {
           kind: "para",
           text:
-            "These three quantities are constantly confused, so fix them now.",
+            "**The question this section answers:** how do we *measure* a " +
+            "reaction that is happening? Three quantities come out of that " +
+            "measurement, and they are constantly confused, so we fix them now.",
         },
         {
           kind: "table",
@@ -303,6 +434,14 @@ export const fundamentals: Lecture = {
           tex: String.raw`I = \frac{\mathrm{d}Q}{\mathrm{d}t}, \qquad Q = I\,t`,
           caption:
             "Current is the rate of charge flow; multiply back to get the total.",
+        },
+        {
+          kind: "para",
+          text:
+            "A useful way to hold on to this: charge is a *bag of marbles*, " +
+            "current is *how fast you are emptying it*. A 2 A source delivers " +
+            "twice the charge per second as a 1 A source, but if you run them " +
+            "for the same time the 2 A one simply delivers twice as much.",
         },
         {
           kind: "figure",
@@ -350,13 +489,34 @@ export const fundamentals: Lecture = {
             "steeply, because the same current now has to arrive through less " +
             "area. That is the whole basis of polarisation curves.",
         },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "Your phone battery is labelled around 3000 mAh. That is a current " +
+            "and a time, not a charge: 3 A for 1 hour, or 1 A for 3 hours, or " +
+            "0.5 A for 6 hours - all the same stored charge. It is also why a " +
+            "phone charges faster from a 2 A cable than a 0.5 A one: the " +
+            "battery's voltage is roughly fixed, so pulling more current is " +
+            "the only way to refill it faster. The chapter on batteries makes " +
+            "this quantitative.",
+        },
+        {
+          kind: "para",
+          text:
+            "So charge and current are quantities you can measure. The next " +
+            "step is the one that makes electrochemistry useful rather than " +
+            "merely descriptive: knowing how much charge passed, you can " +
+            "calculate how much material that charge made.",
+        },
       ],
     },
     {
       id: "faradays-laws",
       tone: "violet",
       title: "Faraday's laws: charge becomes mass",
-      minutes: 6,
+      minutes: 7,
       summary:
         "The bridge between what you measure and what you make: how much " +
         "material a given charge will deposit.",
@@ -364,15 +524,17 @@ export const fundamentals: Lecture = {
         "Faraday's first law: deposited mass is proportional to charge passed.",
         "Faraday's second law: deposited mass is proportional to molar mass, and inversely proportional to electrons per ion.",
         "m = M Q / (n F), with F = 96 485 C mol⁻¹.",
+        "n is the number of electrons in the half-reaction; a 2+ ion needs two.",
       ],
       blocks: [
         {
           kind: "para",
           text:
-            "Faraday's laws are the workhorse of applied electrochemistry. " +
-            "They are the reason you can weigh a deposited metal coating, " +
-            "measure the purity of an alloy, or compute the operating time of " +
-            "a plating cell.",
+            "**The question this section answers:** if I know how much charge " +
+            "went through the cell, how much material do I get? This is the " +
+            "one calculation that connects a meter reading to a physical " +
+            "object, and it is used to design plating baths, to assay alloys " +
+            "and to size the electrodes in an electrolytic plant.",
         },
         {
           kind: "para",
@@ -388,14 +550,25 @@ export const fundamentals: Lecture = {
           text:
             "**Second law.** The mass deposited also depends on the substance " +
             "itself. It rises with molar mass M, and falls as the number of " +
-            "electrons per ion n rises, because a heavier ion needs more " +
-            "electrons to change.",
+            "electrons per ion n rises, because a higher-charged ion needs " +
+            "more electrons to change.",
         },
         {
           kind: "formula",
           tex: String.raw`m = \frac{M\,Q}{n\,F} = \frac{M\,I\,t}{n\,F}, \qquad F = 96485\ \mathrm{C\,mol^{-1}}`,
           caption:
             "Faraday's law. m in grams, M in g mol⁻¹, Q in coulombs, n electrons per ion.",
+        },
+        {
+          kind: "para",
+          text:
+            "The four symbols, once and for all: **M** is the molar mass of " +
+            "whatever is being deposited, in g mol⁻¹. **n** is the number of " +
+            "electrons in the half-reaction - 1 for Ag⁺ → Ag, 2 for " +
+            "Cu²⁺ → Cu, 3 for Au³⁺ → Au. **F** is the Faraday constant, the " +
+            "charge carried by one mole of electrons, 96 485 C mol⁻¹. **Q** is " +
+            "the charge you measured from the previous section. Get n from the " +
+            "half-reaction and the rest is arithmetic.",
         },
         {
           kind: "figure",
@@ -438,13 +611,50 @@ export const fundamentals: Lecture = {
             "per cent of its current into hydrogen evolution instead - which " +
             "is also five per cent wasted power.",
         },
+        {
+          kind: "worked",
+          title: "How thick does that coating have to be?",
+          given:
+            "A tap is plated with 10 μm of nickel over a total surface of " +
+            "200 cm². Nickel is 8.9 g cm⁻³, and plating it at 2 A.",
+          steps: [
+            String.raw`V = A \times \text{thickness} = 200 \times 10\times10^{-4} = 0.20\ \mathrm{cm^3}`,
+            String.raw`m = \rho V = 8.9 \times 0.20 = 1.78\ \mathrm{g}`,
+            String.raw`Q = \frac{m\,nF}{M} = \frac{1.78 \times 2 \times 96485}{58.69} = 5850\ \mathrm{C}`,
+            String.raw`t = \frac{Q}{I} = \frac{5850}{2} = 2925\ \mathrm{s} \approx 49\ \mathrm{min}`,
+          ],
+          result:
+            "About 50 minutes of plating at 2 A to reach 10 μm. This is the " +
+            "calculation that sets the length of a real production line.",
+        },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "The chrome on a car bumper, the gold on a connector finger, and " +
+            "the silver on a mirror are all Faraday's law in production. " +
+            "Electrorefining of copper uses the same equation in reverse: " +
+            "weigh the cathode before and after, and the mass gain tells you " +
+            "exactly how much copper was deposited - which is how the purity " +
+            "of the refined metal is certified. The reason gold plating uses a " +
+            "thin layer is arithmetic, not thrift: gold is expensive and n = 3, " +
+            "so each gram of it needs three times the charge of a gram of silver.",
+        },
+        {
+          kind: "para",
+          text:
+            "Charge in, mass out - that is the applied half of the subject. " +
+            "The other half asks the reverse question: how much energy was " +
+            "stored, and how fast can you get it back? That is the next section.",
+        },
       ],
     },
     {
       id: "energy-and-power",
       tone: "amber",
       title: "Energy, power and what a battery rating means",
-      minutes: 5,
+      minutes: 6,
       summary:
         "Volts times coulombs is joules; volts times amps is watts. Every " +
         "battery number on a label is one of those two.",
@@ -452,8 +662,17 @@ export const fundamentals: Lecture = {
         "Energy = V × Q. Power = V × I. These are different quantities.",
         "Ampere-hours measure charge (capacity), not energy.",
         "Specific energy is Wh/kg; specific power is W/kg. Never quote one as the other.",
+        "For a real battery, energy is the area under the discharge curve.",
       ],
       blocks: [
+        {
+          kind: "para",
+          text:
+            "**The question this section answers:** every battery you have ever " +
+            "bought is labelled with numbers that look interchangeable and are " +
+            "not. Which number means how long it lasts, and which means how " +
+            "hard it can push?",
+        },
         {
           kind: "para",
           text:
@@ -520,6 +739,20 @@ export const fundamentals: Lecture = {
             "exactly why lithium chemistry replaced lead-acid in vehicles.",
         },
         {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "A 60 Ah car battery holds 720 Wh, and it weighs 25 kg - so " +
+            "carrying that to lift a car is absurd, which is why cars need " +
+            "engines. The same calculation run the other way is the entire " +
+            "reason electric vehicles exist: energy density decides range. " +
+            "Power density is a different question, and it is why a phone can " +
+            "burst to 20 W for a camera flash but a car battery struggles to " +
+            "supply the 100 kW a motor needs - which is why EVs have " +
+            "hundreds of small cells in series rather than one big one.",
+        },
+        {
           kind: "para",
           text:
             "You now have the whole quantitative basis of the subject: charge " +
@@ -533,7 +766,7 @@ export const fundamentals: Lecture = {
       id: "lab-cell",
       tone: "emerald",
       title: "Reading a real cell in the laboratory",
-      minutes: 5,
+      minutes: 6,
       summary:
         "Three electrodes and a potentiostat: the setup behind every " +
         "experiment in the rest of this course.",
@@ -541,8 +774,16 @@ export const fundamentals: Lecture = {
         "Working electrode: the one you study. Reference: measures potential. Counter: completes the circuit.",
         "A three-electrode cell measures one electrode's potential independently of current.",
         "The reference electrode has a fixed, known potential - that is the whole point of it.",
+        "Two-electrode cells are only acceptable when the counter is not polarising.",
       ],
       blocks: [
+        {
+          kind: "para",
+          text:
+            "**The question this section answers:** everything so far has been " +
+            "a two-electrode cell. If you want to know what *one* electrode is " +
+            "doing, rather than what the pair is doing, how do you arrange it?",
+        },
         {
           kind: "para",
           text:
@@ -603,22 +844,68 @@ export const fundamentals: Lecture = {
             "hold it and step the current to get an impedance spectrum. Both " +
             "appear in Lecture 1.",
         },
+        {
+          kind: "worked",
+          title: "Converting what you read into a reported potential",
+          given:
+            "Your potentiostat says -0.310 V versus Ag/AgCl (saturated KCl), " +
+            "and the sample pH is 4.2.",
+          steps: [
+            "Ag/AgCl (sat) sits at +0.197 V vs. SHE, and the sample reads " +
+              "-0.310 V against it, so:",
+            String.raw`E_{\text{vs SHE}} = -0.310 + 0.197 = -0.113\ \text{V}`,
+            "If you also want the value at pH 0 - the reversible hydrogen " +
+              "electrode scale - each pH unit is worth 59.16 mV:",
+            String.raw`E_{\text{vs RHE}} = -0.113 - (0.05916 \times 4.2) = -0.361\ \text{V}`,
+          ],
+          result:
+            "-0.113 V vs. SHE, or -0.361 V vs. RHE. Always state which " +
+            "reference you used - two papers reporting these numbers against " +
+            "different references are not comparable.",
+        },
+        {
+          kind: "callout",
+          variant: "key",
+          title: "Where you already meet this",
+          body:
+            "The three-electrode cell is not exotic laboratory furniture. " +
+            "Every handheld pH meter is one: a glass body measures the " +
+            "potential across a membrane against an Ag/AgCl reference, with a " +
+            "counter electrode closing the circuit. It is also how a " +
+            "corrosion engineer finds a structure's corrosion potential, and " +
+            "how a battery's internal resistance is measured without " +
+            "shorting it.",
+        },
+        {
+          kind: "para",
+          text:
+            "That is the apparatus. The last page of the primer is the " +
+            "reference sheet - every symbol and unit you will meet in the " +
+            "rest of the course, so nothing later stops you for want of " +
+            "vocabulary.",
+        },
       ],
     },
     {
       id: "units-and-glossary",
       tone: "slate",
       title: "Units, symbols and the words you will meet",
-      minutes: 4,
+      minutes: 5,
       summary:
         "A cheat-sheet to keep open while reading. Every symbol here is " +
         "used in the rest of the course.",
+      keyPoints: [
+        "1 mol L⁻¹ = 10⁻³ mol cm⁻³. Check which one a paper uses before substituting.",
+        "Current density i = I/A, in A cm⁻², is not current. Most of Lecture 1 plots i, not I.",
+        "Overpotential η is a loss, in volts, and is never the cell voltage itself.",
+      ],
       blocks: [
         {
           kind: "para",
           text:
-            "Numbers in this subject are meaningless without their units and " +
-            "their reference point. Keep this page open.",
+            "**The job of this section:** numbers in this subject are " +
+            "meaningless without their units and their reference point. Keep " +
+            "this page open while you work through Lecture 1.",
         },
         {
           kind: "table",
@@ -644,6 +931,24 @@ export const fundamentals: Lecture = {
         },
         {
           kind: "table",
+          head: ["Symbol", "Name", "Unit", "Means"],
+          widths: [0.7, 1.6, 1.1, 2.2],
+          rows: [
+            ["Q", "Charge", "C", "How much charge has passed"],
+            ["I", "Current", "A", "Rate of charge flow"],
+            ["i", "Current density", "A cm⁻²", "Current per unit electrode area, i = I/A"],
+            ["E", "Electrode potential", "V", "Must always be quoted against a reference"],
+            ["η", "Overpotential", "V", "Extra voltage lost to polarisation, a loss not a gain"],
+            ["n", "Electrons transferred", "—", "Number of electrons in the half-reaction"],
+            ["M", "Molar mass", "g mol⁻¹", "Mass of one mole of the species"],
+            ["m", "Mass", "g", "Mass actually deposited"],
+            ["F", "Faraday constant", "C mol⁻¹", "Charge per mole of electrons, 96 485"],
+            ["R", "Gas constant", "J mol⁻¹ K⁻¹", "8.314, in the Nernst and Butler-Volmer equations"],
+            ["T", "Absolute temperature", "K", "Use 298.15 for 25 °C"],
+          ],
+        },
+        {
+          kind: "table",
           head: ["Term", "Meaning"],
           widths: [1.3, 3.7],
           rows: [
@@ -659,7 +964,28 @@ export const fundamentals: Lecture = {
             ["Tafel slope", "Slope of overpotential against log current, in V per decade"],
             ["Limiting current", "The ceiling current set by mass transport of reactants"],
             ["Open circuit", "No current flowing; the potential is the cell voltage"],
+            ["Reference electrode", "An electrode of fixed, known potential used as a measuring point"],
+            ["Polarisation", "The departure of electrode potential from its reversible value under current"],
           ],
+        },
+        {
+          kind: "worked",
+          title: "Two conversions you will need constantly",
+          given:
+            "A paper reports a concentration of 5.0 mmol L⁻¹ and a current " +
+            "density of 250 mA cm⁻².",
+          steps: [
+            "Concentration: 5.0 mmol L⁻¹ = 5.0 × 10⁻³ mol L⁻¹ = 5.0 × 10⁻⁶ mol cm⁻³. " +
+              "The Levich equation wants mol cm⁻³, because D and ν are in cm² s⁻¹.",
+            "Current density: 250 mA cm⁻² = 0.250 A cm⁻². If the electrode " +
+              "has an area of 2.0 cm², the current is I = iA = 0.50 A.",
+            "Sanity check on a 1 cm² electrode at the same density: " +
+              "i_L = 0.250 A cm⁻² becomes a current of 0.250 A.",
+          ],
+          result:
+            "5.0 × 10⁻⁶ mol cm⁻³ and 0.250 A cm⁻². Substituting mmol L⁻¹ " +
+            "straight into a cm-based equation gives an answer wrong by a " +
+            "factor of 1000.",
         },
         {
           kind: "para",
