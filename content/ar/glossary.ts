@@ -54,7 +54,6 @@ export const GLOSSARY: Record<string, string> = {
   السعة: "capacity",
   "التيار النوعي": "current density",
   "الكثافة التيارية": "current density",
-  "معامل الانتشار": "diffusion coefficient",
   "معامل النشاط": "activity coefficient",
   "ثابت فاراداي": "Faraday constant",
   "ثابت الغاز": "gas constant",
@@ -164,6 +163,14 @@ export const GLOSSARY: Record<string, string> = {
   "السعة المطلوبة": "discharged capacity",
   "الطاقة الحرة المخزنة": "stored free energy",
   "فائق المكثف": "supercapacitor",
+
+  // Symbols and words from the reference sheet.
+  "معامل الانتقال": "transfer coefficient",
+  "ثابت المعدل القياسي": "standard rate constant",
+  "معامل الانتشار": "diffusion coefficient",
+  "اللزوجة الحركية": "kinematic viscosity",
+  "القطب المرجعي الهيدروجيني القياسي": "standard hydrogen electrode",
+  "كثافة التيار": "current density",
 };
 
 /**

@@ -6,6 +6,7 @@ import { chargeAndCurrentAr } from "./sections/fundamentals-03-charge-and-curren
 import { faradaysLawsAr } from "./sections/fundamentals-04-faradays-laws";
 import { energyAndPowerAr } from "./sections/fundamentals-05-energy-and-power";
 import { labCellAr } from "./sections/fundamentals-06-lab-cell";
+import { unitsAndGlossaryAr } from "./sections/fundamentals-07-units-and-glossary";
 
 /**
  * Arabic translation of the Fundamentals lecture.
@@ -61,5 +62,5 @@ export const fundamentalsAr: Partial<Lecture> = {
         "تنتهي من القسم الأخير ستعرف المواضيع التي يمكنك البدء بها.",
     },
   ],
-  sections: [whatIsItAr, cellAnatomyAr, chargeAndCurrentAr, faradaysLawsAr, energyAndPowerAr, labCellAr],
+  sections: [whatIsItAr, cellAnatomyAr, chargeAndCurrentAr, faradaysLawsAr, energyAndPowerAr, labCellAr, unitsAndGlossaryAr],
 };

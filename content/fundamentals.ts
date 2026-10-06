@@ -1120,20 +1120,28 @@ export const fundamentals: Lecture = {
       title: "Units, symbols and the words you will meet",
       minutes: 5,
       summary:
-        "A cheat-sheet to keep open while reading. Every symbol here is " +
-        "used in the rest of the course.",
+        "A reference sheet to keep open while reading. Every symbol here is " +
+        "used in the rest of the course, and every one is ambiguous in at " +
+        "least one way.",
       keyPoints: [
-        "1 mol L⁻¹ = 10⁻³ mol cm⁻³. Check which one a paper uses before substituting.",
-        "Current density i = I/A, in A cm⁻², is not current. Most of Lecture 1 plots i, not I.",
-        "Overpotential η is a loss, in volts, and is never the cell voltage itself.",
+        "Dimensional consistency is a real check: if the units do not simplify to something physical, you have made a mistake.",
+        "`1 mol L⁻¹ = 10⁻³ mol cm⁻³`, and `M` means mega in `MW` but molar in `mol L⁻¹`.",
+        "Current density `j = I/A` is not current. Most of Lecture 1 plots `j`, never `I`.",
+        "Overpotential `η` is a loss in volts, never the cell voltage itself, and `E` is meaningless without its reference electrode.",
       ],
       blocks: [
         {
           kind: "para",
           text:
             "**The job of this section:** numbers in this subject are " +
-            "meaningless without their units and their reference point. Keep " +
-            "this page open while you work through Lecture 1.",
+            "meaningless without their units and their reference point, and " +
+            "both are easy to get wrong in a way that does not look wrong. " +
+            "Keep this page open while you work through Lecture 1. Two habits " +
+            "pay for it immediately: write the unit next to every number as " +
+            "you read it, and before you believe any answer, check that the " +
+            "units collapse to something physical. A mass calculation that " +
+            "leaves you holding volts has failed, and no amount of arithmetic " +
+            "will explain why.",
         },
         {
           kind: "table",
@@ -1155,7 +1163,10 @@ export const fundamentals: Lecture = {
             "Published electrochemistry mixes millivolts and volts, and molar " +
             "concentrations per litre and per cubic centimetre, freely. 1 " +
             "mol L⁻¹ is only 10⁻³ mol cm⁻³. Check which one you are in before " +
-            "you substitute a number.",
+            "you substitute a number. And note that one letter does two " +
+            "jobs: `M` is mega in `MW` but molar in `mol L⁻¹`, while molar " +
+            "mass uses a capital `M` as a variable. Unit consistency is not " +
+            "pedantry here; it is the cheapest error check you will ever get.",
         },
         {
           kind: "table",
@@ -1164,15 +1175,20 @@ export const fundamentals: Lecture = {
           rows: [
             ["Q", "Charge", "C", "How much charge has passed"],
             ["I", "Current", "A", "Rate of charge flow"],
-            ["i", "Current density", "A cm⁻²", "Current per unit electrode area, i = I/A"],
+            ["j", "Current density", "A cm⁻²", "Current per unit electrode area, j = I/A"],
             ["E", "Electrode potential", "V", "Must always be quoted against a reference"],
             ["η", "Overpotential", "V", "Extra voltage lost to polarisation, a loss not a gain"],
             ["n", "Electrons transferred", "—", "Number of electrons in the half-reaction"],
+            ["ξ", "Extent of reaction", "mol", "How far the reaction has proceeded; Q = nF ξ"],
             ["M", "Molar mass", "g mol⁻¹", "Mass of one mole of the species"],
             ["m", "Mass", "g", "Mass actually deposited"],
             ["F", "Faraday constant", "C mol⁻¹", "Charge per mole of electrons, 96 485"],
             ["R", "Gas constant", "J mol⁻¹ K⁻¹", "8.314, in the Nernst and Butler-Volmer equations"],
             ["T", "Absolute temperature", "K", "Use 298.15 for 25 °C"],
+            ["D", "Diffusion coefficient", "cm² s⁻¹", "How fast a species diffuses"],
+            ["ν", "Kinematic viscosity", "cm² s⁻¹", "Solvent viscosity divided by density"],
+            ["α", "Transfer coefficient", "—", "Asymmetry of the forward and reverse barriers"],
+            ["k⁰", "Standard rate constant", "cm s⁻¹", "How fast the interface is at standard conditions"],
           ],
         },
         {
@@ -1193,6 +1209,7 @@ export const fundamentals: Lecture = {
             ["Limiting current", "The ceiling current set by mass transport of reactants"],
             ["Open circuit", "No current flowing; the potential is the cell voltage"],
             ["Reference electrode", "An electrode of fixed, known potential used as a measuring point"],
+            ["SHE", "The standard hydrogen electrode: the reference all others are quoted against"],
             ["Polarisation", "The departure of electrode potential from its reversible value under current"],
           ],
         },
@@ -1206,14 +1223,15 @@ export const fundamentals: Lecture = {
             "Concentration: 5.0 mmol L⁻¹ = 5.0 × 10⁻³ mol L⁻¹ = 5.0 × 10⁻⁶ mol cm⁻³. " +
               "The Levich equation wants mol cm⁻³, because D and ν are in cm² s⁻¹.",
             "Current density: 250 mA cm⁻² = 0.250 A cm⁻². If the electrode " +
-              "has an area of 2.0 cm², the current is I = iA = 0.50 A.",
+              "has an area of 2.0 cm², the current is I = jA = 0.50 A.",
             "Sanity check on a 1 cm² electrode at the same density: " +
-              "i_L = 0.250 A cm⁻² becomes a current of 0.250 A.",
+              "j_L = 0.250 A cm⁻² becomes a current of 0.250 A.",
           ],
           result:
             "5.0 × 10⁻⁶ mol cm⁻³ and 0.250 A cm⁻². Substituting mmol L⁻¹ " +
             "straight into a cm-based equation gives an answer wrong by a " +
-            "factor of 1000.",
+            "factor of 1000 - and one that still looks like a plausible " +
+            "number, which is exactly what makes it dangerous.",
         },
         {
           kind: "para",

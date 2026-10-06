@@ -43,9 +43,14 @@ STRING_LITERAL = re.compile(r'"((?:[^"\\\\]|\\\\.)*)"|\'((?:[^\'\\\\]|\\\\.)*)\'
 
 # Punctuation that legitimately appears inside the Arabic content.
 ALLOWED_PUNCT = set(
-    "·←→…—✓✗²³¹"
+    "·←→…—✓✗²³¹⁰⁴⁵⁶⁷⁸⁹"
     "⁺⁻°±×÷≈≥≤√"
     "μΩΔ«»ـ،؛؟٪٫"
+    # Greek letters standing in for symbols: overpotential, extent of
+    # reaction, kinematic viscosity, transfer coefficient. They are deliberate
+    # here, and CJK and Cyrillic - which is what this check exists for - stay
+    # flagged.
+    "ηξνα"
 )
 
 # Latin that is allowed inside Arabic prose. Mnemonics are kept in English on
@@ -55,7 +60,7 @@ ALLOWED_LATIN = {
     "Red", "Cat", "An", "Ox",
     # units and symbols
     "V", "mV", "A", "mA", "C", "F", "K", "J", "W", "Wh", "Ah", "mAh", "S",
-    "mol", "ppm", "kJ", "kWh", "mV", "S", "mol", "cm", "mm", "nm", "um",
+    "mol", "ppm", "kJ", "kWh", "mV", "S", "mol", "mmol", "cm", "mm", "nm", "um",
     "L", "mL", "M", "N", "Pa", "Hz", "atm", "bar", "eV", "mS",
     # element symbols that are also Arabic text, and constants
     "Cu", "Zn", "Fe", "Ni", "Al", "Ag", "Au", "Pb", "Sn", "Pt", "H", "O",
