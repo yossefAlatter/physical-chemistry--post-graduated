@@ -954,13 +954,13 @@ export const fundamentals: Lecture = {
       title: "Reading a real cell in the laboratory",
       minutes: 6,
       summary:
-        "Three electrodes and a potentiostat: the setup behind every " +
-        "experiment in the rest of this course.",
+        "Three electrodes and a potentiostat. The reason one of them must " +
+        "not be touched by the current is the reason the other two exist.",
       keyPoints: [
-        "Working electrode: the one you study. Reference: measures potential. Counter: completes the circuit.",
-        "A three-electrode cell measures one electrode's potential independently of current.",
-        "The reference electrode has a fixed, known potential - that is the whole point of it.",
-        "Two-electrode cells are only acceptable when the counter is not polarising.",
+        "Working electrode: the one you study. Reference: measures potential without drawing current. Counter: carries the current so the working electrode need not.",
+        "A reference electrode is fixed because its own reaction is at equilibrium and its chloride activity is buffered by a saturated KCl solution.",
+        "Any current through the reference shifts it by `iR`, so potentiostat inputs are measured in picoamperes.",
+        "Keep the reference tip near the working electrode, or the drop you measure is not the drop you meant.",
       ],
       blocks: [
         {
@@ -974,8 +974,10 @@ export const fundamentals: Lecture = {
           kind: "para",
           text:
             "The beaker from two sections ago will tell you a cell works, but " +
-            "not what any one electrode is doing. Real measurements need three " +
-            "electrodes.",
+            "not what any one electrode is doing, and it cannot: with two " +
+            "electrodes you measure the *sum* of two potentials and no way of " +
+            "splitting it. Separating them needs a third electrode, and each of " +
+            "the three exists to solve one specific problem with the other two.",
         },
         {
           kind: "figure",
@@ -989,7 +991,9 @@ export const fundamentals: Lecture = {
             "controls potential, RE measures it, CE carries the current.",
           caption:
             "The standard three-electrode cell. Everything in Lecture 1 is " +
-            "measured on this arrangement.",
+            "measured on this arrangement. Note that the reference is drawn " +
+            "close to the working electrode rather than at the far side of the " +
+            "cell - that detail is the subject of the last paragraph.",
         },
         {
           kind: "table",
@@ -1004,12 +1008,29 @@ export const fundamentals: Lecture = {
         {
           kind: "para",
           text:
-            "Why does the counter electrode matter? If current flowed through " +
-            "the working electrode and out through the reference electrode, " +
-            "the reference's own chemistry would shift its potential, and your " +
-            "measurement would be of two electrodes at once. A separate counter " +
-            "electrode takes the current instead, leaving the reference " +
-            "untouched.",
+            "Start with the reference, because its stability is the whole " +
+            "measurement. A reference electrode is not just a half-cell; it is " +
+            "a half-cell arranged so that its potential cannot move. Two " +
+            "things arrange that. The electrode's own reaction is at " +
+            "equilibrium, so there is no net current and nothing to shift; and " +
+            "the ion setting its potential - chloride for Ag/AgCl - is held at " +
+            "a fixed activity by a saturated KCl solution, so the Nernst term " +
+            "that depends on concentration is pinned rather than drifting. " +
+            "Change that KCl solution for a dilute one and the electrode is no " +
+            "longer a reference at all: its potential moves, slowly and with " +
+            "the weather.",
+        },
+        {
+          kind: "para",
+          text:
+            "The second reason the reference stays out of the current is " +
+            "arithmetic. Any current at all polarises it, shifting its " +
+            "potential by `iR` for the resistance of its own internals. Since " +
+            "you cannot know `iR` without disturbing the measurement, the only " +
+            "defensible answer is to make `i` negligible - which is why a " +
+            "potentiostat measures its inputs in picoamperes and why a leaking " +
+            "reference shows up as a drifting baseline long before anything " +
+            "else goes wrong.",
         },
         {
           kind: "callout",
@@ -1018,16 +1039,25 @@ export const fundamentals: Lecture = {
           body:
             "The reference electrode is there to be *measured from* and carries " +
             "almost no current. The counter electrode is there to *carry current* " +
-            "and its potential does not matter. Swap them and the measurement " +
-            "falls apart.",
+            "and its potential does not matter - but it is not free, because the " +
+            "current passing through it drops a voltage across its own " +
+            "resistance and polarises it like any other electrode. That is why " +
+            "the counter is normally a large piece of platinum or graphite: a " +
+            "big area has a small resistance and a low current density, so it " +
+            "stays outside the region where it would dissolve or evolve gas " +
+            "that fouled your experiment. Swap the reference and the counter " +
+            "and the measurement falls apart.",
         },
         {
           kind: "para",
           text:
-            "The potentiostat holds the working electrode at a potential you " +
-            "command, relative to the reference, and reports the current that " +
-            "results. Sweep that potential and you record a polarisation curve; " +
-            "hold it and step the current to get an impedance spectrum. Both " +
+            "With those three settled, the potentiostat's job is simple to " +
+            "state. It holds the working electrode at the potential you " +
+            "command, measured against the reference, and reports the current " +
+            "that results. Sweep the potential and you record a polarisation " +
+            "curve. Hold it still and superimpose a small sinusoidal " +
+            "perturbation, sweeping its frequency, and you get an impedance " +
+            "spectrum that separates the resistances section 3 listed. Both " +
             "appear in Lecture 1.",
         },
         {
@@ -1047,7 +1077,10 @@ export const fundamentals: Lecture = {
           result:
             "-0.113 V vs. SHE, or -0.361 V vs. RHE. Always state which " +
             "reference you used - two papers reporting these numbers against " +
-            "different references are not comparable.",
+            "different references are not comparable. And note what this " +
+            "arithmetic assumes: the potential step between reference and " +
+            "solution, and any solution resistance between the reference tip " +
+            "and the working electrode, are being neglected.",
         },
         {
           kind: "callout",
@@ -1065,10 +1098,19 @@ export const fundamentals: Lecture = {
         {
           kind: "para",
           text:
-            "That is the apparatus. The last page of the primer is the " +
-            "reference sheet - every symbol and unit you will meet in the " +
-            "rest of the course, so nothing later stops you for want of " +
-            "vocabulary.",
+            "One practical detail decides whether any of this is accurate. " +
+            "The reference measures the potential at its own tip, not at the " +
+            "working electrode's surface, and between the two lies solution " +
+            "that the current is flowing through. That drop, `iR`, is " +
+            "uncompensated unless the tip is brought close - which is why the " +
+            "figure shows it next to the working electrode and why real cells " +
+            "use a Luggin capillary. Ignore it and your error grows with " +
+            "current, so the same electrode measures a different potential at " +
+            "a different scan rate, and every cyclic voltammogram you have " +
+            "measured with a distant reference is a little too tall. That is " +
+            "the apparatus. The last page of the primer is the reference " +
+            "sheet - every symbol and unit you will meet in the rest of the " +
+            "course, so nothing later stops you for want of vocabulary.",
         },
       ],
     },
