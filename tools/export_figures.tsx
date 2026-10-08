@@ -14,7 +14,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import fs from "node:fs";
 import path from "node:path";
 import { FIGURES } from "../components/figures";
-import type { Locale } from "../lib/i18n";
 
 const outDir = process.argv[2] ?? "/tmp/figs";
 fs.mkdirSync(outDir, { recursive: true });
@@ -34,7 +33,7 @@ const VARS = `
     --tone-rose: #e11d48;       --tone-rose-soft: #ffe9ee;
     --tone-violet: #7c3aed;     --tone-violet-soft: #f3eeff;
     --tone-amber: #d97706;      --tone-amber-soft: #fff6e5;
-    --font-sans: "IBM Plex Sans Arabic", "Inter", system-ui, sans-serif;
+    --font-sans: "Inter", system-ui, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -48,18 +47,16 @@ const VARS = `
   }
 `;
 
-for (const locale of ["en", "ar"] as Locale[]) {
-  for (const [name, Component] of Object.entries(FIGURES)) {
-    const markup = renderToStaticMarkup(<Component locale={locale} />);
-    // Give the root svg a background so a transparent export is not unreadable.
-    const withStyle = markup.replace(
-      /<svg /,
-      `<svg xmlns="http://www.w3.org/2000/svg" `,
-    ).replace(/(<svg[^>]*>)/, `$1<style>${VARS}</style><rect width="100%" height="100%" fill="var(--c-page)"/>`);
+for (const [name, Component] of Object.entries(FIGURES)) {
+  const markup = renderToStaticMarkup(<Component />);
+  // Give the root svg a background so a transparent export is not unreadable.
+  const withStyle = markup.replace(
+    /<svg /,
+    `<svg xmlns="http://www.w3.org/2000/svg" `,
+  ).replace(/(<svg[^>]*>)/, `$1<style>${VARS}</style><rect width="100%" height="100%" fill="var(--c-page)"/>`);
 
-    const stem = name.replace(/\.png$/, "");
-    const file = path.join(outDir, `${stem}.${locale}.svg`);
-    fs.writeFileSync(file, withStyle, "utf8");
-    console.log(`${file}  ${(withStyle.length / 1024).toFixed(1)} kB`);
-  }
+  const stem = name.replace(/\.png$/, "");
+  const file = path.join(outDir, `${stem}.svg`);
+  fs.writeFileSync(file, withStyle, "utf8");
+  console.log(`${file}  ${(withStyle.length / 1024).toFixed(1)} kB`);
 }

@@ -2,62 +2,69 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RenderBlock, RichText } from "@/components/Blocks";
 import QuickCheck from "@/components/QuickCheck";
+import { SectionChrome } from "@/components/SectionChrome";
 import {
   getRegistry,
   homeHref,
-  lectureHref,
+  lessonHref,
   quizHref,
   sectionHref,
 } from "@/content/registry";
-import { fill, t, type Locale } from "@/lib/i18n";
+import { fill, t } from "@/lib/i18n";
+import { buildToc, idForBlock } from "@/lib/toc";
 
 /**
  * One section: the unit of study. Every section is its own page with its own
  * header, body blocks, key points, quick check and previous/next navigation.
- * Shared by both languages.
  */
 export default function SectionView({
-  locale,
   slug,
   sectionId,
 }: {
-  locale: Locale;
   slug: string;
   sectionId: string;
 }) {
-  const reg = getRegistry(locale);
-  const d = t(locale);
+  const reg = getRegistry();
+  const d = t();
 
-  const lecture = reg.getLecture(slug);
-  if (!lecture) notFound();
+  const lesson = reg.getLesson(slug);
+  if (!lesson) notFound();
 
-  const nav = reg.sectionNeighbours(lecture, sectionId);
+  const nav = reg.sectionNeighbours(lesson, sectionId);
   if (!nav) notFound();
   const { section, index, total, prev, next } = nav;
 
-  const quick = reg.quickCheckFor(lecture, section.id);
-  const quizCount = reg.questionsForSection(lecture, section.id).length;
+  const quick = reg.quickCheckFor(lesson, section.id);
+  const quizCount = reg.questionsForSection(lesson, section.id).length;
+
+  const toc = buildToc(section.blocks);
+  const lessonNav = lesson.sections.map((s) => ({
+    id: s.id,
+    label: s.title,
+    tone: s.tone,
+    href: sectionHref(lesson, s),
+  }));
 
   return (
-    <div data-tone={section.tone} className="relative isolate pb-12">
-      {/* soft wash in this topic's colour, behind the header */}
-      <div aria-hidden="true" className="page-wash" />
+    <div data-tone={section.tone} className="pb-12">
+
+      <SectionChrome toc={toc} sections={lessonNav} currentId={section.id}>
 
       {/* ---------------- breadcrumb ---------------- */}
       <nav aria-label={d.breadcrumbAria} className="no-print text-[0.8rem]">
         <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-faint">
           <li>
-            <Link href={homeHref(locale)} className="hover:text-accent-dark">
+            <Link href={homeHref()} className="hover:text-accent-dark">
               {d.navHome}
             </Link>
           </li>
           <li aria-hidden="true">/</li>
           <li>
             <Link
-              href={lectureHref(locale, lecture)}
+              href={lessonHref(lesson)}
               className="hover:text-accent-dark"
             >
-              {lecture.label}
+              {lesson.label}
             </Link>
           </li>
           <li aria-hidden="true">/</li>
@@ -69,17 +76,17 @@ export default function SectionView({
 
       {/* ---------------- header ---------------- */}
       <header className="mt-3 border-b border-rule pb-5">
-        <p className="eyebrow">{lecture.label}</p>
-        <div className="mt-1.5 flex items-baseline gap-2.5">
-          <span className="numeral text-[1.35rem] leading-none font-semibold text-[color:var(--tone)] tabular-nums">
+        <p className="eyebrow">{lesson.label}</p>
+        <div className="mt-3 flex items-center gap-3">
+          <span className="numeral grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[color:var(--tone-soft)] text-[1.05rem] font-semibold text-[color:var(--tone)] ring-1 ring-[color:var(--tone-line)] tabular-nums">
             {String(index).padStart(2, "0")}
           </span>
-          <h1 className="font-serif text-[1.6rem] leading-tight font-semibold text-ink sm:text-[2rem]">
+          <h1 className="font-serif text-[1.55rem] leading-tight font-semibold text-ink sm:text-[1.95rem]">
             {section.title}
           </h1>
         </div>
         {section.summary && (
-          <p className="mt-2 max-w-[62ch] text-[1rem] leading-relaxed text-ink-soft italic">
+          <p className="mt-3 max-w-[62ch] text-[1rem] leading-relaxed text-ink-soft italic">
             <RichText text={section.summary} />
           </p>
         )}
@@ -116,16 +123,19 @@ export default function SectionView({
       </header>
 
       {/* ---------------- body ---------------- */}
-      <div className="prose-lecture mt-6 max-w-[68ch]">
+      <div className="prose-lesson mt-8 max-w-[64ch]">
         {section.blocks.map((block, i) => (
-          <RenderBlock key={i} block={block} locale={locale} />
+          <RenderBlock key={i} block={block} id={idForBlock(section.blocks, i)} />
         ))}
       </div>
 
+      {/* key points last: a short recap once the reader has worked through
+          the body, so the section opens with the subject itself rather than
+          a list of answers. */}
       {section.keyPoints && section.keyPoints.length > 0 && (
-        <div className="card-tone mt-7 max-w-[68ch] rounded-lg border p-4">
+        <div className="card-tone mt-10 max-w-[64ch] rounded-lg border p-5">
           <p className="eyebrow">{d.worthMemorising}</p>
-          <ul className="mt-2 space-y-1.5">
+          <ul className="mt-3 space-y-2.5">
             {section.keyPoints.map((k, i) => (
               <li
                 key={i}
@@ -140,10 +150,10 @@ export default function SectionView({
       )}
 
       {quizCount > 0 && (
-        <p className="mt-4 text-[0.88rem] text-faint">
+        <p className="mt-6 max-w-[64ch] text-[0.88rem] text-faint">
           {fill(d.bankCovers, { n: quizCount })}{" "}
           <Link
-            href={`${quizHref(locale, lecture)}?topic=${section.id}`}
+            href={`${quizHref(lesson)}?topic=${section.id}`}
             className="font-semibold text-[color:var(--tone)] underline underline-offset-2"
           >
             {fill(d.openAll, { n: quizCount })}
@@ -152,17 +162,13 @@ export default function SectionView({
       )}
 
       {/* ---------------- quick check ---------------- */}
-      <div className="max-w-[68ch]">
-        <QuickCheck
-          locale={locale}
-          questions={quick}
-          sectionTitle={section.title}
-        />
+      <div className="mt-8 max-w-[64ch]">
+        <QuickCheck questions={quick} sectionTitle={section.title} />
       </div>
 
       {/* ---------------- closing call to action ---------------- */}
       {section.cta && (
-        <div className="card-tone no-print mt-8 max-w-[68ch] rounded-xl border p-5">
+        <div className="card-tone no-print mt-8 max-w-[64ch] rounded-xl border p-5">
           <h2 className="font-serif text-[1.25rem] leading-snug font-semibold text-ink">
             {section.cta.title}
           </h2>
@@ -194,11 +200,11 @@ export default function SectionView({
       {/* ---------------- previous / next section ---------------- */}
       <nav
         aria-label={d.sectionNavAria}
-        className="no-print mt-10 grid gap-2.5 border-t border-rule pt-6 sm:grid-cols-2"
+        className="no-print mt-10 max-w-[64ch] grid gap-2.5 border-t border-rule pt-6 sm:grid-cols-2"
       >
         {prev ? (
           <Link
-            href={sectionHref(locale, lecture, prev)}
+            href={sectionHref(lesson, prev)}
             className="group rounded-lg border border-rule bg-surface px-4 py-3 transition-colors hover:border-accent hover:shadow-sm"
           >
             <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
@@ -213,21 +219,21 @@ export default function SectionView({
           </Link>
         ) : (
           <Link
-            href={lectureHref(locale, lecture)}
+            href={lessonHref(lesson)}
             className="group rounded-lg border border-rule bg-surface px-4 py-3 transition-colors hover:border-accent hover:shadow-sm"
           >
             <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
               {d.contents}
             </span>
             <span className="mt-0.5 block text-[0.92rem] font-semibold text-ink">
-              {fill(d.allSectionsOf, { n: total, label: lecture.label })}
+              {fill(d.allSectionsOf, { n: total, label: lesson.label })}
             </span>
           </Link>
         )}
 
         {next ? (
           <Link
-            href={sectionHref(locale, lecture, next)}
+            href={sectionHref(lesson, next)}
             className="group rounded-lg border border-[color:var(--tone-line)] bg-[color:var(--tone-soft)] px-4 py-3 text-end transition-colors hover:shadow-sm"
           >
             <span className="text-[0.7rem] font-bold uppercase tracking-wider text-[color:var(--tone)]">
@@ -242,18 +248,19 @@ export default function SectionView({
           </Link>
         ) : (
           <Link
-            href={lectureHref(locale, lecture)}
+            href={lessonHref(lesson)}
             className="group rounded-lg border border-rule bg-surface px-4 py-3 text-end transition-colors hover:border-accent hover:shadow-sm sm:col-start-2"
           >
             <span className="text-[0.7rem] font-bold uppercase tracking-wider text-faint">
               {d.finish}
             </span>
             <span className="mt-0.5 block text-[0.92rem] font-semibold text-ink">
-              {fill(d.backToContents, { label: lecture.label })}
+              {fill(d.backToContents, { label: lesson.label })}
             </span>
           </Link>
         )}
       </nav>
+      </SectionChrome>
     </div>
   );
 }

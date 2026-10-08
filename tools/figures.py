@@ -328,7 +328,7 @@ def fig_two_worlds():
 # ------------------------------------------------------------ 2. roadmap ---
 
 def fig_roadmap():
-    """What the primer covers, and where it hands over to Lecture 1."""
+    """What the primer covers, and where it hands over to Lesson 1."""
     fig = _fig(6.8)
     ax = panel(fig, [0.04, 0.05, 0.92, 0.90])
     T(ax, 50, 97, "Your route through this primer", size=SZ_TITLE,
@@ -355,11 +355,11 @@ def fig_roadmap():
                     zorder=2)
         y -= 10.4
 
-    # handover to the lecture
+    # handover to the lesson
     ax.add_patch(FancyBboxPatch(
         (3, 2), 94, 14, boxstyle="round,pad=0.5,rounding_size=2",
         fc=TINT["emerald"], ec=S["emerald"], lw=1.8, zorder=1))
-    T(ax, 50, 12, "then Lecture 1: electrochemistry", size=SZ_HEAD,
+    T(ax, 50, 12, "then Lesson 1: electrochemistry", size=SZ_HEAD,
       weight="bold", color=S["emerald"])
     T(ax, 50, 5.5, "eleven short sections", size=SZ_SMALL, color=S["soft"])
     return fig

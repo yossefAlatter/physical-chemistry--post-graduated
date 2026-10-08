@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import type { Lecture, Mcq } from "@/content/types";
-import { lectureHref } from "@/content/registry";
-import { fill, optionLetters, t, type Locale } from "@/lib/i18n";
+import type { Lesson, Mcq } from "@/content/types";
+import { lessonHref } from "@/content/registry";
+import { fill, optionLetters, t } from "@/lib/i18n";
 import { RichText } from "@/components/Blocks";
 
 type Phase = "intro" | "quiz" | "results";
@@ -26,25 +26,19 @@ function shuffle<T>(items: T[]): T[] {
  * own full-width row. Progress is kept in component state so the page stays
  * a server component.
  */
-export function Quiz({
-  locale,
-  lecture,
-}: {
-  locale: Locale;
-  lecture: Lecture;
-}) {
-  const d = t(locale);
+export function Quiz({ lesson }: { lesson: Lesson }) {
+  const d = t();
   const params = useSearchParams();
   const topicParam = params.get("topic");
 
-  const sections = lecture.sections;
+  const sections = lesson.sections;
   // the pool is derived from the URL, so it is safe to compute during render
   const pool = useMemo<Mcq[]>(
     () =>
       topicParam
-        ? lecture.mcq.filter((q) => q.topicId === topicParam)
-        : lecture.mcq,
-    [lecture.mcq, topicParam],
+        ? lesson.mcq.filter((q) => q.topicId === topicParam)
+        : lesson.mcq,
+    [lesson.mcq, topicParam],
   );
 
   // the order is shuffled when the quiz starts, not during render: render
@@ -93,7 +87,7 @@ export function Quiz({
       .map((s) => ({
         id: s.id,
         title: s.title,
-        n: lecture.mcq.filter((q) => q.topicId === s.id).length,
+        n: lesson.mcq.filter((q) => q.topicId === s.id).length,
       }))
       .filter((s) => s.n > 0);
 
@@ -101,10 +95,10 @@ export function Quiz({
       <div className="pb-10">
         <header className="border-b border-rule pb-5">
           <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-accent">
-            {lecture.label}
+            {lesson.label}
           </p>
           <h1 className="mt-1.5 font-serif text-[1.7rem] leading-tight font-semibold text-ink sm:text-[2.1rem]">
-            {fill(d.quizTitle, { title: lecture.title })}
+            {fill(d.quizTitle, { title: lesson.title })}
           </h1>
           <p className="mt-2 max-w-[58ch] text-[1rem] leading-relaxed text-ink-soft">
             {fill(d.quizLede, { n: pool.length })}
@@ -163,7 +157,7 @@ export function Quiz({
       <div className="pb-10">
         <header className="border-b border-rule pb-5">
           <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-accent">
-            {fill(d.finishedLabel, { label: lecture.label })}
+            {fill(d.finishedLabel, { label: lesson.label })}
           </p>
           <h1 className="mt-1.5 font-serif text-[1.7rem] leading-tight font-semibold text-ink sm:text-[2.1rem]">
             {d.yourScore}
@@ -201,7 +195,7 @@ export function Quiz({
             Try again
           </button>
           <Link
-            href={lectureHref(locale, lecture)}
+            href={lessonHref(lesson)}
             className="inline-flex min-h-12 items-center justify-center rounded-lg border border-rule bg-surface px-5 text-[0.98rem] font-semibold text-ink-soft transition-colors hover:border-accent"
           >
             Back to the notes
@@ -261,7 +255,6 @@ export function Quiz({
   // ------------------------- question -------------------------
   if (!current) return null;
 
-  const letters = optionLetters[locale];
   const section = sections.find((s) => s.id === current.topicId);
   const pct = ((at + 1) / live.length) * 100;
 
@@ -319,7 +312,7 @@ export function Quiz({
                   ) : picked !== null && isPicked ? (
                     <span aria-hidden="true">✕</span>
                   ) : (
-                    letters[i]
+                    optionLetters[i]
                   )}
                 </span>
                 <span className="min-w-0 text-[0.97rem] leading-snug">
@@ -343,7 +336,7 @@ export function Quiz({
           >
             {picked === current.answer
               ? d.correct
-              : fill(d.notQuite, { letter: letters[current.answer] })}
+              : fill(d.notQuite, { letter: optionLetters[current.answer] })}
           </div>
           <div className="mt-3 rounded-lg border border-rule bg-surface p-4">
             <p className="text-[0.7rem] font-bold uppercase tracking-wider text-accent">
@@ -380,7 +373,7 @@ export function Quiz({
           {d.prev}
         </button>
         <Link
-          href={`/lectures/${lecture.slug}`}
+          href={`/lessons/${lesson.slug}`}
           className="min-h-11 py-2.5 text-faint hover:text-ink-soft"
         >
           {d.notes}

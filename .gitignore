@@ -43,3 +43,6 @@ next-env.d.ts
 # python bytecode from the figure tools
 __pycache__/
 *.pyc
+
+# local reference textbooks (kept for authoring, never committed)
+/books/

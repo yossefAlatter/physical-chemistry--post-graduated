@@ -8,20 +8,17 @@
 
 import { useState } from "react";
 import type { Mcq } from "@/content/types";
-import { fill, optionLetters, t, type Locale } from "@/lib/i18n";
+import { fill, optionLetters, t } from "@/lib/i18n";
 import { RichText } from "@/components/Blocks";
 
 export default function QuickCheck({
-  locale,
   questions,
   sectionTitle,
 }: {
-  locale: Locale;
   questions: Mcq[];
   sectionTitle: string;
 }) {
-  const d = t(locale);
-  const LETTERS = optionLetters[locale];
+  const d = t();
   const [at, setAt] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [got, setGot] = useState<boolean[]>([]);
@@ -142,7 +139,7 @@ export default function QuickCheck({
                               : "bg-tint text-faint"
                       }`}
                     >
-                      {show && isAnswer ? "✓" : show && isPicked ? "✗" : LETTERS[i]}
+                      {show && isAnswer ? "✓" : show && isPicked ? "✗" : optionLetters[i]}
                     </span>
                     <span className="text-[0.94rem] leading-relaxed text-ink">
                       <RichText text={opt} />

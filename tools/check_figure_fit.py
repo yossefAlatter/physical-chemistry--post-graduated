@@ -64,7 +64,7 @@ def main() -> int:
             # that `npm run check:figures` works with no setup
             figdir = staging
             cleanup = figdir
-            print("exporting the registered figures for both locales...")
+            print("exporting the registered figures...")
             subprocess.run(
                 ["npx", "--yes", "tsx", os.path.join(repo, "tools", "export_figures.tsx"), figdir],
                 cwd=repo, check=True,

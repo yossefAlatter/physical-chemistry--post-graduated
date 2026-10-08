@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { getRegistry, homeHref, lectureHref, quizHref, sectionHref } from "@/content/registry";
-import { localePath, locales } from "@/lib/i18n";
+import { getRegistry, homeHref, lessonHref, quizHref, sectionHref } from "@/content/registry";
 
 /**
  * The list of URLs the service worker precaches, so the whole site can be
@@ -30,7 +29,6 @@ const STATIC_URLS = [
   "/icon.svg",
   "/apple-icon.png",
   "/manifest.webmanifest",
-  "/ar/manifest.webmanifest",
 ];
 
 function publicAssets(): string[] {
@@ -81,16 +79,14 @@ function buildAssets(): string[] {
 export function GET() {
   const urls = new Set<string>([...STATIC_URLS, ...publicAssets(), ...buildAssets()]);
 
-  for (const locale of locales) {
-    const reg = getRegistry(locale);
-    urls.add(homeHref(locale));
-    urls.add(localePath(locale, "/offline"));
-    for (const lecture of reg.allLectures) {
-      urls.add(lectureHref(locale, lecture));
-      urls.add(quizHref(locale, lecture));
-      for (const section of lecture.sections) {
-        urls.add(sectionHref(locale, lecture, section));
-      }
+  const reg = getRegistry();
+  urls.add(homeHref());
+  urls.add("/offline");
+  for (const lesson of reg.allLessons) {
+    urls.add(lessonHref(lesson));
+    urls.add(quizHref(lesson));
+    for (const section of lesson.sections) {
+      urls.add(sectionHref(lesson, section));
     }
   }
 

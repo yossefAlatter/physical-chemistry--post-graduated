@@ -238,22 +238,22 @@ a {
    Typography
    ========================================================================== */
 
-.prose-lecture {
-  font-size: 1.0625rem;
-  line-height: 1.75;
+.prose-lesson {
+  font-size: calc(1.0625rem * var(--reading-scale, 1));
+  line-height: calc(1.75 * var(--reading-scale, 1));
 }
 
-.prose-lecture p {
-  margin-bottom: 1.05rem;
+.prose-lesson p {
+  margin-bottom: calc(1.35rem * var(--reading-scale, 1));
   color: var(--c-ink-soft);
 }
 
-.prose-lecture strong {
+.prose-lesson strong {
   color: var(--c-ink);
   font-weight: 650;
 }
 
-.prose-lecture a {
+.prose-lesson a {
   color: var(--tone);
   font-weight: 500;
   text-decoration: underline;
@@ -262,7 +262,7 @@ a {
   transition: text-decoration-color 0.15s ease;
 }
 
-.prose-lecture a:hover {
+.prose-lesson a:hover {
   text-decoration-color: var(--tone);
 }
 
@@ -271,6 +271,11 @@ a {
   font-family: var(--font-display), Georgia, serif;
   font-variation-settings: "SOFT" 0, "WONK" 0;
   letter-spacing: -0.015em;
+}
+
+/* Keep multi-line headings from breaking just one word onto a line. */
+:where(h1, h2, h3, h4) {
+  text-wrap: balance;
 }
 
 /* ==========================================================================
@@ -290,19 +295,6 @@ a {
   border-inline-start: 4px solid var(--tone);
 }
 
-/* The soft hue wash behind a page header, in the section's own colour.
-   The page wrapper must be `relative isolate` and this must be `-z-10`. */
-.page-wash {
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 20rem;
-  z-index: -10;
-  pointer-events: none;
-  background:
-    radial-gradient(720px 320px at 6% -4%, color-mix(in oklab, var(--tone) 13%, transparent), transparent 68%),
-    radial-gradient(560px 260px at 94% 4%, color-mix(in oklab, var(--tone) 9%, transparent), transparent 70%);
-}
-
 /* Section eyebrow / overline. */
 .eyebrow {
   font-family: var(--font-body);
@@ -313,6 +305,53 @@ a {
   color: var(--tone);
 }
 
+/* ==========================================================================
+   Reading chrome
+   ========================================================================== */
+
+/* Anchor targets surfaced by buildToc: give the jump enough clearance below
+   the fixed progress bar and, on phones, the sticky app header. */
+.toc-anchor {
+  scroll-margin-top: 6rem;
+}
+
+/* A heading wired into the in-page table of contents. It must read as the
+   heading (inherit its colour), not as a link, but still hint on hover that
+   the page offers an anchor for it. */
+.toc-link {
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+}
+
+.toc-link::before {
+  content: "#";
+  position: absolute;
+  inset-inline-end: calc(100% + 0.4em);
+  color: var(--tone);
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.toc-link:hover::before,
+.toc-link:focus-visible::before {
+  opacity: 0.9;
+}
+
+.toc-link:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--tone) 60%, transparent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Soft scroll instead of a hard jump when following an in-page anchor. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 /* Gradient text for the wordmark and hero heading. */
 .text-shine {
   background-image: linear-gradient(
@@ -321,16 +360,6 @@ a {
     color-mix(in oklab, var(--tone) 55%, var(--tone-violet)) 55%,
     var(--tone-violet) 100%
   );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Same idea as .text-shine, but for the dark hero gradient. The normal version
-   starts at --tone, which on a light surface is a mid-dark blue and would
-   vanish against the hero's blue stop. */
-.text-shine-hero {
-  background-image: linear-gradient(100deg, #e0f2fe 0%, #dbe7ff 55%, #ddd6fe 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -388,90 +417,10 @@ a {
     background: white;
   }
 }
-/* ==========================================================================
-   Bidirectional layout
-   ==========================================================================
 
-   The Arabic tree sets dir="rtl" on <html> and everything else follows from
-   there. Components are written with CSS logical properties (ms-/me-, ps-/pe-,
-   start/end, text-start), so the same markup reads correctly in both
-   languages and there is no per-language branching in the JSX.
-
-   What is left for this section is the handful of things CSS cannot infer:
-   genuinely physical decorations, and elements that must stay LTR.
-   ========================================================================== */
-
-/* A decorative arrow that means "forwards". It points along the reading
-   direction, so it is mirrored rather than merely re-aligned. */
-[dir="rtl"] .flow-arrow {
-  transform: scaleX(-1);
-}
-
-/* ==========================================================================
-   Arabic type scale
-   --------------------------------------------------------------------------
-   The English scale is tuned for Latin, and Latin metrics are the wrong
-   reference for Arabic. Arabic is a cursive script with no x-height, tall
-   ascenders, marks below the baseline (the ya, and the kasra and jim dots) and
-   a deep descender. Set at Latin sizes the script reads as though it were
-   slightly small and the marks collide with the line above. So:
-
-     size      +6% on body prose, +12% on the lecture prose itself
-     leading   1.65 -> 1.85 body, 1.75 -> 1.95 in the lecture body
-
-   Both are modest. The reason to be careful is that leading this generous
-   makes the long single-line passages in the Fundamentals feel loosely set,
-   so the increase is spent on prose and headings, not on tables and captions.
-   ========================================================================== */
-
-/* The Arabic layout binds the variable to --font-display only, because one
-   family serves both roles. Point the sans stack at it so anything that asks
-   for --font-sans lands on Plex Arabic rather than the system fallback. */
-[dir="rtl"] {
-  --font-sans: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-}
-
-/* No letter-spacing. Arabic joins along the baseline, and tracking breaks the
-   optical connection between letters, which is why the uppercase labels in
-   this site must never be given it. Word spacing is the opposite: it helps,
-   because Arabic word boundaries are less visually distinct than Latin ones. */
-[dir="rtl"] body {
-  font-size: 1.0625rem;
-  line-height: 1.85;
-  word-spacing: 0.04em;
-  /* "cv11" is a Latin alternates feature and does nothing here; leaving it on
-     makes the browser hunt for a Latin glyph set it will not use. */
-  font-feature-settings: "kern", "liga";
-}
-
-[dir="rtl"] .prose-lecture {
-  font-size: 1.1875rem;
-  line-height: 1.95;
-}
-
-/* Headings carry more diacritics than Latin headings do, and a 1.2 leading
-   clips them on the first line of a multi-line heading. */
-[dir="rtl"] h1,
-[dir="rtl"] h2,
-[dir="rtl"] h3,
-[dir="rtl"] h4 {
-  line-height: 1.45;
-  word-spacing: normal;
-}
-
-/* Tables and captions stay at the English sizes: they are set in narrower
-   columns where a larger size would wrap every label onto two lines. */
-[dir="rtl"] table,
-[dir="rtl"] figcaption,
-[dir="rtl"] .text-xs,
-[dir="rtl"] .text-sm {
-  line-height: 1.6;
-}
-
-/* An inline gloss: the English term that follows an Arabic one on first
-   mention. Kept visually subordinate so it does not compete with the
-   sentence, but never so small that it becomes decoration. */
-[dir="rtl"] .gloss,
+/* An inline gloss: a term the reader may not know yet, marked inline. Kept
+   visually subordinate so it does not compete with the sentence, but never
+   so small that it becomes decoration. */
 .gloss {
   color: var(--c-ink-faint);
   font-size: 0.82em;
@@ -479,39 +428,4 @@ a {
   direction: ltr;
   unicode-bidi: isolate;
   white-space: nowrap;
-}
-
-/* Maths, formulae, chemical symbols and code are not bidirectional. An
-   Arabic sentence containing E = mc^2 must still render that fragment
-   left-to-right, and the line must not reorder around it. */
-[dir="rtl"] .katex,
-[dir="rtl"] code,
-[dir="rtl"] pre,
-[dir="rtl"] .font-mono,
-[dir="rtl"] [role="math"] {
-  direction: ltr;
-  text-align: start;
-}
-
-/* Keep numerals and option letters in reading order inside a line of Arabic. */
-[dir="rtl"] .numeral,
-[dir="rtl"] .tabular-nums {
-  direction: ltr;
-  unicode-bidi: isolate;
-}
-
-/* Latin words embedded in Arabic text (Nernst, Butler-Volmer, Tafel) are
-   already handled by the Unicode bidirectional algorithm; this only stops
-   long unbroken Latin runs from being broken mid-word. */
-[dir="rtl"] .prose-lecture {
-  overflow-wrap: break-word;
-  word-break: normal;
-  line-break: auto;
-}
-
-/* The sidebar drawer hangs off the inline-start edge. Tailwind's rtl:
-   variant handles the offset; this covers the shadow so it falls away from
-   the page on the correct side. */
-[dir="rtl"] .prose-lecture ul {
-  padding-inline-start: 1.25rem;
 }

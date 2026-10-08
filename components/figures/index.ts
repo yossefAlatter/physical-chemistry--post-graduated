@@ -12,16 +12,13 @@
  */
 
 import type { ComponentType } from "react";
-import type { Locale } from "@/lib/i18n";
-import { FundTwoWorlds } from "./fund-two-worlds";
-import { FundOxidationStates } from "./fund-oxidation-states";
+import { PnJunction } from "./pn-junction";
 
-/** Every registered figure takes the locale so it can label itself. */
-export type FigureComponent = ComponentType<{ locale: Locale }>;
+/** Every registered figure draws itself; none takes props. */
+export type FigureComponent = ComponentType;
 
 export const FIGURES: Record<string, FigureComponent> = {
-  "fund_two_worlds.png": FundTwoWorlds,
-  "fund_oxidation_states.png": FundOxidationStates,
+  "pn_junction.png": PnJunction,
 };
 
 /** The SVG component for a figure file name, or null to fall back to the PNG. */

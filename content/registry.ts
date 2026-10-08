@@ -1,94 +1,41 @@
-// Locale-aware content access.
+// Content access.
 //
-// Routes and views never import the content files directly. They ask for the
-// registry of their language, which returns the same derived data (navigation,
-// section neighbours, question counts) either way. That is what keeps the two
-// languages from drifting apart in behaviour: only strings differ.
-//
-// Links are the one place the two languages genuinely differ, so they are
-// built here rather than in the registry. English keeps its original root
-// URLs; every other locale is prefixed. Each locale-aware helper reuses the
-// English path shape, so there is exactly one definition of what a lecture
-// URL looks like.
+// Routes and views never import the content files directly. They ask this
+// module for the registry, which returns the derived data (navigation, section
+// neighbours, question counts) and the site links, so there is exactly one
+// definition of what a lesson URL looks like.
 
-import {
-  defaultLocale,
-  localePath,
-  stripLocale,
-  type Locale,
-} from "@/lib/i18n";
-import {
-  createRegistry,
-  registry as enRegistry,
-  subjects as enSubjects,
-  type Registry,
-} from "./index";
-import type { Lecture, Section, Subject } from "./types";
-import { subjects as arSubjects, untranslated as arUntranslated } from "./ar";
+import { registry, type Registry } from "./index";
+import type { Lesson, Section, Subject } from "./types";
 
-const arRegistry: Registry = createRegistry(arSubjects);
-
-const registries: Record<Locale, Registry> = {
-  en: enRegistry,
-  ar: arRegistry,
-};
-
-/** The registry for a language, falling back to English if it is unknown. */
-export function getRegistry(locale: Locale = defaultLocale): Registry {
-  return registries[locale] ?? enRegistry;
+/** The registry: the whole derived view of the content tree. */
+export function getRegistry(): Registry {
+  return registry;
 }
 
-export function getSubjects(locale: Locale = defaultLocale): Subject[] {
-  return getRegistry(locale).subjects;
+export function getSubjects(): Subject[] {
+  return registry.subjects;
 }
 
 /* -------------------------------------------------------------------- links --*/
 
-export function homeHref(locale: Locale = defaultLocale): string {
-  return localePath(locale, "/");
+export function homeHref(): string {
+  return registry.homeHref();
 }
 
-export function lectureHref(
-  locale: Locale,
-  lecture: Lecture | { slug: string },
-): string {
-  return localePath(locale, enRegistry.lectureHref(lecture));
+export function lessonHref(lesson: Lesson | { slug: string }): string {
+  return registry.lessonHref(lesson);
 }
 
 export function sectionHref(
-  locale: Locale,
-  lecture: Lecture | { slug: string },
+  lesson: Lesson | { slug: string },
   section: Section | { id: string },
 ): string {
-  return localePath(locale, enRegistry.sectionHref(lecture, section));
+  return registry.sectionHref(lesson, section);
 }
 
-export function quizHref(
-  locale: Locale,
-  lecture: Lecture | { slug: string },
-): string {
-  return localePath(locale, enRegistry.quizHref(lecture));
-}
-
-/**
- * The same page in the other language, for the language switcher.
- *
- * The current prefix has to come off before the new one goes on: passing the
- * raw pathname to localePath would leave "/ar/lectures/x" still pointing at
- * Arabic when the reader asked for English.
- */
-export function alternateLocalePath(locale: Locale, pathname: string): string {
-  const next: Locale = locale === "ar" ? "en" : "ar";
-  return localePath(next, stripLocale(pathname));
-}
-
-/* ------------------------------------------------------------- translation --*/
-
-export { arSubjects, enSubjects };
-
-/** Lecture slugs still falling back to English. Checked by the site tests. */
-export function untranslatedLectures(locale: Locale = defaultLocale): string[] {
-  return locale === "ar" ? arUntranslated : [];
+export function quizHref(lesson: Lesson | { slug: string }): string {
+  return registry.quizHref(lesson);
 }
 
 export type { Registry };

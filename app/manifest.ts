@@ -4,10 +4,6 @@ import type { MetadataRoute } from "next";
  * Web-app manifest, so the site installs to a home screen with the real
  * electrochemistry mark rather than a screenshot. Icons come from
  * tools/make_icons.py, which draws the same geometry as app/icon.svg.
- *
- * The Arabic tree has its own manifest at app/(ar)/ar/manifest.ts, served
- * from /ar/manifest.webmanifest, so an install launched from an Arabic page
- * gets an Arabic name and start URL.
  */
 export const dynamic = "force-static";
 
@@ -18,7 +14,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Phys. Chem.",
     description:
       "Postgraduate physical chemistry in short illustrated sections, starting " +
-      "from a Fundamentals primer. Works offline once installed.",
+      "from a short Lesson 0 orientation. Works offline once installed.",
     lang: "en",
     dir: "ltr",
     start_url: "/",
@@ -43,15 +39,15 @@ export default function manifest(): MetadataRoute.Manifest {
     shortcuts: [
       {
         name: "Start from zero",
-        short_name: "Fundamentals",
-        description: "Open the Fundamentals primer",
-        url: "/lectures/fundamentals",
+        short_name: "Lesson 0",
+        description: "Open the Lesson 0 orientation",
+        url: "/lessons/lesson-0",
       },
       {
-        name: "Lecture 1",
-        short_name: "Lecture 1",
-        description: "Open Lecture 1 and its question bank",
-        url: "/lectures/lecture-1",
+        name: "Lesson 1",
+        short_name: "Lesson 1",
+        description: "Open Lesson 1 and its question bank",
+        url: "/lessons/lesson-1",
       },
     ],
   };

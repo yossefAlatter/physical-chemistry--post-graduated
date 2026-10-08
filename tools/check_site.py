@@ -1,4 +1,4 @@
-"""Checks the rendered site, in both languages.
+"""Checks the rendered site.
 
 Complements `check_figures.py`: that one guards the PNGs, this one guards the
 HTML that references them. It boots nothing - point it at a running server.
@@ -7,18 +7,17 @@ HTML that references them. It boots nothing - point it at a running server.
     ../electricial-chemistry/.venv/bin/python tools/check_site.py
     ../electricial-chemistry/.venv/bin/python tools/check_site.py --base https://site.vercel.app
 
-Checks, for English (at the root) and Arabic (under /ar) alike:
+Checks:
   * every route generated from the content registry answers 200
-  * an unknown lecture and an unknown section answer 404
+  * an unknown lesson and an unknown section answer 404
   * each section page links to exactly the right previous/next neighbours
   * each section page carries a quick check of the expected size
   * every image referenced by any page resolves
   * each page declares the right lang and dir on <html>
+  * no Arabic text leaks into <main>
 
 Plus, once:
   * the PWA assets exist and the precache manifest resolves
-  * the English site carries no Arabic and vice versa
-  * the Arabic translation ledger is reported (and fails if --strict-translation)
 """
 
 from __future__ import annotations
@@ -41,7 +40,6 @@ notes: list[str] = []
 # prefix, locale code, the quick-check heading, the section-nav aria-label
 LOCALES = [
     ("", "en", "Quick check", "Section navigation"),
-    ("/ar", "ar", "فحص سريع", "تنقل الأقسام"),
 ]
 
 
@@ -60,12 +58,10 @@ def get(path: str, method: str = "GET") -> tuple[int, str]:
 
 
 def registry() -> list[tuple[str, list[str]]]:
-    """(lecture slug, [section ids]) read straight from the TS sources."""
+    """(lesson slug, [section ids]) read straight from the TS sources."""
     out = []
     content_dir = os.path.join(ROOT, "content")
     for fn in sorted(os.listdir(content_dir)):
-        # content/ar holds the translations; skip it here and check it
-        # separately against the English tree.
         if not os.path.isfile(os.path.join(content_dir, fn)):
             continue
         if fn in ("index.ts", "types.ts") or fn.endswith(".mcq.ts"):
@@ -80,7 +76,7 @@ def registry() -> list[tuple[str, list[str]]]:
 
 
 def qcounts() -> dict[str, dict[str, int]]:
-    """{lecture slug: {topicId: number of questions}}"""
+    """{lesson slug: {topicId: number of questions}}"""
     out = {}
     for fn in sorted(os.listdir(os.path.join(ROOT, "content"))):
         if not fn.endswith(".mcq.ts"):
@@ -105,7 +101,7 @@ def check_locale(prefix: str, locale: str, qc_label: str, nav_label: str) -> Non
     for slug, per in counts.items():
         sections = dict(reg).get(slug)
         if sections is None:
-            problems.append(f"{slug}.mcq.ts: no matching lecture file")
+            problems.append(f"{slug}.mcq.ts: no matching lesson file")
             continue
         for t in per:
             if t not in sections:
@@ -114,23 +110,23 @@ def check_locale(prefix: str, locale: str, qc_label: str, nav_label: str) -> Non
     # 2. routes answer
     for slug, sections in reg:
         for path, label in [
-            (f"{prefix}/lectures/{slug}", "contents"),
-            (f"{prefix}/lectures/{slug}/quiz", "quiz"),
+            (f"{prefix}/lessons/{slug}", "contents"),
+            (f"{prefix}/lessons/{slug}/quiz", "quiz"),
         ]:
             code, _ = get(path)
             if code != 200:
                 problems.append(f"{path} ({label}): HTTP {code}, expected 200")
         for s in sections:
-            code, _ = get(f"{prefix}/lectures/{slug}/{s}")
+            code, _ = get(f"{prefix}/lessons/{slug}/{s}")
             if code != 200:
-                problems.append(f"{prefix}/lectures/{slug}/{s}: HTTP {code}")
+                problems.append(f"{prefix}/lessons/{slug}/{s}: HTTP {code}")
         notes.append(
             f"{prefix or '/'}: {slug}: {len(sections)} sections + contents + quiz"
         )
 
     for bad in (
-        f"{prefix}/lectures/nope",
-        f"{prefix}/lectures/lecture-1/nope",
+        f"{prefix}/lessons/nope",
+        f"{prefix}/lessons/lesson-1/nope",
         f"{prefix}/nope",
     ):
         code, _ = get(bad)
@@ -143,7 +139,7 @@ def check_locale(prefix: str, locale: str, qc_label: str, nav_label: str) -> Non
         n = len(sections)
         for i, s in enumerate(sections):
             total_sections += 1
-            path = f"{prefix}/lectures/{slug}/{s}"
+            path = f"{prefix}/lessons/{slug}/{s}"
             code, html = get(path)
             if code != 200:
                 continue
@@ -153,17 +149,17 @@ def check_locale(prefix: str, locale: str, qc_label: str, nav_label: str) -> Non
                 problems.append(f"{path}: no <html> tag")
             else:
                 tag = html_tag.group(0)
-                want_dir = "rtl" if locale == "ar" else "ltr"
+                want_dir = "ltr"
                 if f'lang="{locale}"' not in tag:
                     problems.append(f"{path}: <html> is not lang={locale!r}")
                 if f'dir="{want_dir}"' not in tag:
                     problems.append(f"{path}: <html> is not dir={want_dir!r}")
 
             prev_want = (
-                f"{prefix}/lectures/{slug}/{sections[i - 1]}" if i else None
+                f"{prefix}/lessons/{slug}/{sections[i - 1]}" if i else None
             )
             next_want = (
-                f"{prefix}/lectures/{slug}/{sections[i + 1]}"
+                f"{prefix}/lessons/{slug}/{sections[i + 1]}"
                 if i < n - 1
                 else None
             )
@@ -172,7 +168,7 @@ def check_locale(prefix: str, locale: str, qc_label: str, nav_label: str) -> Non
             if not nav:
                 problems.append(f"{path}: no section navigation")
                 continue
-            hrefs = set(re.findall(r'href="([^"]*lectures/[^"]*)"', nav.group(0)))
+            hrefs = set(re.findall(r'href="([^"]*lessons/[^"]*)"', nav.group(0)))
             for want in (prev_want, next_want):
                 if want and want not in hrefs:
                     problems.append(f"{path}: navigation missing {want}")
@@ -209,17 +205,12 @@ def check_locale(prefix: str, locale: str, qc_label: str, nav_label: str) -> Non
                         f"{path}: unrendered {label} markup in visible output"
                     )
 
-            # No Arabic may leak into English content. Scoped to <main>
-            # because the language switcher legitimately labels its target
-            # with the other language's name ("العربية" on English pages).
-            # English text under /ar is expected while the ledger is non-empty
-            # and is tracked there instead.
-            if locale == "en":
-                main = re.search(r"<main.*?</main>", html, re.S)
-                if not main:
-                    problems.append(f"{path}: no <main> element")
-                elif re.search(r"[\u0600-\u06FF]", main.group(0)):
-                    problems.append(f"{path}: Arabic text inside English <main>")
+            # No Arabic may leak into the content.
+            main = re.search(r"<main.*?</main>", html, re.S)
+            if not main:
+                problems.append(f"{path}: no <main> element")
+            elif re.search(r"[\u0600-\u06FF]", main.group(0)):
+                problems.append(f"{path}: Arabic text inside <main>")
 
     notes.append(f"{locale}: {total_sections} section pages checked")
     notes.append(f"{locale}: {total_quick} inline quick-check questions expected")
@@ -228,8 +219,8 @@ def check_locale(prefix: str, locale: str, qc_label: str, nav_label: str) -> Non
     seen: set[str] = set()
     for slug, sections in reg:
         paths = (
-            [f"{prefix}/", f"{prefix}/lectures/{slug}"]
-            + [f"{prefix}/lectures/{slug}/{s}" for s in sections]
+            [f"{prefix}/", f"{prefix}/lessons/{slug}"]
+            + [f"{prefix}/lessons/{slug}/{s}" for s in sections]
         )
         for p in paths:
             _, html = get(p)
@@ -243,14 +234,12 @@ def check_locale(prefix: str, locale: str, qc_label: str, nav_label: str) -> Non
     notes.append(f"{locale}: {len(seen)} distinct images resolved")
 
 
-def check_pwa(strict_translation: bool) -> None:
+def check_pwa() -> None:
     # service worker, manifests, offline pages, precache manifest
     for path, kind in [
         ("/sw.js", "javascript"),
         ("/manifest.webmanifest", "json"),
-        ("/ar/manifest.webmanifest", "json"),
         ("/offline", "html"),
-        ("/ar/offline", "html"),
         ("/precache-manifest", "json"),
     ]:
         code, body = get(path)
@@ -283,13 +272,13 @@ def check_pwa(strict_translation: bool) -> None:
                 return
             # A 404 in the list just burns install time, and a page or hashed
             # asset missing from it means the reader is offline before they
-            # have ever visited that route. So check the list covers both, and
-            # that every entry resolves.
+            # have ever visited that route. So check the list covers the whole
+            # content tree, and that every entry resolves.
             for slug, sections in registry():
                 for want in (
-                    f"/lectures/{slug}",
-                    f"/lectures/{slug}/quiz",
-                    *[f"/lectures/{slug}/{x}" for x in sections],
+                    f"/lessons/{slug}",
+                    f"/lessons/{slug}/quiz",
+                    *[f"/lessons/{slug}/{x}" for x in sections],
                 ):
                     if want not in urls:
                         problems.append(f"pwa precache: missing {want}")
@@ -310,59 +299,18 @@ def check_pwa(strict_translation: bool) -> None:
             for b in bad[:10]:
                 problems.append(f"pwa precache URL {b}")
 
-    # the Arabic manifest must point at the Arabic tree
-    _, body = get("/ar/manifest.webmanifest")
-    try:
-        ar_manifest = json.loads(body)
-        for key, want in [("lang", "ar"), ("dir", "rtl"), ("start_url", "/ar")]:
-            if ar_manifest.get(key) != want:
-                problems.append(
-                    f"pwa /ar/manifest.webmanifest: {key} is "
-                    f"{ar_manifest.get(key)!r}, expected {want!r}"
-                )
-    except json.JSONDecodeError:
-        problems.append("pwa /ar/manifest.webmanifest: not valid JSON")
-
-    # the language switcher has to reach the other language
-    _, en = get("/lectures/lecture-1")
-    _, ar = get("/ar/lectures/lecture-1")
-    if 'href="/ar/lectures/lecture-1"' not in en:
-        problems.append("language switch: English page does not link to /ar")
-    if 'href="/lectures/lecture-1"' not in ar:
-        problems.append("language switch: Arabic page does not link to English")
-
-    # translation ledger
-    ledger = os.path.join(ROOT, "tools", "translation_ledger.txt")
-    if os.path.exists(ledger):
-        pending = [
-            ln.strip()
-            for ln in open(ledger, encoding="utf-8")
-            if ln.strip() and not ln.startswith("#")
-        ]
-        notes.append(f"translation: {len(pending)} item(s) still English under /ar")
-        if pending and strict_translation:
-            for p in pending[:20]:
-                problems.append(f"translation pending: {p}")
-    else:
-        notes.append("translation: no ledger file, skipping")
-
 
 def main() -> int:
     global BASE
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", default=BASE)
-    ap.add_argument(
-        "--strict-translation",
-        action="store_true",
-        help="fail if any content is still English under /ar",
-    )
     args = ap.parse_args()
     BASE = args.base.rstrip("/")
     notes.append(f"checking {BASE}")
 
     for prefix, locale, qc_label, nav_label in LOCALES:
         check_locale(prefix, locale, qc_label, nav_label)
-    check_pwa(args.strict_translation)
+    check_pwa()
 
     print("\n".join(notes))
     if problems:

@@ -2,14 +2,14 @@
 //
 // Everything the site displays is hard-coded in `content/`. There is no
 // database and no fetch at runtime. Adding material means adding a file and
-// one line to content/index.ts - see ADDING_A_LECTURE.md.
+// one line to content/index.ts - see ADDING_A_LESSON.md.
 //
 // The nesting is:
 //
 //   Subject   -> a subject area, e.g. "Physical Chemistry"
-//     Course  -> a group of lectures, e.g. "Electrochemistry"
-//       Lecture -> e.g. "Lecture 1", has its own question bank
-//         Section -> one routable page, e.g. "/lectures/lecture-1/nernst"
+//     Course  -> a group of lessons, e.g. "Electrochemistry"
+//       Lesson -> e.g. "Lesson 1", has its own question bank
+//         Section -> one routable page, e.g. "/lessons/lesson-1/nernst"
 //
 // Sections are the unit you actually study: each is its own short page with
 // its own Next / Previous buttons and its own quick check, so no single page
@@ -85,7 +85,7 @@ export type Block =
 export interface SectionCta {
   title: string;
   body: string;
-  /** Where the button goes, usually the next lecture. */
+  /** Where the button goes, usually the next lesson. */
   href: string;
   linkLabel: string;
   /** Optional smaller second link, e.g. back to the section index. */
@@ -94,7 +94,7 @@ export interface SectionCta {
 }
 
 /**
- * One topic within a lecture. A section is a page in its own right, so it is
+ * One topic within a lesson. A section is a page in its own right, so it is
  * kept short on purpose.
  */
 /** The nine reusable accent hues, one per topic. See app/globals.css. */
@@ -113,7 +113,7 @@ export const TONES = [
 export type Tone = (typeof TONES)[number];
 
 export interface Section {
-  /** URL segment and the anchor used by MCQs; unique inside the lecture. */
+  /** URL segment and the anchor used by MCQs; unique inside the lesson. */
   id: string;
   title: string;
   /**
@@ -159,30 +159,30 @@ export interface Constant {
   value: string;
 }
 
-export interface Lecture {
+export interface Lesson {
   /** URL segment, unique across the whole site. */
   slug: string;
-  /** Sidebar label, e.g. "Lecture 1". */
+  /** Sidebar label, e.g. "Lesson 1". */
   label: string;
   title: string;
   summary: string;
   /** Sidebar / card ordering. Lowest first. */
   order: number;
-  /** Approximate reading time for the whole lecture, in minutes. */
+  /** Approximate reading time for the whole lesson, in minutes. */
   minutes: number;
-  /** Shown on the lecture overview page, above the section list. */
+  /** Shown on the lesson overview page, above the section list. */
   intro?: Block[];
   sections: Section[];
   mcq: Mcq[];
   constants?: Constant[];
 }
 
-/** A group of lectures in the sidebar, e.g. "Electrochemistry". */
+/** A group of lessons in the sidebar, e.g. "Electrochemistry". */
 export interface Course {
   id: string;
   title: string;
   description: string;
-  lectures: Lecture[];
+  lessons: Lesson[];
 }
 
 /**

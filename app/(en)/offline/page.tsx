@@ -4,12 +4,12 @@ import { t } from "@/lib/i18n";
 /**
  * Shown when a page is opened with no connection and was never cached. It
  * points back to the parts of the site that are, which is everything, since
- * install precaches both languages.
+ * install precaches the whole site.
  */
 export const metadata = { title: "Offline" };
 
 export default function OfflinePage() {
-  const d = t("en");
+  const d = t();
 
   return (
     <div className="mx-auto max-w-[54ch] py-10">
@@ -29,7 +29,7 @@ export default function OfflinePage() {
           {d.pwaBackHome}
         </Link>
         <Link
-          href="/lectures/fundamentals"
+          href="/lessons/lesson-0"
           className="inline-flex min-h-11 items-center rounded-lg border border-rule bg-surface px-4 py-2.5 text-[0.92rem] font-semibold text-ink-soft transition-colors hover:border-accent hover:text-accent-dark"
         >
           {d.startFromZero}

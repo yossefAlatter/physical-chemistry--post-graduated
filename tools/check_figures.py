@@ -98,14 +98,24 @@ def check_references() -> None:
         for m in re.finditer(r'"src":\s*"([^"]+)"', body):
             referenced.setdefault(m.group(1), entry)
 
+    on_disk = {f for f in os.listdir(FIGDIR) if f.endswith(".png")}
+    # Figure names registered in the JS figure registry render as inline SVG,
+    # so no PNG file on disk is required for them.
+    import os as _os, re as _re
+    _js = open(os.path.join(ROOT, "components", "figures", "index.ts"), encoding="utf-8").read()
+    registered = set(_re.findall(r'"([^"]+\.png)"\s*:', _js))
+
     for src, entry in sorted(referenced.items()):
+        if src in registered:
+            continue
         if not os.path.exists(os.path.join(FIGDIR, src)):
             problems.append(
                 f"content/{entry}: references missing figure {src!r}"
             )
 
-    on_disk = {f for f in os.listdir(FIGDIR) if f.endswith(".png")}
     for src in sorted(referenced):
+        if src in registered:
+            continue
         if src.endswith(".png") and src not in on_disk:
             problems.append(f"missing on disk: {src}")
 

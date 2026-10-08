@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
   description:
     "Postgraduate physical chemistry, taught in short illustrated sections. " +
-    "Start from zero with the Fundamentals primer, then work through " +
+    "Start from zero with the Lesson 0 orientation, then work through " +
     "electrochemistry from cell anatomy to batteries, with a quick check at " +
     "the end of every section.",
   authors: [{ name: "Yossef Hafez Alatter" }],
@@ -55,12 +55,12 @@ export const viewport: Viewport = {
 };
 
 /**
- * The English tree of the site. It owns the root <html> element, which is why
- * the Arabic side needs a second root layout under app/(ar): `lang` and `dir`
- * are document-level, so they cannot be set by a nested layout.
+ * The root layout. It owns the <html> element, so `lang` and `dir` are set
+ * here once and every component below relies on CSS logical properties rather
+ * than deciding alignment for itself.
  *
- * English is served from the root of the domain, with no /en prefix, so every
- * URL that existed before the Arabic translation was added still resolves here.
+ * The site is served from the root of the domain, with no /en prefix, so every
+ * URL is `/lessons/...` exactly as it always was.
  */
 export default function EnglishLayout({
   children,
@@ -79,7 +79,7 @@ export default function EnglishLayout({
       </head>
       <body className="min-h-full">
         <ServiceWorkerRegister />
-        <SiteShell locale="en">{children}</SiteShell>
+        <SiteShell>{children}</SiteShell>
       </body>
     </html>
   );

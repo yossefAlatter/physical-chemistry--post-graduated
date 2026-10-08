@@ -19,9 +19,9 @@ export function swSource(revision: string): string {
   return `/*
  * Offline copy of the site. Generated at build time - edit lib/sw-source.ts.
  *
- *   install    precache every page in both languages, plus hashed build
- *              assets, figures and icons, so a fresh install is fully
- *              readable with no network and no prior visit
+ *   install    precache every page, plus hashed build assets, figures and
+ *              icons, so a fresh install is fully readable with no network and
+ *              no prior visit
  *   navigate   network first, fall back to the cached page, then /offline
  *   assets     cache first with a background refresh
  */
@@ -30,15 +30,7 @@ const REVISION = ${JSON.stringify(revision)};
 const CACHE = "pc-" + REVISION;
 const MANIFEST_URL = "/precache-manifest";
 
-const OFFLINE_URLS = {
-  en: "/offline",
-  ar: "/ar/offline",
-};
-
-/** Pick the offline page matching the language of the failed navigation. */
-function offlineUrlFor(pathname) {
-  return pathname.startsWith("/ar") ? OFFLINE_URLS.ar : OFFLINE_URLS.en;
-}
+const OFFLINE_URL = "/offline";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -112,7 +104,7 @@ self.addEventListener("fetch", (event) => {
         } catch {
           const cached = await caches.match(req, { ignoreSearch: true });
           if (cached) return cached;
-          const fallback = await caches.match(offlineUrlFor(url.pathname));
+          const fallback = await caches.match(OFFLINE_URL);
           if (fallback) return fallback;
           return new Response(
             "<!doctype html><meta charset=utf-8><title>Offline</title>" +

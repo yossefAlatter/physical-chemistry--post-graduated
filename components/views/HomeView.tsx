@@ -1,82 +1,91 @@
 import Link from "next/link";
 import { RichText } from "@/components/Blocks";
-import { getSubjects, lectureHref } from "@/content/registry";
-import { fill, t, type Locale } from "@/lib/i18n";
+import { getSubjects, lessonHref } from "@/content/registry";
+import { fill, t } from "@/lib/i18n";
 
 /**
- * The home page, shared by both languages.
+ * The home page.
  *
- * All it needs is a locale: the subject tree comes from that language's
- * registry and every string from its dictionary, so there is exactly one
- * implementation of this page. Nothing below is hard-coded English.
+ * The subject tree comes from the content registry and every string from the
+ * dictionary in lib/i18n, so there is exactly one implementation of this page
+ * and nothing below is hard-coded.
  */
-export default function HomeView({ locale }: { locale: Locale }) {
-  const subjects = getSubjects(locale);
-  const d = t(locale);
+export default function HomeView() {
+  const subjects = getSubjects();
+  const d = t();
 
-  const allLectures = subjects.flatMap((s) =>
-    s.courses.flatMap((c) => c.lectures),
+  const allLessons = subjects.flatMap((s) =>
+    s.courses.flatMap((c) => c.lessons),
   );
-  const totalQuestions = allLectures.reduce((n, l) => n + l.mcq.length, 0);
-  const totalSections = allLectures.reduce((n, l) => n + l.sections.length, 0);
-  const start = allLectures[0];
+  const totalQuestions = allLessons.reduce((n, l) => n + l.mcq.length, 0);
+  const totalSections = allLessons.reduce((n, l) => n + l.sections.length, 0);
+  const start = allLessons[0];
 
   return (
     <div className="pb-10">
       {/* ---------------- hero ---------------- */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#10192b] via-[#123a52] to-[#0b6e99] px-5 py-8 text-white shadow-lg sm:px-8 sm:py-10">
-        {/* colour wash so the hero is not one flat navy block */}
+      <section className="relative overflow-hidden rounded-2xl border border-rule bg-surface px-5 py-9 sm:px-9 sm:py-11">
+        {/* a whisper of the accent washes behind the headline, far quieter
+            than the old navy gradient and matched to the section tones */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-24 -end-20 h-72 w-72 rounded-full bg-[#7c3aed] opacity-25 blur-3xl"
+          className="pointer-events-none absolute -top-28 -end-24 h-80 w-80 rounded-full bg-[color:var(--tone-azure-soft)] blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-28 -start-16 h-72 w-72 rounded-full bg-[#f59e0b] opacity-20 blur-3xl"
+          className="pointer-events-none absolute -bottom-32 -start-20 h-80 w-80 rounded-full bg-[color:var(--tone-violet-soft)] blur-3xl"
         />
 
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.17em] text-[#fcd34d]">
-          {d.siteAuthorLine}
-        </p>
-        <h1 className="mt-2 max-w-[20ch] font-serif text-[2.1rem] leading-[1.1] font-semibold sm:text-[2.8rem]">
-          <span className="text-shine-hero">{d.homeLedeLead}</span>{" "}
-          {d.homeLedeRest}
-        </h1>
-        <p className="mt-3 max-w-[52ch] text-[1.02rem] leading-relaxed text-[#cfdeeb]">
-          {d.homeSub}
-        </p>
+        <div className="relative">
+          <p className="eyebrow">{d.siteAuthorLine}</p>
+          <h1 className="mt-3 max-w-[16ch] font-serif text-[2.15rem] leading-[1.08] font-semibold tracking-tight text-ink sm:text-[2.9rem]">
+            {d.homeLedeLead}{" "}
+            <span className="text-[color:var(--tone)]">{d.homeLedeRest}</span>
+          </h1>
+          <p className="mt-4 max-w-[54ch] text-[1.04rem] leading-relaxed text-ink-soft">
+            {d.homeSub}
+          </p>
 
-        <dl className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-xl bg-white/15 sm:max-w-md">
-          {[
-            [String(allLectures.length), d.statLectures],
-            [String(totalSections), d.statSections],
-            [String(totalQuestions), d.statQuestions],
-          ].map(([n, l]) => (
-            <div key={l} className="bg-[#10192b]/45 px-3 py-3 text-center">
-              <dt className="numeral text-[1.6rem] leading-none font-semibold">
-                {n}
-              </dt>
-              <dd className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-[#a9c2d6]">
-                {l}
-              </dd>
-            </div>
-          ))}
-        </dl>
+          <dl className="mt-7 grid max-w-lg grid-cols-3 divide-x divide-rule rounded-xl border border-rule bg-surface-2/70">
+            {[
+              [String(allLessons.length), d.statLessons],
+              [String(totalSections), d.statSections],
+              [String(totalQuestions), d.statQuestions],
+            ].map(([n, l]) => (
+              <div key={l} className="px-3 py-4 text-center">
+                <dt className="numeral text-[1.5rem] leading-none font-semibold text-ink">
+                  {n}
+                </dt>
+                <dd className="mt-1.5 text-[0.64rem] font-bold uppercase tracking-[0.1em] text-faint">
+                  {l}
+                </dd>
+              </div>
+            ))}
+          </dl>
 
-        {start && (
-          <Link
-            href={lectureHref(locale, start)}
-            className="mt-6 inline-flex min-h-12 items-center rounded-lg bg-[#fcd34d] px-5 text-[0.95rem] font-semibold text-[#1a1206] shadow-sm transition-colors hover:bg-[#fde68a]"
-          >
-            {d.startFromZero}
-            <span aria-hidden="true" className="ms-1.5 flow-arrow">
-              →
-            </span>
-          </Link>
-        )}
+          <div className="mt-7 flex flex-wrap items-center gap-3">
+            {start && (
+              <Link
+                href={lessonHref(start)}
+                className="inline-flex min-h-12 items-center rounded-lg bg-[color:var(--tone)] px-5 text-[0.95rem] font-semibold text-on-accent shadow-sm transition-all hover:opacity-90 hover:shadow-md"
+              >
+                {d.startFromZero}
+                <span aria-hidden="true" className="ms-1.5 flow-arrow">
+                  →
+                </span>
+              </Link>
+            )}
+            <Link
+              href="#how-to-use"
+              className="inline-flex min-h-12 items-center rounded-lg border border-rule bg-surface px-5 text-[0.95rem] font-semibold text-ink-soft transition-colors hover:border-[color:var(--tone)] hover:text-[color:var(--tone)]"
+            >
+              {d.howToUseTitle}
+            </Link>
+          </div>
+        </div>
       </section>
 
-      {/* ---------------- subjects, courses, lectures ---------------- */}
+      {/* ---------------- subjects, courses, lessons ---------------- */}
       {subjects.map((subject) => (
         <section key={subject.slug} className="mt-9">
           <h2 className="font-serif text-[1.45rem] font-semibold text-ink">
@@ -93,7 +102,7 @@ export default function HomeView({ locale }: { locale: Locale }) {
                 {course.title}
               </h3>
               <div aria-hidden="true" className="mt-2 flex gap-1">
-                {course.lectures.flatMap((l) =>
+                {course.lessons.flatMap((l) =>
                   l.sections.map((s) => (
                     <span
                       key={`${l.slug}-${s.id}`}
@@ -108,39 +117,39 @@ export default function HomeView({ locale }: { locale: Locale }) {
               </p>
 
               <ul className="mt-4 space-y-3">
-                {course.lectures.map((lecture) => {
-                  const mins = lecture.sections.reduce(
+                {course.lessons.map((lesson) => {
+                  const mins = lesson.sections.reduce(
                     (n, s) => n + (s.minutes ?? 0),
                     0,
                   );
                   return (
-                    <li key={lecture.slug}>
+                    <li key={lesson.slug}>
                       <Link
-                        href={lectureHref(locale, lecture)}
+                        href={lessonHref(lesson)}
                         className="block rounded-xl border border-rule bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-accent hover:shadow-md sm:p-5"
                       >
                         <div className="flex items-baseline justify-between gap-3">
                           <span className="text-[0.7rem] font-bold uppercase tracking-[0.13em] text-accent">
-                            {lecture.label}
+                            {lesson.label}
                           </span>
                           <span className="shrink-0 text-[0.72rem] text-faint tabular-nums">
                             {fill(d.cardMeta, {
-                              n: lecture.sections.length,
-                              m: mins || lecture.minutes,
-                              k: lecture.mcq.length,
+                              n: lesson.sections.length,
+                              m: mins || lesson.minutes,
+                              k: lesson.mcq.length,
                             })}
                           </span>
                         </div>
 
                         <h4 className="mt-1 font-serif text-[1.2rem] leading-snug font-semibold text-ink">
-                          {lecture.title}
+                          {lesson.title}
                         </h4>
                         <p className="mt-1.5 text-[0.93rem] leading-relaxed text-ink-soft">
-                          <RichText text={lecture.summary} />
+                          <RichText text={lesson.summary} />
                         </p>
 
                         <ul className="mt-3.5 divide-y divide-rule border-t border-rule">
-                          {lecture.sections.map((s, i) => (
+                          {lesson.sections.map((s, i) => (
                             <li
                               key={s.id}
                               data-tone={s.tone}
@@ -175,7 +184,7 @@ export default function HomeView({ locale }: { locale: Locale }) {
       ))}
 
       {/* ---------------- how to use ---------------- */}
-      <section className="card-tone mt-9 rounded-xl border p-5">
+      <section id="how-to-use" className="card-tone mt-9 rounded-xl border p-5 sm:p-6">
         <h2 className="font-serif text-[1.2rem] font-semibold text-ink">
           {d.howToUseTitle}
         </h2>

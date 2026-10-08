@@ -4,39 +4,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  alternateLocalePath,
   getSubjects,
   homeHref,
-  lectureHref,
+  lessonHref,
   quizHref,
   sectionHref,
 } from "@/content/registry";
 import ThemeToggle from "@/components/ThemeToggle";
-import { fill, localeName, locales, t, type Locale } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
 /**
- * App shell: a permanent sidebar from `lg` up, and a slide-in drawer with a
+ * App shell: a permanent sidebar from `lg` up, and a slide in drawer with a
  * hamburger below it. The drawer closes on navigation and on Escape, and it
  * traps the page behind an overlay so a stray tap cannot scroll it.
  *
- * The sidebar is generated from the subject registry for `locale`, so a new
- * subject, course, lecture or section appears here without edits here - and
- * the same code serves both languages, reading the tree and the links that
- * belong to the language currently being viewed.
+ * The sidebar is generated from the subject registry, so a new subject,
+ * course, lesson or section appears here without edits here.
  *
  * Side placement follows the text direction: the drawer hangs off the inline
- * start edge, which is the left in English and the right in Arabic. The
- * `rtl:` variants below flip both the anchor and the off-screen offset.
+ * start edge, which is the left in this LTR layout.
  */
-export function SiteShell({
-  locale,
-  children,
-}: {
-  locale: Locale;
-  children: React.ReactNode;
-}) {
+export function SiteShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
-  const d = t(locale);
+  const d = t();
 
   // Escape closes the drawer
   useEffect(() => {
@@ -75,7 +65,7 @@ export function SiteShell({
               />
             </svg>
           </button>
-          <Link href={homeHref(locale)} className="min-w-0 flex-1">
+          <Link href={homeHref()} className="min-w-0 flex-1">
             <span className="block truncate font-serif text-[1.05rem] font-semibold text-ink">
               {d.siteTitle}
             </span>
@@ -83,8 +73,7 @@ export function SiteShell({
               {d.siteTagline}
             </span>
           </Link>
-          <LangSwitch locale={locale} />
-          <ThemeToggle locale={locale} />
+          <ThemeToggle />
         </div>
       </header>
 
@@ -106,17 +95,17 @@ export function SiteShell({
           "overflow-y-auto overscroll-contain border-e border-rule bg-surface",
           "transition-transform duration-200 ease-out",
           "lg:translate-x-0",
-          open ? "translate-x-0 shadow-2xl" : "-translate-x-full rtl:translate-x-full",
+          open ? "translate-x-0 shadow-2xl" : "-translate-x-full",
         ].join(" ")}
       >
-        <SidebarBody locale={locale} onNavigate={() => setOpen(false)} />
+        <SidebarBody onNavigate={() => setOpen(false)} />
       </nav>
 
       {/* ---------- page ---------- */}
       <div className="lg:ps-[17rem]">
         <main
           id="main"
-          className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8 lg:px-10"
+          className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-10"
         >
           {children}
         </main>
@@ -125,50 +114,15 @@ export function SiteShell({
   );
 }
 
-/**
- * Switch to the same page in the other language. There is no Arabic page for
- * a URL that has not been written yet, so the link always points at the
- * matching path rather than at a locale index.
- */
-function LangSwitch({ locale }: { locale: Locale }) {
+function SidebarBody({ onNavigate }: { onNavigate: () => void }) {
   const pathname = usePathname();
-  const other = locales.find((l) => l !== locale) ?? "en";
-  const href = alternateLocalePath(locale, pathname);
-  const label = fill(t(locale).switchTo, { name: localeName[other] });
-
-  return (
-    <Link
-      href={href}
-      hrefLang={other}
-      lang={other}
-      aria-label={t(locale).switchLanguage}
-      title={label}
-      className={[
-        "flex h-9 min-w-9 items-center justify-center rounded-lg border border-rule px-2",
-        "text-[0.8rem] font-semibold text-ink-soft",
-        "transition-colors hover:border-accent hover:text-accent",
-      ].join(" ")}
-    >
-      {localeName[other]}
-    </Link>
-  );
-}
-
-function SidebarBody({
-  locale,
-  onNavigate,
-}: {
-  locale: Locale;
-  onNavigate: () => void;
-}) {
-  const pathname = usePathname();
-  const subjects = getSubjects(locale);
-  const d = t(locale);
+  const subjects = getSubjects();
+  const d = t();
 
   return (
     <div className="flex min-h-full flex-col">
       <div className="flex items-start justify-between gap-2 border-b border-rule bg-surface-2 px-5 py-4">
-        <Link href={homeHref(locale)} onClick={onNavigate} className="min-w-0">
+        <Link href={homeHref()} onClick={onNavigate} className="min-w-0">
           <span className="text-shine block font-serif text-lg leading-tight font-semibold">
             {d.siteTitle}
           </span>
@@ -177,8 +131,7 @@ function SidebarBody({
           </span>
         </Link>
         <div className="flex shrink-0 items-center gap-1.5">
-          <LangSwitch locale={locale} />
-          <ThemeToggle locale={locale} />
+          <ThemeToggle />
           <button
             type="button"
             onClick={onNavigate}
@@ -212,53 +165,53 @@ function SidebarBody({
                   {course.title}
                 </h3>
                 <ul className="space-y-0.5">
-                  {course.lectures.map((lecture) => {
-                    const lectureBase = lectureHref(locale, lecture);
-                    const onLecture =
-                      pathname === lectureBase ||
-                      pathname.startsWith(`${lectureBase}/`);
+                  {course.lessons.map((lesson) => {
+                    const lessonBase = lessonHref(lesson);
+                    const onLesson =
+                      pathname === lessonBase ||
+                      pathname.startsWith(`${lessonBase}/`);
                     return (
-                      <li key={lecture.slug}>
+                      <li key={lesson.slug}>
                         <Link
-                          href={lectureBase}
+                          href={lessonBase}
                           onClick={onNavigate}
-                          aria-current={pathname === lectureBase ? "page" : undefined}
+                          aria-current={pathname === lessonBase ? "page" : undefined}
                           className={[
                             "flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-2.5",
                             "text-[0.94rem] leading-snug transition-colors",
-                            onLecture
+                            onLesson
                               ? "bg-accent-light font-semibold text-accent-dark"
                               : "text-ink-soft hover:bg-tint hover:text-ink",
                           ].join(" ")}
                         >
-                          <span className="min-w-0">{lecture.label}</span>
+                          <span className="min-w-0">{lesson.label}</span>
                           <span
                             className={[
                               "shrink-0 text-[0.68rem] font-semibold tabular-nums",
-                              onLecture ? "text-accent" : "text-faint",
+                              onLesson ? "text-accent" : "text-faint",
                             ].join(" ")}
                           >
-                            {lecture.sections.length}
+                            {lesson.sections.length}
                           </span>
                         </Link>
 
-                        {onLecture && (
+                        {onLesson && (
                           <ul className="mb-1 ms-2.5 mt-0.5 space-y-0.5 border-s border-rule ps-2">
-                            {lecture.sections.map((s) => (
+                            {lesson.sections.map((s) => (
                               <SubLink
                                 key={s.id}
-                                href={sectionHref(locale, lecture, s)}
+                                href={sectionHref(lesson, s)}
                                 label={s.title}
                                 tone={s.tone}
-                                active={pathname === sectionHref(locale, lecture, s)}
+                                active={pathname === sectionHref(lesson, s)}
                                 onNavigate={onNavigate}
                               />
                             ))}
                             <SubLink
-                              href={quizHref(locale, lecture)}
+                              href={quizHref(lesson)}
                               label={d.navAllQuestions}
                               tone={undefined}
-                              active={pathname === quizHref(locale, lecture)}
+                              active={pathname === quizHref(lesson)}
                               onNavigate={onNavigate}
                             />
                           </ul>

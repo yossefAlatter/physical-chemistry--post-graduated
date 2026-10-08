@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { t, type Locale } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
 const KEY = "pc-theme";
 
@@ -24,15 +24,9 @@ function isDark() {
   return document.documentElement.classList.contains("dark");
 }
 
-export default function ThemeToggle({
-  className = "",
-  locale,
-}: {
-  className?: string;
-  locale: Locale;
-}) {
+export default function ThemeToggle({ className = "" }: { className?: string }) {
   const dark = useSyncExternalStore(subscribe, isDark, () => false);
-  const label = t(locale)[dark ? "themeToLight" : "themeToDark"];
+  const label = t()[dark ? "themeToLight" : "themeToDark"];
 
   function toggle() {
     const next = !document.documentElement.classList.contains("dark");
